@@ -23,5 +23,6 @@ $router->post('/register', [$authController, 'register']);
 $router->post('/logout', [$authController, 'logout']);
 
 $router->get('/treatments', [$treatmentController, 'list']);
+$router->post('/treatments', [$treatmentController, 'create']);
 
 $router->handleRequest();

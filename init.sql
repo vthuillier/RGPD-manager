@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS treatments;
+
+CREATE TABLE treatments (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    purpose TEXT NOT NULL,
+    legal_basis VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
