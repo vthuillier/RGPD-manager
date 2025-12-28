@@ -1,6 +1,5 @@
 stages:
   - test
-  - build
 
 lint:
   stage: test
