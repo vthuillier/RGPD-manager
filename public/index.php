@@ -175,7 +175,16 @@ try {
                 $controller->generateAnnual();
                 break;
         }
+    } elseif ($page === 'credits') {
+        $title = 'Crédits';
+        extract(['title' => $title]);
+        ob_start();
+        require __DIR__ . '/../templates/credits.php';
+        $content = ob_get_clean();
+        require __DIR__ . '/../templates/layout.php';
+        exit;
     } elseif ($page === 'logs') {
+
 
 
 

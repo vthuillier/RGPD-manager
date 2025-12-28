@@ -1,17 +1,26 @@
 {
     "name": "vthuillier/rgpd-manager",
+    "description": "Une solution moderne et intuitive pour la gestion de la conformité RGPD.",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Valentin THUILLIER",
+            "email": "valentin.thuillier@luxferre-code.fr",
+            "homepage": "https://valentin-thuillier.fr"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "dompdf/dompdf": "^3.1"
+    },
     "autoload": {
         "psr-4": {
             "App\\": "src/"
         }
     },
-    "authors": [
-        {
-            "name": "Valentin THUILLIER",
-            "email": "valentin.thuillier@luxferre-code.fr"
-        }
-    ],
-    "require": {
-        "dompdf/dompdf": "^3.1"
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
     }
 }

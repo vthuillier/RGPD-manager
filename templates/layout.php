@@ -110,6 +110,19 @@
 
                     </div>
                 </div>
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <!-- Mobile menu button -->
+                    <button type="button" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+                        aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Ouvrir le menu</span>
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
                 <div class="hidden sm:ml-6 sm:flex sm:items-center">
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <div class="flex items-center gap-4">
@@ -135,7 +148,51 @@
                 </div>
             </div>
         </div>
+
+        <!-- Mobile menu, show/hide based on menu state. -->
+        <div class="hidden sm:hidden" id="mobile-menu">
+            <div class="pt-2 pb-3 space-y-1 bg-white border-t border-slate-100 px-4">
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <a href="index.php?page=treatment&action=dashboard"
+                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentAction === 'dashboard') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Tableau
+                        de bord</a>
+                    <a href="index.php?page=treatment&action=list"
+                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'treatment' && $currentAction === 'list') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Registre</a>
+                    <a href="index.php?page=subprocessor&action=list"
+                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'subprocessor') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Sous-traitants</a>
+                    <a href="index.php?page=rights&action=list"
+                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'rights') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Exercice
+                        des droits</a>
+                    <a href="index.php?page=breach&action=list"
+                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'breach') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Violations
+                        de données</a>
+
+                    <div class="pt-4 pb-3 border-t border-slate-200 mt-4">
+                        <div class="flex items-center px-4">
+                            <div class="ml-3">
+                                <div class="text-base font-medium text-slate-800">
+                                    <?= htmlspecialchars($_SESSION['user_name']) ?>
+                                </div>
+                                <div class="text-sm font-medium text-slate-500">
+                                    <?= htmlspecialchars($_SESSION['user_email'] ?? '') ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3 space-y-1">
+                            <a href="index.php?page=auth&action=logout"
+                                class="block px-4 py-2 text-base font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100">Déconnexion</a>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <a href="index.php?page=auth&action=login"
+                        class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800 text-base font-medium">Connexion</a>
+                    <a href="index.php?page=auth&action=register"
+                        class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800 text-base font-medium">S'inscrire</a>
+                <?php endif; ?>
+            </div>
+        </div>
     </nav>
+
 
     <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <?php if (isset($_SESSION['flash_success'])): ?>
@@ -171,6 +228,10 @@
             <p class="text-center text-sm text-slate-500">
                 &copy; <?= date('Y') ?> RGPD Manager - Solution de mise en conformité
             </p>
+            <a href="index.php?page=credits" class="text-xs text-slate-400 hover:text-primary-600 transition-colors">
+                Crédits & Mentions
+            </a>
+
         </div>
     </footer>
 
