@@ -14,6 +14,16 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+// Auto-initialize database
+try {
+    $schemaManager = new \App\Database\SchemaManager();
+    $schemaManager->init();
+} catch (\Exception $e) {
+    // We log but continue, the app might crash later if DB is really missing
+    // error_log("Database initialization failed: " . $e->getMessage());
+}
+
+
 $page = $_GET['page'] ?? 'treatment';
 $action = $_GET['action'] ?? 'list';
 

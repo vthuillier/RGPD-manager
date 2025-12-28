@@ -28,14 +28,15 @@ class UserRepository
     public function save(User $user): void
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO users (email, password, name) 
-             VALUES (:email, :password, :name)'
+            'INSERT INTO users (email, password, name, role) 
+             VALUES (:email, :password, :name, :role)'
         );
 
         $stmt->execute([
             'email' => $user->email,
             'password' => $user->password,
             'name' => $user->name,
+            'role' => $user->role,
         ]);
     }
 }

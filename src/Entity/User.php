@@ -10,6 +10,7 @@ class User
         public string $email,
         public string $password,
         public string $name,
+        public string $role = 'user',
         public ?string $createdAt = null
     ) {
     }
@@ -21,7 +22,13 @@ class User
             $data['email'] ?? '',
             $data['password'] ?? '',
             $data['name'] ?? '',
+            $data['role'] ?? 'user',
             $data['created_at'] ?? null
         );
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
     }
 }

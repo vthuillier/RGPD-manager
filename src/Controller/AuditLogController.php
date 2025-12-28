@@ -15,8 +15,16 @@ class AuditLogController
             header('Location: index.php?page=auth&action=login');
             exit;
         }
+
+        if (($_SESSION['user_role'] ?? 'user') !== 'admin') {
+            $_SESSION['flash_error'] = "Accès réservé aux administrateurs.";
+            header('Location: index.php?page=treatment&action=dashboard');
+            exit;
+        }
+
         $this->service = new AuditLogService();
     }
+
 
     public function list(): void
     {
