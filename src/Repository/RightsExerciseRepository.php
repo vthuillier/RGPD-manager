@@ -19,19 +19,19 @@ class RightsExerciseRepository
     /**
      * @return RightsExercise[]
      */
-    public function findAllByUserId(int $userId): array
+    public function findAllByOrganizationId(int $organizationId): array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM rights_exercises WHERE user_id = :user_id ORDER BY request_date DESC');
-        $stmt->execute(['user_id' => $userId]);
+        $stmt = $this->pdo->prepare('SELECT * FROM rights_exercises WHERE organization_id = :organization_id ORDER BY request_date DESC');
+        $stmt->execute(['organization_id' => $organizationId]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return array_map(fn($data) => RightsExercise::fromArray($data), $results);
     }
 
-    public function findByIdAndUserId(int $id, int $userId): ?RightsExercise
+    public function findByIdAndOrganizationId(int $id, int $organizationId): ?RightsExercise
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM rights_exercises WHERE id = :id AND user_id = :user_id');
-        $stmt->execute(['id' => $id, 'user_id' => $userId]);
+        $stmt = $this->pdo->prepare('SELECT * FROM rights_exercises WHERE id = :id AND organization_id = :organization_id');
+        $stmt->execute(['id' => $id, 'organization_id' => $organizationId]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $data ? RightsExercise::fromArray($data) : null;
@@ -41,19 +41,20 @@ class RightsExerciseRepository
     {
         if ($exercise->id === null) {
             $stmt = $this->pdo->prepare(
-                'INSERT INTO rights_exercises (user_id, applicant_name, request_date, request_type, status, completion_date, details)
-                 VALUES (:user_id, :applicant_name, :request_date, :request_type, :status, :completion_date, :details)'
+                'INSERT INTO rights_exercises (user_id, organization_id, applicant_name, request_date, request_type, status, completion_date, details)
+                 VALUES (:user_id, :organization_id, :applicant_name, :request_date, :request_type, :status, :completion_date, :details)'
             );
         } else {
             $stmt = $this->pdo->prepare(
                 'UPDATE rights_exercises SET applicant_name = :applicant_name, request_date = :request_date, 
                         request_type = :request_type, status = :status, completion_date = :completion_date, details = :details
-                 WHERE id = :id AND user_id = :user_id'
+                 WHERE id = :id AND organization_id = :organization_id'
             );
             $stmt->bindValue(':id', $exercise->id);
         }
 
         $stmt->bindValue(':user_id', $exercise->userId);
+        $stmt->bindValue(':organization_id', $exercise->organizationId);
         $stmt->bindValue(':applicant_name', $exercise->applicantName);
         $stmt->bindValue(':request_date', $exercise->requestDate);
         $stmt->bindValue(':request_type', $exercise->requestType);
@@ -64,28 +65,28 @@ class RightsExerciseRepository
         $stmt->execute();
     }
 
-    public function deleteAndUserId(int $id, int $userId): void
+    public function deleteAndOrganizationId(int $id, int $organizationId): void
     {
-        $stmt = $this->pdo->prepare('DELETE FROM rights_exercises WHERE id = :id AND user_id = :user_id');
-        $stmt->execute(['id' => $id, 'user_id' => $userId]);
+        $stmt = $this->pdo->prepare('DELETE FROM rights_exercises WHERE id = :id AND organization_id = :organization_id');
+        $stmt->execute(['id' => $id, 'organization_id' => $organizationId]);
     }
 
-    public function getStats(int $userId): array
+    public function getStats(int $organizationId): array
     {
         // Total
-        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM rights_exercises WHERE user_id = :user_id');
-        $stmt->execute(['user_id' => $userId]);
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM rights_exercises WHERE organization_id = :organization_id');
+        $stmt->execute(['organization_id' => $organizationId]);
         $total = (int) $stmt->fetchColumn();
 
         // Count by status
-        $stmt = $this->pdo->prepare('SELECT status, COUNT(*) as count FROM rights_exercises WHERE user_id = :user_id GROUP BY status');
-        $stmt->execute(['user_id' => $userId]);
+        $stmt = $this->pdo->prepare('SELECT status, COUNT(*) as count FROM rights_exercises WHERE organization_id = :organization_id GROUP BY status');
+        $stmt->execute(['organization_id' => $organizationId]);
         $byStatus = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
         // Urgent (pending and more than 23 days old)
         $limitDate = date('Y-m-d', strtotime('-23 days'));
-        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM rights_exercises WHERE user_id = :user_id AND status = \'En attente\' AND request_date <= :limit_date');
-        $stmt->execute(['user_id' => $userId, 'limit_date' => $limitDate]);
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM rights_exercises WHERE organization_id = :organization_id AND status = \'En attente\' AND request_date <= :limit_date');
+        $stmt->execute(['organization_id' => $organizationId, 'limit_date' => $limitDate]);
         $urgent = (int) $stmt->fetchColumn();
 
         return [
@@ -95,5 +96,6 @@ class RightsExerciseRepository
             'urgent' => $urgent
         ];
     }
+
 }
 

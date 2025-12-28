@@ -12,6 +12,7 @@ class Subprocessor
         public string $service,
         public string $location,
         public ?string $guarantees,
+        public ?int $organizationId = null,
         public ?string $createdAt = null
     ) {
     }
@@ -25,7 +26,9 @@ class Subprocessor
             $data['service'] ?? '',
             $data['location'] ?? '',
             $data['guarantees'] ?? '',
+            isset($data['organization_id']) ? (int) $data['organization_id'] : null,
             $data['created_at'] ?? null
         );
     }
+
 }

@@ -19,19 +19,19 @@ class DataBreachRepository
     /**
      * @return DataBreach[]
      */
-    public function findAllByUserId(int $userId): array
+    public function findAllByOrganizationId(int $organizationId): array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM data_breaches WHERE user_id = :user_id ORDER BY discovery_date DESC');
-        $stmt->execute(['user_id' => $userId]);
+        $stmt = $this->pdo->prepare('SELECT * FROM data_breaches WHERE organization_id = :organization_id ORDER BY discovery_date DESC');
+        $stmt->execute(['organization_id' => $organizationId]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return array_map(fn($data) => DataBreach::fromArray($data), $results);
     }
 
-    public function findByIdAndUserId(int $id, int $userId): ?DataBreach
+    public function findByIdAndOrganizationId(int $id, int $organizationId): ?DataBreach
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM data_breaches WHERE id = :id AND user_id = :user_id');
-        $stmt->execute(['id' => $id, 'user_id' => $userId]);
+        $stmt = $this->pdo->prepare('SELECT * FROM data_breaches WHERE id = :id AND organization_id = :organization_id');
+        $stmt->execute(['id' => $id, 'organization_id' => $organizationId]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $data ? DataBreach::fromArray($data) : null;
@@ -41,8 +41,8 @@ class DataBreachRepository
     {
         if ($breach->id === null) {
             $stmt = $this->pdo->prepare(
-                'INSERT INTO data_breaches (user_id, discovery_date, nature, data_categories, subjects_count, records_count, consequences, measures_taken, is_notified_authority, notification_authority_date, is_notified_individuals)
-                 VALUES (:user_id, :discovery_date, :nature, :data_categories, :subjects_count, :records_count, :consequences, :measures_taken, :is_notified_authority, :notification_authority_date, :is_notified_individuals)'
+                'INSERT INTO data_breaches (user_id, organization_id, discovery_date, nature, data_categories, subjects_count, records_count, consequences, measures_taken, is_notified_authority, notification_authority_date, is_notified_individuals)
+                 VALUES (:user_id, :organization_id, :discovery_date, :nature, :data_categories, :subjects_count, :records_count, :consequences, :measures_taken, :is_notified_authority, :notification_authority_date, :is_notified_individuals)'
             );
         } else {
             $stmt = $this->pdo->prepare(
@@ -50,12 +50,13 @@ class DataBreachRepository
                         subjects_count = :subjects_count, records_count = :records_count, consequences = :consequences, 
                         measures_taken = :measures_taken, is_notified_authority = :is_notified_authority, 
                         notification_authority_date = :notification_authority_date, is_notified_individuals = :is_notified_individuals
-                 WHERE id = :id AND user_id = :user_id'
+                 WHERE id = :id AND organization_id = :organization_id'
             );
             $stmt->bindValue(':id', $breach->id);
         }
 
         $stmt->bindValue(':user_id', $breach->userId);
+        $stmt->bindValue(':organization_id', $breach->organizationId);
         $stmt->bindValue(':discovery_date', $breach->discoveryDate);
         $stmt->bindValue(':nature', $breach->nature);
         $stmt->bindValue(':data_categories', $breach->dataCategories);
@@ -70,27 +71,27 @@ class DataBreachRepository
         $stmt->execute();
     }
 
-    public function deleteAndUserId(int $id, int $userId): void
+    public function deleteAndOrganizationId(int $id, int $organizationId): void
     {
-        $stmt = $this->pdo->prepare('DELETE FROM data_breaches WHERE id = :id AND user_id = :user_id');
-        $stmt->execute(['id' => $id, 'user_id' => $userId]);
+        $stmt = $this->pdo->prepare('DELETE FROM data_breaches WHERE id = :id AND organization_id = :organization_id');
+        $stmt->execute(['id' => $id, 'organization_id' => $organizationId]);
     }
 
-    public function getStats(int $userId): array
+    public function getStats(int $organizationId): array
     {
-        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM data_breaches WHERE user_id = :userId');
-        $stmt->execute(['userId' => $userId]);
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM data_breaches WHERE organization_id = :organizationId');
+        $stmt->execute(['organizationId' => $organizationId]);
         $total = (int) $stmt->fetchColumn();
 
         $limit72h = date('Y-m-d H:i:s', strtotime('-72 hours'));
         $stmt = $this->pdo->prepare('
             SELECT COUNT(*) FROM data_breaches 
-            WHERE user_id = :userId 
+            WHERE organization_id = :organizationId 
             AND is_notified_authority = FALSE 
             AND discovery_date <= :limit72h
         ');
 
-        $stmt->execute(['userId' => $userId, 'limit72h' => $limit72h]);
+        $stmt->execute(['organizationId' => $organizationId, 'limit72h' => $limit72h]);
         $urgent = (int) $stmt->fetchColumn();
 
         return [
@@ -98,4 +99,5 @@ class DataBreachRepository
             'urgent' => $urgent
         ];
     }
+
 }

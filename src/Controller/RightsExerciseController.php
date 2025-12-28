@@ -12,6 +12,7 @@ class RightsExerciseController
     private RightsExerciseRepository $repository;
     private AuditLogService $auditLogService;
     private int $userId;
+    private int $organizationId;
 
     public function __construct()
     {
@@ -23,11 +24,12 @@ class RightsExerciseController
         $this->repository = new RightsExerciseRepository();
         $this->auditLogService = new AuditLogService();
         $this->userId = (int) $_SESSION['user_id'];
+        $this->organizationId = (int) $_SESSION['organization_id'];
     }
 
     public function list(): void
     {
-        $exercises = $this->repository->findAllByUserId($this->userId);
+        $exercises = $this->repository->findAllByOrganizationId($this->organizationId);
         $this->render('rights_exercises/list', [
             'exercises' => $exercises,
             'title' => 'Registre des Exercices de Droits'
@@ -48,6 +50,7 @@ class RightsExerciseController
 
         $exercise = RightsExercise::fromArray($_POST);
         $exercise->userId = $this->userId;
+        $exercise->organizationId = $this->organizationId;
 
         $this->repository->save($exercise);
         $this->auditLogService->log('RIGHTS_EXERCISE_CREATE', 'rights_exercise', null, ['applicant' => $exercise->applicantName]);
@@ -59,7 +62,7 @@ class RightsExerciseController
     public function edit(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
-        $exercise = $this->repository->findByIdAndUserId($id, $this->userId);
+        $exercise = $this->repository->findByIdAndOrganizationId($id, $this->organizationId);
 
         if (!$exercise) {
             $_SESSION['flash_error'] = 'Dossier non trouvé.';
@@ -78,7 +81,7 @@ class RightsExerciseController
         $this->validateCsrf();
         $this->validateNotGuest();
         $id = (int) ($_POST['id'] ?? 0);
-        $exercise = $this->repository->findByIdAndUserId($id, $this->userId);
+        $exercise = $this->repository->findByIdAndOrganizationId($id, $this->organizationId);
 
         if (!$exercise) {
             die('Dossier non trouvé');
@@ -87,6 +90,7 @@ class RightsExerciseController
         $updatedExercise = RightsExercise::fromArray($_POST);
         $updatedExercise->id = $id;
         $updatedExercise->userId = $this->userId;
+        $updatedExercise->organizationId = $this->organizationId;
 
         $this->repository->save($updatedExercise);
         $this->auditLogService->log('RIGHTS_EXERCISE_UPDATE', 'rights_exercise', $id, ['applicant' => $updatedExercise->applicantName]);
@@ -100,12 +104,13 @@ class RightsExerciseController
         $this->validateCsrf();
         $this->validateNotGuest();
         $id = (int) ($_POST['id'] ?? 0);
-        $this->repository->deleteAndUserId($id, $this->userId);
+        $this->repository->deleteAndOrganizationId($id, $this->organizationId);
         $this->auditLogService->log('RIGHTS_EXERCISE_DELETE', 'rights_exercise', $id);
 
         $_SESSION['flash_success'] = 'Dossier supprimé.';
         header('Location: index.php?page=rights&action=list');
     }
+
 
     private function render(string $template, array $data = []): void
     {

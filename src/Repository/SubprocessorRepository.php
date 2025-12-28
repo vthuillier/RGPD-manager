@@ -19,19 +19,19 @@ class SubprocessorRepository
     /**
      * @return Subprocessor[]
      */
-    public function findAllByUserId(int $userId): array
+    public function findAllByOrganizationId(int $organizationId): array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM subprocessors WHERE user_id = :user_id ORDER BY name ASC');
-        $stmt->execute(['user_id' => $userId]);
+        $stmt = $this->pdo->prepare('SELECT * FROM subprocessors WHERE organization_id = :organization_id ORDER BY name ASC');
+        $stmt->execute(['organization_id' => $organizationId]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return array_map(fn($data) => Subprocessor::fromArray($data), $results);
     }
 
-    public function findByIdAndUserId(int $id, int $userId): ?Subprocessor
+    public function findByIdAndOrganizationId(int $id, int $organizationId): ?Subprocessor
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM subprocessors WHERE id = :id AND user_id = :user_id');
-        $stmt->execute(['id' => $id, 'user_id' => $userId]);
+        $stmt = $this->pdo->prepare('SELECT * FROM subprocessors WHERE id = :id AND organization_id = :organization_id');
+        $stmt->execute(['id' => $id, 'organization_id' => $organizationId]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $data ? Subprocessor::fromArray($data) : null;
@@ -49,12 +49,13 @@ class SubprocessorRepository
     private function insert(Subprocessor $subprocessor): void
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO subprocessors (user_id, name, service, location, guarantees)
-            VALUES (:user_id, :name, :service, :location, :guarantees)'
+            'INSERT INTO subprocessors (user_id, organization_id, name, service, location, guarantees)
+            VALUES (:user_id, :organization_id, :name, :service, :location, :guarantees)'
         );
 
         $stmt->execute([
             'user_id' => $subprocessor->userId,
+            'organization_id' => $subprocessor->organizationId,
             'name' => $subprocessor->name,
             'service' => $subprocessor->service,
             'location' => $subprocessor->location,
@@ -70,12 +71,12 @@ class SubprocessorRepository
                 service = :service, 
                 location = :location, 
                 guarantees = :guarantees
-            WHERE id = :id AND user_id = :user_id'
+            WHERE id = :id AND organization_id = :organization_id'
         );
 
         $stmt->execute([
             'id' => $subprocessor->id,
-            'user_id' => $subprocessor->userId,
+            'organization_id' => $subprocessor->organizationId,
             'name' => $subprocessor->name,
             'service' => $subprocessor->service,
             'location' => $subprocessor->location,
@@ -83,11 +84,12 @@ class SubprocessorRepository
         ]);
     }
 
-    public function deleteAndUserId(int $id, int $userId): void
+    public function deleteAndOrganizationId(int $id, int $organizationId): void
     {
-        $stmt = $this->pdo->prepare('DELETE FROM subprocessors WHERE id = :id AND user_id = :user_id');
-        $stmt->execute(['id' => $id, 'user_id' => $userId]);
+        $stmt = $this->pdo->prepare('DELETE FROM subprocessors WHERE id = :id AND organization_id = :organization_id');
+        $stmt->execute(['id' => $id, 'organization_id' => $organizationId]);
     }
+
 
     /**
      * Link a subprocessor to a treatment

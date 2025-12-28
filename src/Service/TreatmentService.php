@@ -18,14 +18,14 @@ class TreatmentService
     /**
      * @return Treatment[]
      */
-    public function getTreatmentsForUser(int $userId, array $filters = []): array
+    public function getTreatmentsForOrganization(int $organizationId, array $filters = []): array
     {
-        return $this->repository->findByFilters($userId, $filters);
+        return $this->repository->findByFilters($organizationId, $filters);
     }
 
-    public function getTreatmentForUser(int $id, int $userId): ?Treatment
+    public function getTreatmentForOrganization(int $id, int $organizationId): ?Treatment
     {
-        return $this->repository->findByIdAndUserId($id, $userId);
+        return $this->repository->findByIdAndOrganizationId($id, $organizationId);
     }
 
     public function createTreatment(array $data): void
@@ -39,11 +39,11 @@ class TreatmentService
         }
     }
 
-    public function updateTreatmentForUser(int $id, int $userId, array $data): void
+    public function updateTreatmentForOrganization(int $id, int $organizationId, array $data): void
     {
         $this->validate($data);
         $data['id'] = $id;
-        $data['user_id'] = $userId;
+        $data['organization_id'] = $organizationId;
         $treatment = Treatment::fromArray($data);
         $this->repository->save($treatment);
 
@@ -60,23 +60,24 @@ class TreatmentService
     }
 
 
-    public function deleteTreatmentForUser(int $id, int $userId): void
+    public function deleteTreatmentForOrganization(int $id, int $organizationId): void
     {
-        $this->repository->deleteAndUserId($id, $userId);
+        $this->repository->deleteAndOrganizationId($id, $organizationId);
     }
 
-    public function getStats(int $userId): array
+    public function getStatsForOrganization(int $organizationId): array
     {
         $rightsRepo = new \App\Repository\RightsExerciseRepository();
         $breachRepo = new \App\Repository\DataBreachRepository();
         return [
-            'total' => $this->repository->countAllByUserId($userId),
-            'legal_basis' => $this->repository->countByLegalBasis($userId),
-            'treatments' => $this->repository->findAllByUserId($userId),
-            'rights' => $rightsRepo->getStats($userId),
-            'breaches' => $breachRepo->getStats($userId)
+            'total' => $this->repository->countAllByOrganizationId($organizationId),
+            'legal_basis' => $this->repository->countByLegalBasis($organizationId),
+            'treatments' => $this->repository->findAllByOrganizationId($organizationId),
+            'rights' => $rightsRepo->getStats($organizationId),
+            'breaches' => $breachRepo->getStats($organizationId)
         ];
     }
+
 
 
 

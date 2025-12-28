@@ -18,6 +18,7 @@ class DataBreach
         public bool $isNotifiedAuthority = false,
         public ?string $notificationAuthorityDate = null,
         public bool $isNotifiedIndividuals = false,
+        public ?int $organizationId = null,
         public ?string $createdAt = null
     ) {
     }
@@ -37,8 +38,9 @@ class DataBreach
             (bool) ($data['is_notified_authority'] ?? false),
             !empty($data['notification_authority_date']) ? $data['notification_authority_date'] : null,
             (bool) ($data['is_notified_individuals'] ?? false),
+            isset($data['organization_id']) ? (int) $data['organization_id'] : null,
             $data['created_at'] ?? null
         );
-
     }
+
 }

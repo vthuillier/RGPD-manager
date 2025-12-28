@@ -1,7 +1,17 @@
 -- Consolidated schema for RGPD Manager
 
+CREATE TABLE IF NOT EXISTS organizations (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Ensure a default organization exists
+INSERT INTO organizations (id, name) VALUES (-1, 'Organisation par défaut') ON CONFLICT (id) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
+    organization_id INTEGER REFERENCES organizations(id) ON DELETE SET NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -9,11 +19,18 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Ensure role column exists if table was already there
+-- Migrate existing users to default org if needed
+UPDATE users SET organization_id = -1 WHERE organization_id IS NULL;
+
+-- Ensure role and organization_id columns exist if table was already there
 DO $$ 
 BEGIN 
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='role') THEN
         ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'user';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='organization_id') THEN
+        ALTER TABLE users ADD COLUMN organization_id INTEGER REFERENCES organizations(id) ON DELETE SET NULL;
+        UPDATE users SET organization_id = -1;
     END IF;
 END $$;
 
@@ -21,6 +38,7 @@ END $$;
 CREATE TABLE IF NOT EXISTS treatments (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     purpose TEXT NOT NULL,
     legal_basis VARCHAR(100) NOT NULL,
@@ -32,15 +50,36 @@ CREATE TABLE IF NOT EXISTS treatments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='treatments' AND column_name='organization_id') THEN
+        ALTER TABLE treatments ADD COLUMN organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE;
+        -- Map existing treatments to their owner's organization
+        UPDATE treatments t SET organization_id = u.organization_id FROM users u WHERE t.user_id = u.id;
+        -- Default to 1 if user_id mapping fails for some reason
+        UPDATE treatments SET organization_id = -1 WHERE organization_id IS NULL;
+    END IF;
+END $$;
+
 CREATE TABLE IF NOT EXISTS subprocessors (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     service VARCHAR(255) NOT NULL,
     location VARCHAR(100) NOT NULL,
     guarantees TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='subprocessors' AND column_name='organization_id') THEN
+        ALTER TABLE subprocessors ADD COLUMN organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE;
+        UPDATE subprocessors s SET organization_id = u.organization_id FROM users u WHERE s.user_id = u.id;
+        UPDATE subprocessors SET organization_id = -1 WHERE organization_id IS NULL;
+    END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS treatment_subprocessors (
     treatment_id INTEGER REFERENCES treatments(id) ON DELETE CASCADE,
@@ -51,6 +90,7 @@ CREATE TABLE IF NOT EXISTS treatment_subprocessors (
 CREATE TABLE IF NOT EXISTS audit_logs (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    organization_id INTEGER REFERENCES organizations(id) ON DELETE SET NULL,
     action VARCHAR(100) NOT NULL,
     entity_type VARCHAR(100),
     entity_id INTEGER,
@@ -59,9 +99,19 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='audit_logs' AND column_name='organization_id') THEN
+        ALTER TABLE audit_logs ADD COLUMN organization_id INTEGER REFERENCES organizations(id) ON DELETE SET NULL;
+        UPDATE audit_logs a SET organization_id = u.organization_id FROM users u WHERE a.user_id = u.id;
+        UPDATE audit_logs SET organization_id = -1 WHERE organization_id IS NULL AND user_id IS NOT NULL;
+    END IF;
+END $$;
+
 CREATE TABLE IF NOT EXISTS rights_exercises (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
     applicant_name VARCHAR(255) NOT NULL,
     request_date DATE NOT NULL,
     request_type VARCHAR(100) NOT NULL,
@@ -71,9 +121,19 @@ CREATE TABLE IF NOT EXISTS rights_exercises (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='rights_exercises' AND column_name='organization_id') THEN
+        ALTER TABLE rights_exercises ADD COLUMN organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE;
+        UPDATE rights_exercises r SET organization_id = u.organization_id FROM users u WHERE r.user_id = u.id;
+        UPDATE rights_exercises SET organization_id = -1 WHERE organization_id IS NULL;
+    END IF;
+END $$;
+
 CREATE TABLE IF NOT EXISTS data_breaches (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
     discovery_date TIMESTAMP NOT NULL,
     nature TEXT NOT NULL,
     data_categories TEXT NOT NULL,
@@ -86,5 +146,14 @@ CREATE TABLE IF NOT EXISTS data_breaches (
     is_notified_individuals BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='data_breaches' AND column_name='organization_id') THEN
+        ALTER TABLE data_breaches ADD COLUMN organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE;
+        UPDATE data_breaches d SET organization_id = u.organization_id FROM users u WHERE d.user_id = u.id;
+        UPDATE data_breaches SET organization_id = -1 WHERE organization_id IS NULL;
+    END IF;
+END $$;
 
 

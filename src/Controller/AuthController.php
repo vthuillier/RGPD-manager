@@ -42,6 +42,7 @@ class AuthController
 
         if ($user) {
             $_SESSION['user_id'] = $user->id;
+            $_SESSION['organization_id'] = $user->organizationId;
             $_SESSION['user_name'] = $user->name;
             $_SESSION['user_role'] = $user->role;
             $_SESSION['flash_success'] = "Bienvenue, " . $user->name;
@@ -64,6 +65,7 @@ class AuthController
         }
 
         $_SESSION['user_id'] = (int) (getenv('GUEST_TARGET_ID') ?: 1);
+        $_SESSION['organization_id'] = 1; // Default organization for guest mode
         $_SESSION['user_name'] = "Invité";
         $_SESSION['user_role'] = 'guest';
         $_SESSION['flash_success'] = "Connecté en mode consultation.";
@@ -74,27 +76,18 @@ class AuthController
     }
 
 
+
     public function showRegister(): void
     {
-        $this->render('auth/register', [
-            'title' => 'Inscription'
-        ]);
+        $_SESSION['flash_error'] = "L'inscription publique est désactivée. Veuillez contacter votre administrateur.";
+        $this->redirect('index.php?page=auth&action=login');
     }
 
     public function register(): void
     {
-        $this->validateCsrf();
-        try {
-            $this->authService->register($_POST);
-            $this->auditLogService->log('REGISTER', 'user', null, ['email' => $_POST['email'] ?? '']);
-            $_SESSION['flash_success'] = "Compte créé avec succès. Vous pouvez vous connecter.";
-            $this->redirect('index.php?page=auth&action=login');
-        } catch (Exception $e) {
-            $_SESSION['flash_error'] = $e->getMessage();
-            $this->redirect('index.php?page=auth&action=register');
-        }
-
+        $this->showRegister();
     }
+
 
     public function logout(): void
     {

@@ -12,6 +12,7 @@ class DataBreachController
     private DataBreachRepository $repository;
     private AuditLogService $auditLogService;
     private int $userId;
+    private int $organizationId;
 
     public function __construct()
     {
@@ -23,11 +24,12 @@ class DataBreachController
         $this->repository = new DataBreachRepository();
         $this->auditLogService = new AuditLogService();
         $this->userId = (int) $_SESSION['user_id'];
+        $this->organizationId = (int) $_SESSION['organization_id'];
     }
 
     public function list(): void
     {
-        $breaches = $this->repository->findAllByUserId($this->userId);
+        $breaches = $this->repository->findAllByOrganizationId($this->organizationId);
         $this->render('data_breaches/list', [
             'breaches' => $breaches,
             'title' => 'Registre des Violations de Données'
@@ -48,6 +50,7 @@ class DataBreachController
 
         $data = $_POST;
         $data['user_id'] = $this->userId;
+        $data['organization_id'] = $this->organizationId;
         $data['is_notified_authority'] = isset($_POST['is_notified_authority']);
         $data['is_notified_individuals'] = isset($_POST['is_notified_individuals']);
 
@@ -63,7 +66,7 @@ class DataBreachController
     public function edit(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
-        $breach = $this->repository->findByIdAndUserId($id, $this->userId);
+        $breach = $this->repository->findByIdAndOrganizationId($id, $this->organizationId);
 
         if (!$breach) {
             $_SESSION['flash_error'] = 'Violation non trouvée.';
@@ -82,7 +85,7 @@ class DataBreachController
         $this->validateCsrf();
         $this->validateNotGuest();
         $id = (int) ($_POST['id'] ?? 0);
-        $breach = $this->repository->findByIdAndUserId($id, $this->userId);
+        $breach = $this->repository->findByIdAndOrganizationId($id, $this->organizationId);
 
         if (!$breach) {
             die('Dossier non trouvé');
@@ -91,6 +94,7 @@ class DataBreachController
         $data = $_POST;
         $data['id'] = $id;
         $data['user_id'] = $this->userId;
+        $data['organization_id'] = $this->organizationId;
         $data['is_notified_authority'] = isset($_POST['is_notified_authority']);
         $data['is_notified_individuals'] = isset($_POST['is_notified_individuals']);
 
@@ -108,12 +112,13 @@ class DataBreachController
         $this->validateCsrf();
         $this->validateNotGuest();
         $id = (int) ($_POST['id'] ?? 0);
-        $this->repository->deleteAndUserId($id, $this->userId);
+        $this->repository->deleteAndOrganizationId($id, $this->organizationId);
         $this->auditLogService->log('DATA_BREACH_DELETE', 'data_breach', $id);
 
         $_SESSION['flash_success'] = 'Dossier supprimé.';
         header('Location: index.php?page=breach&action=list');
     }
+
 
     private function render(string $template, array $data = []): void
     {

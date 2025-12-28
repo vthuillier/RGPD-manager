@@ -23,23 +23,24 @@ class ReportService
         $this->breachRepo = new DataBreachRepository();
     }
 
-    public function getAnnualData(int $userId): array
+    public function getAnnualData(int $organizationId): array
     {
         return [
             'year' => date('Y'),
             'date' => date('d/m/Y'),
             'treatments' => [
-                'total' => $this->treatmentRepo->countAllByUserId($userId),
-                'by_legal_basis' => $this->treatmentRepo->countByLegalBasis($userId),
-                'list' => $this->treatmentRepo->findAllByUserId($userId),
+                'total' => $this->treatmentRepo->countAllByOrganizationId($organizationId),
+                'by_legal_basis' => $this->treatmentRepo->countByLegalBasis($organizationId),
+                'list' => $this->treatmentRepo->findAllByOrganizationId($organizationId),
             ],
             'subprocessors' => [
-                'total' => count($this->subprocessorRepo->findAllByUserId($userId)),
+                'total' => count($this->subprocessorRepo->findAllByOrganizationId($organizationId)),
             ],
 
-            'rights' => $this->rightsRepo->getStats($userId),
-            'breaches' => $this->breachRepo->getStats($userId),
-            'recent_breaches' => $this->breachRepo->findAllByUserId($userId),
+            'rights' => $this->rightsRepo->getStats($organizationId),
+            'breaches' => $this->breachRepo->getStats($organizationId),
+            'recent_breaches' => $this->breachRepo->findAllByOrganizationId($organizationId),
         ];
     }
+
 }

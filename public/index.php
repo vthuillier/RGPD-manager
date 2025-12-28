@@ -25,21 +25,27 @@ try {
     $schemaManager = new \App\Database\SchemaManager();
     $schemaManager->init();
 } catch (\Exception $e) {
-    // We log but continue, the app might crash later if DB is really missing
-    // error_log("Database initialization failed: " . $e->getMessage());
+    // We log but continue
 }
 
-
+// Installation Check
+$isInstalled = \App\Controller\SetupController::isInstalled();
 $page = $_GET['page'] ?? null;
 $action = $_GET['action'] ?? null;
 
-if (!$page && !isset($_SESSION['user_id'])) {
+if (!$isInstalled && $page !== 'setup') {
+    header('Location: index.php?page=setup');
+    exit;
+}
+
+if ($isInstalled && !$page && !isset($_SESSION['user_id'])) {
     header('Location: landing.html');
     exit;
 }
 
 $page = $page ?? 'treatment';
 $action = $action ?? 'dashboard';
+
 
 try {
     if ($page === 'auth') {
@@ -186,7 +192,18 @@ try {
                 $controller->generateAnnual();
                 break;
         }
+    } elseif ($page === 'setup') {
+        $controller = new \App\Controller\SetupController();
+        switch ($action) {
+            case 'process':
+                $controller->setup();
+                break;
+            default:
+                $controller->showSetup();
+                break;
+        }
     } elseif ($page === 'credits') {
+
         $title = 'Crédits';
         extract(['title' => $title]);
         ob_start();
@@ -194,7 +211,27 @@ try {
         $content = ob_get_clean();
         require __DIR__ . '/../templates/layout.php';
         exit;
+    } elseif ($page === 'user') {
+        $controller = new \App\Controller\UserController();
+        switch ($action) {
+            case 'list':
+                $controller->list();
+                break;
+            case 'create':
+                $controller->create();
+                break;
+            case 'store':
+                $controller->store();
+                break;
+            case 'delete':
+                $controller->delete();
+                break;
+            default:
+                $controller->list();
+                break;
+        }
     } elseif ($page === 'logs') {
+
 
 
 

@@ -13,6 +13,7 @@ class AuditLog
         public ?int $entityId,
         public ?string $details,
         public ?string $ipAddress,
+        public ?int $organizationId = null,
         public ?string $createdAt = null,
         public ?string $userName = null // Optional, for display
     ) {
@@ -28,8 +29,10 @@ class AuditLog
             isset($data['entity_id']) ? (int) $data['entity_id'] : null,
             $data['details'] ?? null,
             $data['ip_address'] ?? null,
+            isset($data['organization_id']) ? (int) $data['organization_id'] : null,
             $data['created_at'] ?? null,
             $data['user_name'] ?? null
         );
     }
+
 }

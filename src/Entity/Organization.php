@@ -3,15 +3,11 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-class User
+class Organization
 {
     public function __construct(
         public ?int $id,
-        public string $email,
-        public string $password,
         public string $name,
-        public string $role = 'user',
-        public ?int $organizationId = null,
         public ?string $createdAt = null
     ) {
     }
@@ -20,18 +16,8 @@ class User
     {
         return new self(
             $data['id'] ?? null,
-            $data['email'] ?? '',
-            $data['password'] ?? '',
             $data['name'] ?? '',
-            $data['role'] ?? 'user',
-            $data['organization_id'] ?? null,
             $data['created_at'] ?? null
         );
-    }
-
-
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
     }
 }

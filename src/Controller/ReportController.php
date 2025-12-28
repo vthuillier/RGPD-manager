@@ -22,7 +22,8 @@ class ReportController
 
     public function generateAnnual(): void
     {
-        $data = $this->service->getAnnualData((int) $_SESSION['user_id']);
+        $data = $this->service->getAnnualData((int) $_SESSION['organization_id']);
+
 
         // Add logo base64 (only if GD is available for Dompdf)
         $logoPath = __DIR__ . '/../../public/assets/logo_texte.png';

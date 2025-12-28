@@ -14,6 +14,7 @@ class RightsExercise
         public string $status = 'En attente',
         public ?string $completionDate = null,
         public ?string $details = null,
+        public ?int $organizationId = null,
         public ?string $createdAt = null
     ) {
     }
@@ -29,9 +30,10 @@ class RightsExercise
             $data['status'] ?? 'En attente',
             !empty($data['completion_date']) ? $data['completion_date'] : null,
             !empty($data['details']) ? $data['details'] : null,
+            isset($data['organization_id']) ? (int) $data['organization_id'] : null,
             $data['created_at'] ?? null
         );
-
     }
+
 
 }

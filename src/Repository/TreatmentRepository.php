@@ -19,18 +19,18 @@ class TreatmentRepository
     /**
      * @return Treatment[]
      */
-    public function findAllByUserId(int $userId): array
+    public function findAllByOrganizationId(int $organizationId): array
     {
-        return $this->findByFilters($userId, []);
+        return $this->findByFilters($organizationId, []);
     }
 
     /**
      * @return Treatment[]
      */
-    public function findByFilters(int $userId, array $filters): array
+    public function findByFilters(int $organizationId, array $filters): array
     {
-        $sql = 'SELECT * FROM treatments WHERE user_id = :user_id';
-        $params = ['user_id' => $userId];
+        $sql = 'SELECT * FROM treatments WHERE organization_id = :organization_id';
+        $params = ['organization_id' => $organizationId];
 
         if (!empty($filters['search'])) {
             $sql .= ' AND (name ILIKE :search OR purpose ILIKE :search)';
@@ -51,10 +51,10 @@ class TreatmentRepository
         return array_map(fn($data) => Treatment::fromArray($data), $results);
     }
 
-    public function findByIdAndUserId(int $id, int $userId): ?Treatment
+    public function findByIdAndOrganizationId(int $id, int $organizationId): ?Treatment
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM treatments WHERE id = :id AND user_id = :user_id');
-        $stmt->execute(['id' => $id, 'user_id' => $userId]);
+        $stmt = $this->pdo->prepare('SELECT * FROM treatments WHERE id = :id AND organization_id = :organization_id');
+        $stmt->execute(['id' => $id, 'organization_id' => $organizationId]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $data ? Treatment::fromArray($data) : null;
@@ -74,13 +74,14 @@ class TreatmentRepository
     private function insert(Treatment $treatment): int
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO treatments (user_id, name, purpose, legal_basis, data_categories, retention_period, has_sensitive_data, is_large_scale, retention_years)
-            VALUES (:user_id, :name, :purpose, :legal_basis, :data_categories, :retention_period, :has_sensitive_data, :is_large_scale, :retention_years)
+            'INSERT INTO treatments (user_id, organization_id, name, purpose, legal_basis, data_categories, retention_period, has_sensitive_data, is_large_scale, retention_years)
+            VALUES (:user_id, :organization_id, :name, :purpose, :legal_basis, :data_categories, :retention_period, :has_sensitive_data, :is_large_scale, :retention_years)
             RETURNING id'
         );
 
         $stmt->execute([
             'user_id' => $treatment->userId,
+            'organization_id' => $treatment->organizationId,
             'name' => $treatment->name,
             'purpose' => $treatment->purpose,
             'legal_basis' => $treatment->legalBasis,
@@ -107,12 +108,12 @@ class TreatmentRepository
                 has_sensitive_data = :has_sensitive_data,
                 is_large_scale = :is_large_scale,
                 retention_years = :retention_years
-            WHERE id = :id AND user_id = :user_id'
+            WHERE id = :id AND organization_id = :organization_id'
         );
 
         $stmt->execute([
             'id' => $treatment->id,
-            'user_id' => $treatment->userId,
+            'organization_id' => $treatment->organizationId,
             'name' => $treatment->name,
             'purpose' => $treatment->purpose,
             'legal_basis' => $treatment->legalBasis,
@@ -124,30 +125,31 @@ class TreatmentRepository
         ]);
     }
 
-    public function deleteAndUserId(int $id, int $userId): void
+    public function deleteAndOrganizationId(int $id, int $organizationId): void
     {
-        $stmt = $this->pdo->prepare('DELETE FROM treatments WHERE id = :id AND user_id = :user_id');
-        $stmt->execute(['id' => $id, 'user_id' => $userId]);
+        $stmt = $this->pdo->prepare('DELETE FROM treatments WHERE id = :id AND organization_id = :organization_id');
+        $stmt->execute(['id' => $id, 'organization_id' => $organizationId]);
     }
 
-    public function countAllByUserId(int $userId): int
+    public function countAllByOrganizationId(int $organizationId): int
     {
-        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM treatments WHERE user_id = :user_id');
-        $stmt->execute(['user_id' => $userId]);
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM treatments WHERE organization_id = :organization_id');
+        $stmt->execute(['organization_id' => $organizationId]);
         return (int) $stmt->fetchColumn();
     }
 
-    public function countByLegalBasis(int $userId): array
+    public function countByLegalBasis(int $organizationId): array
     {
         $stmt = $this->pdo->prepare('
             SELECT legal_basis, COUNT(*) as count 
             FROM treatments 
-            WHERE user_id = :user_id 
+            WHERE organization_id = :organization_id 
             GROUP BY legal_basis
         ');
-        $stmt->execute(['user_id' => $userId]);
+        $stmt->execute(['organization_id' => $organizationId]);
         return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
     }
+
 
 
     public function getSubprocessorIds(int $treatmentId): array

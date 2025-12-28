@@ -19,13 +19,20 @@ class SchemaManager
     {
         if (!$this->isDatabaseInitialized()) {
             $this->runInitSql();
-            $this->createDefaultAdmin();
         }
     }
+
 
     private function isDatabaseInitialized(): bool
     {
         try {
+            // Check if 'organizations' table exists (newest addition)
+            $stmt = $this->pdo->query("SELECT 1 FROM information_schema.tables WHERE table_name = 'organizations' LIMIT 1");
+            $orgTableExists = $stmt !== false && $stmt->fetch() !== false;
+
+            if (!$orgTableExists)
+                return false;
+
             // Check if 'users' table exists
             $stmt = $this->pdo->query("SELECT 1 FROM information_schema.tables WHERE table_name = 'users' LIMIT 1");
             $tableExists = $stmt !== false && $stmt->fetch() !== false;
@@ -33,22 +40,13 @@ class SchemaManager
             if (!$tableExists)
                 return false;
 
-            // Check if 'role' column exists in 'users' (for backward compatibility during this update)
-            $stmt = $this->pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'role' LIMIT 1");
-            $columnExists = $stmt !== false && $stmt->fetch() !== false;
+            // Check if 'organization_id' column exists in 'users'
+            $stmt = $this->pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'organization_id' LIMIT 1");
+            $orgColumnExists = $stmt !== false && $stmt->fetch() !== false;
 
-            // Check if 'rights_exercises' table exists
-            $stmt = $this->pdo->query("SELECT 1 FROM information_schema.tables WHERE table_name = 'rights_exercises' LIMIT 1");
-            $rightsTableExists = $stmt !== false && $stmt->fetch() !== false;
-
-            // Check if 'data_breaches' table exists
-            $stmt = $this->pdo->query("SELECT 1 FROM information_schema.tables WHERE table_name = 'data_breaches' LIMIT 1");
-            $breachesTableExists = $stmt !== false && $stmt->fetch() !== false;
-
-            return $columnExists && $rightsTableExists && $breachesTableExists;
+            return $orgColumnExists;
 
         } catch (Exception $e) {
-
             return false;
         }
     }
@@ -67,18 +65,5 @@ class SchemaManager
         }
 
         $this->pdo->exec($sql);
-    }
-
-    private function createDefaultAdmin(): void
-    {
-        // Check if any admin exists
-        $stmt = $this->pdo->query("SELECT 1 FROM users WHERE role = 'admin' LIMIT 1");
-        if ($stmt->fetch() === false) {
-            $password = password_hash('admin123', PASSWORD_DEFAULT);
-            $stmt = $this->pdo->prepare(
-                "INSERT INTO users (email, password, name, role) VALUES ('admin@rgpd.fr', :password, 'Administrateur', 'admin')"
-            );
-            $stmt->execute(['password' => $password]);
-        }
     }
 }

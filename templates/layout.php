@@ -97,10 +97,13 @@
                             </a>
 
                             <?php if (($_SESSION['user_role'] ?? '') === 'admin'): ?>
-
+                                <a href="index.php?page=user&action=list"
+                                    class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'user') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
+                                    Utilisateurs
+                                </a>
 
                                 <a href="index.php?page=logs&action=list"
-                                    class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($_GET['page'] === 'logs') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
+                                    class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'logs') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
                                     Journaux (Audit)
                                 </a>
                             <?php endif; ?>
@@ -143,15 +146,12 @@
                         </div>
                     <?php else: ?>
                         <div class="flex items-center gap-3">
-                            <a href="index.php?page=auth&action=login"
-                                class="text-sm font-medium text-slate-600 hover:text-slate-900">
+                            <a href="index.php?page=auth&action=login" class="btn btn-primary py-1.5 px-6 shadow-none">
                                 Connexion
-                            </a>
-                            <a href="index.php?page=auth&action=register" class="btn btn-primary py-1.5 px-4 shadow-none">
-                                S'inscrire
                             </a>
                         </div>
                     <?php endif; ?>
+
                 </div>
             </div>
         </div>
@@ -174,6 +174,14 @@
                         class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'breach') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Violations
                         de données</a>
 
+                    <?php if (($_SESSION['user_role'] ?? '') === 'admin'): ?>
+                        <a href="index.php?page=user&action=list"
+                            class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'user') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Utilisateurs</a>
+                        <a href="index.php?page=logs&action=list"
+                            class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'logs') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Journaux
+                            (Audit)</a>
+                    <?php endif; ?>
+
                     <div class="pt-4 pb-3 border-t border-slate-200 mt-4">
                         <div class="flex items-center px-4">
                             <div class="ml-3">
@@ -193,9 +201,8 @@
                 <?php else: ?>
                     <a href="index.php?page=auth&action=login"
                         class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800 text-base font-medium">Connexion</a>
-                    <a href="index.php?page=auth&action=register"
-                        class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800 text-base font-medium">S'inscrire</a>
                 <?php endif; ?>
+
             </div>
         </div>
     </nav>

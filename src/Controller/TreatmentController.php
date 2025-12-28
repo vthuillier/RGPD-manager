@@ -13,19 +13,21 @@ class TreatmentController
     private TreatmentService $service;
     private \App\Service\AuditLogService $auditLogService;
     private int $userId;
+    private int $organizationId;
 
     public function __construct()
     {
         $this->ensureAuthenticated();
         $this->service = new TreatmentService();
         $this->auditLogService = new \App\Service\AuditLogService();
-        $this->userId = $_SESSION['user_id'];
+        $this->userId = (int) $_SESSION['user_id'];
+        $this->organizationId = (int) $_SESSION['organization_id'];
     }
 
 
     public function dashboard(): void
     {
-        $stats = $this->service->getStats($this->userId);
+        $stats = $this->service->getStatsForOrganization($this->organizationId);
         $this->render('treatments/dashboard', [
             'title' => 'Tableau de bord',
             'stats' => $stats
@@ -39,7 +41,7 @@ class TreatmentController
             'legal_basis' => $_GET['legal_basis'] ?? ''
         ];
 
-        $treatments = $this->service->getTreatmentsForUser($this->userId, $filters);
+        $treatments = $this->service->getTreatmentsForOrganization($this->organizationId, $filters);
 
         $this->render('treatments/list', [
             'title' => 'Mon Registre',
@@ -51,7 +53,7 @@ class TreatmentController
     public function create(): void
     {
         $subprocessorRepo = new \App\Repository\SubprocessorRepository();
-        $allSubprocessors = $subprocessorRepo->findAllByUserId($this->userId);
+        $allSubprocessors = $subprocessorRepo->findAllByOrganizationId($this->organizationId);
 
         $this->render('treatments/form', [
             'title' => 'Nouveau traitement',
@@ -68,6 +70,7 @@ class TreatmentController
         try {
             $data = $_POST;
             $data['user_id'] = $this->userId;
+            $data['organization_id'] = $this->organizationId;
             $this->service->createTreatment($data);
 
             $this->auditLogService->log('TREATMENT_CREATE', 'treatment', null, ['name' => $data['name'] ?? '']);
@@ -84,7 +87,7 @@ class TreatmentController
     public function edit(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
-        $treatment = $this->service->getTreatmentForUser($id, $this->userId);
+        $treatment = $this->service->getTreatmentForOrganization($id, $this->organizationId);
 
         if (!$treatment) {
             $_SESSION['flash_error'] = "Traitement introuvable ou vous n'avez pas les droits.";
@@ -92,7 +95,7 @@ class TreatmentController
         }
 
         $subprocessorRepo = new \App\Repository\SubprocessorRepository();
-        $allSubprocessors = $subprocessorRepo->findAllByUserId($this->userId);
+        $allSubprocessors = $subprocessorRepo->findAllByOrganizationId($this->organizationId);
         $selectedSubprocessors = $this->service->getSubprocessorIds($id);
 
         $this->render('treatments/form', [
@@ -112,7 +115,8 @@ class TreatmentController
         try {
             $data = $_POST;
             $data['user_id'] = $this->userId;
-            $this->service->updateTreatmentForUser($id, $this->userId, $data);
+            $data['organization_id'] = $this->organizationId;
+            $this->service->updateTreatmentForOrganization($id, $this->organizationId, $data);
 
             $this->auditLogService->log('TREATMENT_UPDATE', 'treatment', $id, ['name' => $data['name'] ?? '']);
 
@@ -130,7 +134,7 @@ class TreatmentController
         $this->validateCsrf();
         $this->validateNotGuest();
         $id = (int) ($_POST['id'] ?? 0);
-        $this->service->deleteTreatmentForUser($id, $this->userId);
+        $this->service->deleteTreatmentForOrganization($id, $this->organizationId);
 
         $this->auditLogService->log('TREATMENT_DELETE', 'treatment', $id);
 
@@ -141,7 +145,7 @@ class TreatmentController
 
     public function exportCsv(): void
     {
-        $treatments = $this->service->getTreatmentsForUser($this->userId);
+        $treatments = $this->service->getTreatmentsForOrganization($this->organizationId);
         $exportService = new ExportService();
         $this->auditLogService->log('TREATMENT_EXPORT_CSV', 'treatment');
         $exportService->exportCsv($treatments);
@@ -150,7 +154,7 @@ class TreatmentController
 
     public function exportPdf(): void
     {
-        $treatments = $this->service->getTreatmentsForUser($this->userId);
+        $treatments = $this->service->getTreatmentsForOrganization($this->organizationId);
         $this->auditLogService->log('TREATMENT_EXPORT_PDF', 'treatment');
         $this->render('treatments/print', [
             'title' => 'Registre des activités de traitement',
@@ -158,6 +162,7 @@ class TreatmentController
             'isPrint' => true
         ], true);
     }
+
 
 
     private function render(string $template, array $data = [], bool $standalone = false): void

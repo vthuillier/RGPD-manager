@@ -15,6 +15,13 @@
             </div>
 
             <div>
+                <label for="organization_name" class="form-label">Nom de votre organisation / entreprise</label>
+                <input type="text" id="organization_name" name="organization_name" required class="form-input"
+                    placeholder="Ma Société SAS">
+            </div>
+
+
+            <div>
                 <label for="email" class="form-label">Adresse Email</label>
                 <input type="email" id="email" name="email" required class="form-input" placeholder="jean@exemple.fr">
             </div>

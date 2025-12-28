@@ -18,6 +18,7 @@ class AuditLogService
     public function log(string $action, ?string $entityType = null, ?int $entityId = null, ?array $details = null): void
     {
         $userId = $_SESSION['user_id'] ?? null;
+        $organizationId = $_SESSION['organization_id'] ?? null;
         $ipAddress = $_SERVER['REMOTE_ADDR'] ?? null;
 
         $log = new AuditLog(
@@ -27,7 +28,8 @@ class AuditLogService
             $entityType,
             $entityId,
             $details ? json_encode($details, JSON_UNESCAPED_UNICODE) : null,
-            $ipAddress
+            $ipAddress,
+            $organizationId ? (int) $organizationId : null
         );
 
         $this->repository->save($log);
@@ -38,6 +40,8 @@ class AuditLogService
      */
     public function getRecentLogs(int $limit = 50): array
     {
-        return $this->repository->findAll($limit);
+        $organizationId = (int) ($_SESSION['organization_id'] ?? 0);
+        return $this->repository->findAllByOrganizationId($organizationId, $limit);
     }
+
 }

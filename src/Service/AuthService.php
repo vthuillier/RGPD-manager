@@ -30,17 +30,25 @@ class AuthService
             throw new InvalidArgumentException("Cette adresse email est déjà utilisée.");
         }
 
+        // Create a new organization for this user
+        $orgRepo = new \App\Repository\OrganizationRepository();
+        $orgName = $data['organization_name'] ?? "Organisation de " . $data['name'];
+        $orgId = $orgRepo->save(new \App\Entity\Organization(null, $orgName));
+
         $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
 
         $user = new User(
             null,
             $data['email'],
             $hashedPassword,
-            $data['name']
+            $data['name'],
+            'user',
+            $orgId
         );
 
         $this->repository->save($user);
     }
+
 
     public function login(string $email, string $password): ?User
     {

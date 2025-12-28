@@ -25,7 +25,7 @@ class SubprocessorController
 
     public function list(): void
     {
-        $subprocessors = $this->repository->findAllByUserId((int) $_SESSION['user_id']);
+        $subprocessors = $this->repository->findAllByOrganizationId((int) $_SESSION['organization_id']);
         $this->render('subprocessors/list', [
             'subprocessors' => $subprocessors,
             'title' => 'Registre des Sous-traitants'
@@ -50,7 +50,8 @@ class SubprocessorController
             $_POST['name'],
             $_POST['service'],
             $_POST['location'],
-            $_POST['guarantees']
+            $_POST['guarantees'],
+            (int) $_SESSION['organization_id']
         );
 
         $this->repository->save($subprocessor);
@@ -63,7 +64,7 @@ class SubprocessorController
     public function edit(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
-        $subprocessor = $this->repository->findByIdAndUserId($id, (int) $_SESSION['user_id']);
+        $subprocessor = $this->repository->findByIdAndOrganizationId($id, (int) $_SESSION['organization_id']);
 
         if (!$subprocessor) {
             $_SESSION['flash_error'] = 'Sous-traitant non trouvé.';
@@ -83,7 +84,7 @@ class SubprocessorController
         $this->validateNotGuest();
 
         $id = (int) ($_POST['id'] ?? 0);
-        $subprocessor = $this->repository->findByIdAndUserId($id, (int) $_SESSION['user_id']);
+        $subprocessor = $this->repository->findByIdAndOrganizationId($id, (int) $_SESSION['organization_id']);
 
         if (!$subprocessor) {
             die('Subprocessor not found');
@@ -107,12 +108,13 @@ class SubprocessorController
         $this->validateNotGuest();
 
         $id = (int) ($_POST['id'] ?? 0);
-        $this->repository->deleteAndUserId($id, (int) $_SESSION['user_id']);
+        $this->repository->deleteAndOrganizationId($id, (int) $_SESSION['organization_id']);
         $this->auditLogService->log('SUBPROCESSOR_DELETE', 'subprocessor', $id);
 
         $_SESSION['flash_success'] = 'Sous-traitant supprimé.';
         header('Location: index.php?page=subprocessor&action=list');
     }
+
 
 
     private function render(string $template, array $data = []): void
