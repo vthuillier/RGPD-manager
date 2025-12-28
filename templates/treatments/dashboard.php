@@ -21,10 +21,46 @@
             </p>
         <?php else: ?>
             <p style="font-size: 0.875rem; color: var(--error); font-weight: 600; margin: 0.5rem 0;">
-                <?= count($aipdNeeded) ?> traitement(s) nécessitant une AIPD :</p>
+                <?= count($aipdNeeded) ?> traitement(s) nécessitant une AIPD :
+            </p>
             <ul style="font-size: 0.8125rem; padding-left: 1.25rem; margin-top: 0;">
                 <?php foreach ($aipdNeeded as $t): ?>
                     <li><?= htmlspecialchars($t->name) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+    </div>
+
+    <!-- Alerte Rétention -->
+    <div class="card" style="border-left: 4px solid var(--warning); padding: 1.5rem;">
+        <h3 style="margin-top: 0; color: #d97706; font-size: 1rem;">📅 Alertes de Rétention</h3>
+        <?php
+        $today = new DateTime();
+        $expiringSoon = array_filter($stats['treatments'] ?? [], function ($t) use ($today) {
+            $createdAt = new DateTime($t->createdAt);
+            $expiryDate = $createdAt->modify('+' . $t->retentionYears . ' years');
+            $diff = $today->diff($expiryDate);
+            // Alert if expired or expiring in less than 60 days
+            return $expiryDate <= $today || ($diff->invert === 0 && $diff->days < 60);
+        });
+        ?>
+        <?php if (empty($expiringSoon)): ?>
+            <p style="font-size: 0.875rem; color: var(--success); margin: 1rem 0;">Aucune purge à prévoir prochainement.</p>
+        <?php else: ?>
+            <p style="font-size: 0.875rem; color: #d97706; font-weight: 600; margin: 0.5rem 0;"><?= count($expiringSoon) ?>
+                traitement(s) à purger ou réviser :</p>
+            <ul style="font-size: 0.8125rem; padding-left: 1.25rem; margin-top: 0;">
+                <?php foreach ($expiringSoon as $t): ?>
+                    <?php
+                    $expiry = (new DateTime($t->createdAt))->modify('+' . $t->retentionYears . ' years');
+                    $isExpired = $expiry <= $today;
+                    ?>
+                    <li>
+                        <?= htmlspecialchars($t->name) ?>
+                        <span style="color: <?= $isExpired ? 'var(--error)' : '#d97706' ?>; font-weight: bold;">
+                            (<?= $isExpired ? 'Expiré' : 'Bientôt' ?> : <?= $expiry->format('d/m/Y') ?>)
+                        </span>
+                    </li>
                 <?php endforeach; ?>
             </ul>
         <?php endif; ?>

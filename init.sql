@@ -19,5 +19,6 @@ CREATE TABLE treatments (
     retention_period VARCHAR(100) NOT NULL,
     has_sensitive_data BOOLEAN DEFAULT FALSE,
     is_large_scale BOOLEAN DEFAULT FALSE,
+    retention_years INTEGER DEFAULT 5,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

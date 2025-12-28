@@ -41,11 +41,18 @@
                 value="<?= htmlspecialchars($treatment->dataCategories ?? '') ?>" required>
         </div>
 
-        <div>
-            <label for="retention_period">Durée de conservation</label>
-            <input type="text" id="retention_period" name="retention_period"
-                placeholder="Ex: 5 ans après la fin de la relation..."
-                value="<?= htmlspecialchars($treatment->retentionPeriod ?? '') ?>" required>
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+            <div>
+                <label for="retention_period">Texte de conservation (ex: 5 ans après...)</label>
+                <input type="text" id="retention_period" name="retention_period"
+                    placeholder="Ex: 5 ans après la fin de la relation..."
+                    value="<?= htmlspecialchars($treatment->retentionPeriod ?? '') ?>" required>
+            </div>
+            <div>
+                <label for="retention_years">Durée (en années)</label>
+                <input type="number" id="retention_years" name="retention_years" min="1" max="99"
+                    value="<?= htmlspecialchars($treatment->retentionYears ?? '5') ?>" required>
+            </div>
         </div>
 
         <div

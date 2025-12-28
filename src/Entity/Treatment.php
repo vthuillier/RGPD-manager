@@ -15,6 +15,7 @@ class Treatment
         public string $retentionPeriod,
         public bool $hasSensitiveData = false,
         public bool $isLargeScale = false,
+        public int $retentionYears = 5,
         public ?string $createdAt = null
     ) {
     }
@@ -31,6 +32,7 @@ class Treatment
             $data['retention_period'] ?? '',
             (bool) ($data['has_sensitive_data'] ?? false),
             (bool) ($data['is_large_scale'] ?? false),
+            (int) ($data['retention_years'] ?? 5),
             $data['created_at'] ?? null
         );
     }

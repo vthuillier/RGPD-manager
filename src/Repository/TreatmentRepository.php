@@ -72,8 +72,8 @@ class TreatmentRepository
     private function insert(Treatment $treatment): void
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO treatments (user_id, name, purpose, legal_basis, data_categories, retention_period, has_sensitive_data, is_large_scale)
-            VALUES (:user_id, :name, :purpose, :legal_basis, :data_categories, :retention_period, :has_sensitive_data, :is_large_scale)'
+            'INSERT INTO treatments (user_id, name, purpose, legal_basis, data_categories, retention_period, has_sensitive_data, is_large_scale, retention_years)
+            VALUES (:user_id, :name, :purpose, :legal_basis, :data_categories, :retention_period, :has_sensitive_data, :is_large_scale, :retention_years)'
         );
 
         $stmt->execute([
@@ -84,7 +84,8 @@ class TreatmentRepository
             'data_categories' => $treatment->dataCategories,
             'retention_period' => $treatment->retentionPeriod,
             'has_sensitive_data' => (int) $treatment->hasSensitiveData,
-            'is_large_scale' => (int) $treatment->isLargeScale
+            'is_large_scale' => (int) $treatment->isLargeScale,
+            'retention_years' => $treatment->retentionYears
         ]);
     }
 
@@ -98,7 +99,8 @@ class TreatmentRepository
                 data_categories = :data_categories, 
                 retention_period = :retention_period,
                 has_sensitive_data = :has_sensitive_data,
-                is_large_scale = :is_large_scale
+                is_large_scale = :is_large_scale,
+                retention_years = :retention_years
             WHERE id = :id AND user_id = :user_id'
         );
 
@@ -111,7 +113,8 @@ class TreatmentRepository
             'data_categories' => $treatment->dataCategories,
             'retention_period' => $treatment->retentionPeriod,
             'has_sensitive_data' => (int) $treatment->hasSensitiveData,
-            'is_large_scale' => (int) $treatment->isLargeScale
+            'is_large_scale' => (int) $treatment->isLargeScale,
+            'retention_years' => $treatment->retentionYears
         ]);
     }
 
