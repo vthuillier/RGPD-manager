@@ -91,7 +91,12 @@
                                 class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($_GET['page'] === 'subprocessor') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
                                 Sous-traitants
                             </a>
+                            <a href="index.php?page=logs&action=list"
+                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($_GET['page'] === 'logs') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
+                                Journaux (Audit)
+                            </a>
                         <?php endif; ?>
+
 
                     </div>
                 </div>

@@ -8,6 +8,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use App\Controller\TreatmentController;
 use App\Controller\AuthController;
 use App\Controller\SubprocessorController;
+use App\Controller\AuditLogController;
 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -98,9 +99,20 @@ try {
                 $controller->list();
                 break;
         }
+    } elseif ($page === 'logs') {
+        $controller = new AuditLogController();
+        switch ($action) {
+            case 'list':
+                $controller->list();
+                break;
+            default:
+                $controller->list();
+                break;
+        }
     } else {
         header('Location: index.php?page=treatment&action=dashboard');
     }
+
 
 } catch (\Exception $e) {
     echo "Une erreur est survenue : " . $e->getMessage();

@@ -9,10 +9,13 @@ use App\Repository\SubprocessorRepository;
 class SubprocessorController
 {
     private SubprocessorRepository $repository;
+    private \App\Service\AuditLogService $auditLogService;
 
     public function __construct()
     {
         $this->repository = new SubprocessorRepository();
+        $this->auditLogService = new \App\Service\AuditLogService();
+
 
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?page=auth&action=login');
@@ -52,9 +55,11 @@ class SubprocessorController
         );
 
         $this->repository->save($subprocessor);
+        $this->auditLogService->log('SUBPROCESSOR_CREATE', 'subprocessor', null, ['name' => $_POST['name']]);
         $_SESSION['flash_success'] = 'Sous-traitant ajouté avec succès.';
         header('Location: index.php?page=subprocessor&action=list');
     }
+
 
     public function edit(): void
     {
@@ -92,9 +97,11 @@ class SubprocessorController
         $subprocessor->guarantees = $_POST['guarantees'];
 
         $this->repository->save($subprocessor);
+        $this->auditLogService->log('SUBPROCESSOR_UPDATE', 'subprocessor', $id, ['name' => $_POST['name']]);
         $_SESSION['flash_success'] = 'Sous-traitant mis à jour.';
         header('Location: index.php?page=subprocessor&action=list');
     }
+
 
     public function delete(): void
     {
@@ -104,10 +111,12 @@ class SubprocessorController
 
         $id = (int) ($_POST['id'] ?? 0);
         $this->repository->deleteAndUserId($id, (int) $_SESSION['user_id']);
+        $this->auditLogService->log('SUBPROCESSOR_DELETE', 'subprocessor', $id);
 
         $_SESSION['flash_success'] = 'Sous-traitant supprimé.';
         header('Location: index.php?page=subprocessor&action=list');
     }
+
 
     private function render(string $template, array $data = []): void
     {

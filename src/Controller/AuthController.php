@@ -9,11 +9,14 @@ use Exception;
 class AuthController
 {
     private AuthService $authService;
+    private \App\Service\AuditLogService $auditLogService;
 
     public function __construct()
     {
         $this->authService = new AuthService();
+        $this->auditLogService = new \App\Service\AuditLogService();
     }
+
 
     public function showLogin(): void
     {
@@ -38,11 +41,16 @@ class AuthController
             $_SESSION['user_id'] = $user->id;
             $_SESSION['user_name'] = $user->name;
             $_SESSION['flash_success'] = "Bienvenue, " . $user->name;
+
+            $this->auditLogService->log('LOGIN', 'user', $user->id, ['email' => $email]);
+
             $this->redirect('index.php?page=treatment&action=dashboard');
         } else {
+            $this->auditLogService->log('LOGIN_FAILED', 'user', null, ['email' => $email]);
             $_SESSION['flash_error'] = "Identifiants incorrects.";
             $this->redirect('index.php?page=auth&action=login');
         }
+
     }
 
     public function showRegister(): void
@@ -57,21 +65,29 @@ class AuthController
         $this->validateCsrf();
         try {
             $this->authService->register($_POST);
+            $this->auditLogService->log('REGISTER', 'user', null, ['email' => $_POST['email'] ?? '']);
             $_SESSION['flash_success'] = "Compte créé avec succès. Vous pouvez vous connecter.";
             $this->redirect('index.php?page=auth&action=login');
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
             $this->redirect('index.php?page=auth&action=register');
         }
+
     }
 
     public function logout(): void
     {
+        $userId = $_SESSION['user_id'] ?? null;
+        if ($userId) {
+            $this->auditLogService->log('LOGOUT', 'user', (int) $userId);
+        }
+
         session_destroy();
         session_start();
         $_SESSION['flash_success'] = "Vous avez été déconnecté.";
         $this->redirect('index.php?page=auth&action=login');
     }
+
 
     private function render(string $template, array $data = []): void
     {

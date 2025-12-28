@@ -11,14 +11,17 @@ use Exception;
 class TreatmentController
 {
     private TreatmentService $service;
+    private \App\Service\AuditLogService $auditLogService;
     private int $userId;
 
     public function __construct()
     {
         $this->ensureAuthenticated();
         $this->service = new TreatmentService();
+        $this->auditLogService = new \App\Service\AuditLogService();
         $this->userId = $_SESSION['user_id'];
     }
+
 
     public function dashboard(): void
     {
@@ -65,12 +68,16 @@ class TreatmentController
             $data = $_POST;
             $data['user_id'] = $this->userId;
             $this->service->createTreatment($data);
+
+            $this->auditLogService->log('TREATMENT_CREATE', 'treatment', null, ['name' => $data['name'] ?? '']);
+
             $_SESSION['flash_success'] = "Traitement ajouté avec succès.";
             $this->redirect('index.php?page=treatment&action=list');
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
             $this->redirect('index.php?page=treatment&action=create');
         }
+
     }
 
     public function edit(): void
@@ -104,12 +111,16 @@ class TreatmentController
             $data = $_POST;
             $data['user_id'] = $this->userId;
             $this->service->updateTreatmentForUser($id, $this->userId, $data);
+
+            $this->auditLogService->log('TREATMENT_UPDATE', 'treatment', $id, ['name' => $data['name'] ?? '']);
+
             $_SESSION['flash_success'] = "Traitement mis à jour.";
             $this->redirect('index.php?page=treatment&action=list');
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
             $this->redirect('index.php?page=treatment&action=edit&id=' . $id);
         }
+
     }
 
     public function delete(): void
@@ -117,26 +128,34 @@ class TreatmentController
         $this->validateCsrf();
         $id = (int) ($_POST['id'] ?? 0);
         $this->service->deleteTreatmentForUser($id, $this->userId);
+
+        $this->auditLogService->log('TREATMENT_DELETE', 'treatment', $id);
+
         $_SESSION['flash_success'] = "Traitement supprimé.";
         $this->redirect('index.php?page=treatment&action=list');
     }
+
 
     public function exportCsv(): void
     {
         $treatments = $this->service->getTreatmentsForUser($this->userId);
         $exportService = new ExportService();
+        $this->auditLogService->log('TREATMENT_EXPORT_CSV', 'treatment');
         $exportService->exportCsv($treatments);
     }
+
 
     public function exportPdf(): void
     {
         $treatments = $this->service->getTreatmentsForUser($this->userId);
+        $this->auditLogService->log('TREATMENT_EXPORT_PDF', 'treatment');
         $this->render('treatments/print', [
             'title' => 'Registre des activités de traitement',
             'treatments' => $treatments,
             'isPrint' => true
         ], true);
     }
+
 
     private function render(string $template, array $data = [], bool $standalone = false): void
     {
