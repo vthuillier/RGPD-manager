@@ -177,6 +177,7 @@
         <a href="index.php" class="brand">RGPD Manager</a>
         <div class="nav-links">
             <?php if (isset($_SESSION['user_id'])): ?>
+                <a href="index.php?page=treatment&action=dashboard">Tableau de bord</a>
                 <a href="index.php?page=treatment&action=list">Registre</a>
                 <div class="user-nav">
                     <span>Bonjour, <strong><?= htmlspecialchars($_SESSION['user_name']) ?></strong></span>

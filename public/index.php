@@ -41,6 +41,9 @@ try {
     } elseif ($page === 'treatment') {
         $controller = new TreatmentController();
         switch ($action) {
+            case 'dashboard':
+                $controller->dashboard();
+                break;
             case 'list':
                 $controller->list();
                 break;
@@ -66,11 +69,11 @@ try {
                 $controller->exportPdf();
                 break;
             default:
-                $controller->list();
+                $controller->dashboard();
                 break;
         }
     } else {
-        header('Location: index.php?page=treatment&action=list');
+        header('Location: index.php?page=treatment&action=dashboard');
     }
 } catch (\Exception $e) {
     echo "Une erreur est survenue : " . $e->getMessage();

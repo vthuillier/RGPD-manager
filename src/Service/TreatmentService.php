@@ -49,6 +49,14 @@ class TreatmentService
         $this->repository->deleteAndUserId($id, $userId);
     }
 
+    public function getStats(int $userId): array
+    {
+        return [
+            'total' => $this->repository->countAllByUserId($userId),
+            'legal_basis' => $this->repository->countByLegalBasis($userId),
+        ];
+    }
+
     private function validate(array $data): void
     {
         $errors = [];

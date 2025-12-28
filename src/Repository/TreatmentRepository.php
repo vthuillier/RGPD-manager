@@ -91,4 +91,23 @@ class TreatmentRepository
         $stmt = $this->pdo->prepare('DELETE FROM treatments WHERE id = :id AND user_id = :user_id');
         $stmt->execute(['id' => $id, 'user_id' => $userId]);
     }
+
+    public function countAllByUserId(int $userId): int
+    {
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM treatments WHERE user_id = :user_id');
+        $stmt->execute(['user_id' => $userId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function countByLegalBasis(int $userId): array
+    {
+        $stmt = $this->pdo->prepare('
+            SELECT legal_basis, COUNT(*) as count 
+            FROM treatments 
+            WHERE user_id = :user_id 
+            GROUP BY legal_basis
+        ');
+        $stmt->execute(['user_id' => $userId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

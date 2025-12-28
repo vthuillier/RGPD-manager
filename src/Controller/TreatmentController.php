@@ -20,6 +20,15 @@ class TreatmentController
         $this->userId = $_SESSION['user_id'];
     }
 
+    public function dashboard(): void
+    {
+        $stats = $this->service->getStats($this->userId);
+        $this->render('treatments/dashboard', [
+            'title' => 'Tableau de bord',
+            'stats' => $stats
+        ]);
+    }
+
     public function list(): void
     {
         $treatments = $this->service->getTreatmentsForUser($this->userId);

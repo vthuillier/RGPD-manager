@@ -18,7 +18,7 @@ class AuthController
     public function showLogin(): void
     {
         if (isset($_SESSION['user_id'])) {
-            $this->redirect('index.php?page=treatment&action=list');
+            $this->redirect('index.php?page=treatment&action=dashboard');
         }
 
         $this->render('auth/login', [
@@ -38,7 +38,7 @@ class AuthController
             $_SESSION['user_id'] = $user->id;
             $_SESSION['user_name'] = $user->name;
             $_SESSION['flash_success'] = "Bienvenue, " . $user->name;
-            $this->redirect('index.php?page=treatment&action=list');
+            $this->redirect('index.php?page=treatment&action=dashboard');
         } else {
             $_SESSION['flash_error'] = "Identifiants incorrects.";
             $this->redirect('index.php?page=auth&action=login');
