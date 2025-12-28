@@ -27,10 +27,11 @@ class RightsExercise
             $data['request_date'] ?? '',
             $data['request_type'] ?? '',
             $data['status'] ?? 'En attente',
-            $data['completion_date'] ?? null,
-            $data['details'] ?? null,
+            !empty($data['completion_date']) ? $data['completion_date'] : null,
+            !empty($data['details']) ? $data['details'] : null,
             $data['created_at'] ?? null
         );
+
     }
 
 }

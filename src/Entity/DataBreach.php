@@ -30,14 +30,15 @@ class DataBreach
             $data['discovery_date'] ?? date('Y-m-d H:i'),
             $data['nature'] ?? '',
             $data['data_categories'] ?? '',
-            isset($data['subjects_count']) ? (int) $data['subjects_count'] : null,
-            isset($data['records_count']) ? (int) $data['records_count'] : null,
-            $data['consequences'] ?? null,
-            $data['measures_taken'] ?? null,
+            !empty($data['subjects_count']) ? (int) $data['subjects_count'] : null,
+            !empty($data['records_count']) ? (int) $data['records_count'] : null,
+            !empty($data['consequences']) ? $data['consequences'] : null,
+            !empty($data['measures_taken']) ? $data['measures_taken'] : null,
             (bool) ($data['is_notified_authority'] ?? false),
-            $data['notification_authority_date'] ?? null,
+            !empty($data['notification_authority_date']) ? $data['notification_authority_date'] : null,
             (bool) ($data['is_notified_individuals'] ?? false),
             $data['created_at'] ?? null
         );
+
     }
 }

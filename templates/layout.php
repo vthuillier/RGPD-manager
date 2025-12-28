@@ -71,26 +71,31 @@
                     </a>
                     <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
                         <?php if (isset($_SESSION['user_id'])): ?>
+                            <?php
+                            $currentPage = $_GET['page'] ?? 'treatment'; // Default if logged in
+                            $currentAction = $_GET['action'] ?? '';
+                            ?>
                             <a href="index.php?page=treatment&action=dashboard"
-                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($_GET['action'] ?? '') === 'dashboard' ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
+                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentAction === 'dashboard') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
                                 Tableau de bord
                             </a>
                             <a href="index.php?page=treatment&action=list"
-                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($_GET['page'] === 'treatment' && ($_GET['action'] ?? '') === 'list') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
+                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'treatment' && $currentAction === 'list') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
                                 Registre
                             </a>
                             <a href="index.php?page=subprocessor&action=list"
-                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($_GET['page'] === 'subprocessor') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
+                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'subprocessor') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
                                 Sous-traitants
                             </a>
                             <a href="index.php?page=rights&action=list"
-                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($_GET['page'] === 'rights') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
+                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'rights') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
                                 Exercice des droits
                             </a>
                             <a href="index.php?page=breach&action=list"
-                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($_GET['page'] === 'breach') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
+                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'breach') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
                                 Violations de données
                             </a>
+
                             <?php if (($_SESSION['user_role'] ?? '') === 'admin'): ?>
 
 

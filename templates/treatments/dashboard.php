@@ -66,11 +66,12 @@
 
     <!-- Alertes Violations (72h) -->
     <div
-        class="card p-6 border-l-4 <?= $stats['breaches']['urgent'] > 0 ? 'border-red-600 bg-red-50' : 'border-slate-300' ?>">
+        class="card p-6 border-l-4 <?= $stats['breaches']['urgent'] > 0 ? 'border-red-500 bg-red-50' : 'border-slate-300' ?>">
         <div class="flex items-center gap-2 mb-3">
             <div
-                class="p-2 <?= $stats['breaches']['urgent'] > 0 ? 'bg-red-600 text-white' : 'bg-slate-200 text-slate-600' ?> rounded-lg">
+                class="p-2 <?= $stats['breaches']['urgent'] > 0 ? 'bg-red-100 text-red-600' : 'bg-slate-200 text-slate-600' ?> rounded-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
                     </path>
@@ -192,14 +193,14 @@
             <div class="py-12 text-center text-slate-400 italic">Aucune donnée disponible.</div>
         <?php else: ?>
             <div class="space-y-6">
-                <?php foreach ($stats['legal_basis'] as $row): ?>
+                <?php foreach ($stats['legal_basis'] as $basis => $count): ?>
                     <?php
-                    $percentage = ($stats['total'] > 0) ? ($row['count'] / $stats['total']) * 100 : 0;
+                    $percentage = ($stats['total'] > 0) ? ($count / $stats['total']) * 100 : 0;
                     ?>
                     <div>
                         <div class="flex justify-between items-end mb-2">
-                            <span class="text-sm font-medium text-slate-700"><?= htmlspecialchars($row['legal_basis']) ?></span>
-                            <span class="text-sm font-bold text-primary-600"><?= $row['count'] ?> <span
+                            <span class="text-sm font-medium text-slate-700"><?= htmlspecialchars($basis) ?></span>
+                            <span class="text-sm font-bold text-primary-600"><?= $count ?> <span
                                     class="text-slate-400 font-normal ml-1">(<?= round($percentage) ?>%)</span></span>
                         </div>
                         <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
@@ -208,6 +209,7 @@
                         </div>
                     </div>
                 <?php endforeach; ?>
+
             </div>
         <?php endif; ?>
     </div>
