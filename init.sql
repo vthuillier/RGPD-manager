@@ -58,3 +58,16 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     ip_address VARCHAR(45),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS rights_exercises (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    applicant_name VARCHAR(255) NOT NULL,
+    request_date DATE NOT NULL,
+    request_type VARCHAR(100) NOT NULL,
+    status VARCHAR(50) DEFAULT 'En attente',
+    completion_date DATE,
+    details TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

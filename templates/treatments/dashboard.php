@@ -17,7 +17,42 @@
         <span class="text-4xl font-black text-primary-600 mt-1"><?= $stats['total'] ?></span>
     </div>
 
+    <!-- Carte Droits Total -->
+    <div class="card p-6 flex flex-col items-center justify-center text-center">
+        <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+        </div>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Exercices de droits</span>
+        <span class="text-4xl font-black text-indigo-600 mt-1"><?= $stats['rights']['total'] ?></span>
+    </div>
+
+    <!-- Alertes Droits Urgents -->
+    <div
+        class="card p-6 border-l-4 <?= $stats['rights']['urgent'] > 0 ? 'border-red-500 bg-red-50' : 'border-indigo-500' ?>">
+        <div class="flex items-center gap-2 mb-3">
+            <div
+                class="p-2 <?= $stats['rights']['urgent'] > 0 ? 'bg-red-100 text-red-600' : 'bg-indigo-100 text-indigo-600' ?> rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="font-bold text-slate-800">Urgences (J-7)</h3>
+        </div>
+        <?php if ($stats['rights']['urgent'] > 0): ?>
+            <p class="text-2xl font-black text-red-600"><?= $stats['rights']['urgent'] ?></p>
+            <p class="text-xs text-red-700 font-medium">Demandes dépassant bientôt le délai légal !</p>
+        <?php else: ?>
+            <p class="text-2xl font-black text-slate-400">0</p>
+            <p class="text-xs text-slate-500">Aucune demande urgente.</p>
+        <?php endif; ?>
+    </div>
+
     <!-- Alerte AIPD -->
+
     <div class="card p-6 border-l-4 border-amber-500">
         <div class="flex items-center gap-2 mb-3">
             <div class="p-2 bg-amber-100 text-amber-600 rounded-lg">

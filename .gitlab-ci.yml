@@ -21,11 +21,6 @@ build:
     DOCKER_TLS_CERTDIR: "/certs"
     DOCKER_HOST: tcp://docker:2376
   before_script:
-    - |
-      until docker info > /dev/null 2>&1; do
-        echo "Waiting for docker daemon..."
-        sleep 1
-      done
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
 
   script:
