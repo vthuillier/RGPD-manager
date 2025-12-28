@@ -1,208 +1,158 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="h-full bg-slate-50">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'RGPD Manager' ?></title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --error: #ef4444;
-            --success: #22c55e;
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                    }
+                }
+            }
         }
-
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.5;
-            margin: 0;
-            padding: 0;
+    </script>
+    <style type="text/tailwindcss">
+        @layer base {
+            body { @apply text-slate-900 antialiased; }
         }
-
-        .navbar {
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .navbar .nav-links {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-
-        .navbar a {
-            text-decoration: none;
-            color: var(--text);
-            font-weight: 500;
-        }
-
-        .navbar a.brand {
-            color: var(--primary);
-            font-weight: 700;
-            font-size: 1.25rem;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 0.5rem;
-            border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-        }
-
-        h1 {
-            margin-top: 0;
-        }
-
-        .btn {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: background 0.2s;
-        }
-
-        .btn:hover {
-            background: var(--primary-hover);
-        }
-
-        .btn-danger {
-            background: var(--error);
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text);
-        }
-
-        .btn-outline:hover {
-            background: #f1f5f9;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        th,
-        td {
-            text-align: left;
-            padding: 0.75rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        th {
-            background: #f1f5f9;
-            font-weight: 600;
-        }
-
-        form div {
-            margin-bottom: 1rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.25rem;
-            font-weight: 500;
-        }
-
-        input,
-        select,
-        textarea {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid var(--border);
-            border-radius: 0.375rem;
-            box-sizing: border-box;
-        }
-
-        .alert {
-            padding: 1rem;
-            border-radius: 0.375rem;
-            margin-bottom: 1rem;
-        }
-
-        .alert-error {
-            background: #fee2e2;
-            color: #b91c1c;
-            border: 1px solid #fecaca;
-        }
-
-        .alert-success {
-            background: #dcfce7;
-            color: #15803d;
-            border: 1px solid #bbf7d0;
-        }
-
-        .user-nav {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-size: 0.875rem;
+        @layer components {
+            .btn { @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200; }
+            .btn-primary { @apply text-white bg-primary-600 hover:bg-primary-700 focus:ring-primary-500; }
+            .btn-danger { @apply text-white bg-red-600 hover:bg-red-700 focus:ring-red-500; }
+            .btn-outline { @apply border-slate-300 text-slate-700 bg-white hover:bg-slate-50 focus:ring-primary-500; }
+            
+            .card { @apply bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden; }
+            
+            .form-label { @apply block text-sm font-medium text-slate-700 mb-1; }
+            .form-input { @apply block w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-colors; }
+            
+            .alert { @apply p-4 rounded-md mb-6 border; }
+            .alert-success { @apply bg-green-50 text-green-800 border-green-200; }
+            .alert-error { @apply bg-red-50 text-red-800 border-red-200; }
         }
     </style>
 </head>
 
-<body>
-    <nav class="navbar">
-        <a href="index.php" class="brand">RGPD Manager</a>
-        <div class="nav-links">
-            <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="index.php?page=treatment&action=dashboard">Tableau de bord</a>
-                <a href="index.php?page=treatment&action=list">Registre</a>
-                <div class="user-nav">
-                    <span>Bonjour, <strong><?= htmlspecialchars($_SESSION['user_name']) ?></strong></span>
-                    <a href="index.php?page=auth&action=logout" class="btn btn-outline">Déconnecter</a>
+<body class="min-h-full">
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.php" class="flex-shrink-0 flex items-center gap-2">
+                        <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04M12 2.944a11.955 11.955 0 01-4.532 8.36 11.952 11.952 0 001.532 2.704m4.532-11.064a11.952 11.952 0 00-4.532 8.36 11.952 11.952 0 004.532 8.36m0-16.72a11.952 11.952 0 014.532 8.36 11.952 11.952 0 01-4.532 8.36m0-16.72v16.72"></path>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-800">
+                            RGPD Manager
+                        </span>
+                    </a>
+                    <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
+                        <?php if (isset($_SESSION['user_id'])): ?>
+                            <a href="index.php?page=treatment&action=dashboard" class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($_GET['action'] ?? '') === 'dashboard' ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
+                                Tableau de bord
+                            </a>
+                            <a href="index.php?page=treatment&action=list" class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($_GET['action'] ?? '') === 'list' ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
+                                Registre
+                            </a>
+                        <?php endif; ?>
+                    </div>
                 </div>
-            <?php else: ?>
-                <a href="index.php?page=auth&action=login">Connexion</a>
-                <a href="index.php?page=auth&action=register" class="btn">S'inscrire</a>
-            <?php endif; ?>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <div class="flex items-center gap-4">
+                            <span class="text-sm text-slate-600">
+                                Bonjour, <span class="font-semibold text-slate-900"><?= htmlspecialchars($_SESSION['user_name']) ?></span>
+                            </span>
+                            <a href="index.php?page=auth&action=logout" class="btn btn-outline py-1.5">
+                                Déconnecter
+                            </a>
+                        </div>
+                    <?php else: ?>
+                        <div class="flex items-center gap-3">
+                            <a href="index.php?page=auth&action=login" class="text-sm font-medium text-slate-600 hover:text-slate-900">
+                                Connexion
+                            </a>
+                            <a href="index.php?page=auth&action=register" class="btn btn-primary py-1.5 px-4 shadow-none">
+                                S'inscrire
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <div class="container">
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <?php if (isset($_SESSION['flash_success'])): ?>
-            <div class="alert alert-success"><?= htmlspecialchars($_SESSION['flash_success']) ?></div>
+            <div class="alert alert-success flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <?= htmlspecialchars($_SESSION['flash_success']) ?>
+            </div>
             <?php unset($_SESSION['flash_success']); ?>
         <?php endif; ?>
 
         <?php if (isset($_SESSION['flash_error'])): ?>
-            <div class="alert alert-error"><?= htmlspecialchars($_SESSION['flash_error']) ?></div>
+            <div class="alert alert-error flex items-center gap-3">
+                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <?= htmlspecialchars($_SESSION['flash_error']) ?>
+            </div>
             <?php unset($_SESSION['flash_error']); ?>
         <?php endif; ?>
 
-        <?= $content ?>
-    </div>
+        <div class="animate-fade-in">
+            <?= $content ?>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-auto">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm text-slate-500">
+                &copy; <?= date('Y') ?> RGPD Manager - Solution de mise en conformité
+            </p>
+        </div>
+    </footer>
+
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
 </body>
 
 </html>
