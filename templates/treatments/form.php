@@ -74,6 +74,37 @@
             <div class="bg-slate-50 -mx-8 px-8 py-6 border-y border-slate-200">
                 <div class="flex items-center gap-2 mb-4">
                     <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <h3 class="font-bold text-slate-800 uppercase tracking-wider text-xs">Sous-traitants (Hébergeur, SaaS, etc.)</h3>
+                </div>
+                
+                <?php if (empty($allSubprocessors)): ?>
+                    <div class="p-4 bg-white border border-slate-200 rounded-lg text-sm text-slate-500 text-center">
+                        Aucun sous-traitant enregistré. 
+                        <a href="index.php?page=subprocessor&action=create" class="text-primary-600 font-medium hover:underline ml-1">Ajouter un sous-traitant</a>
+                    </div>
+                <?php else: ?>
+                    <p class="text-sm text-slate-500 mb-4">Sélectionnez les sous-traitants impliqués dans ce traitement :</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-48 overflow-y-auto p-1">
+                        <?php foreach ($allSubprocessors as $sub): ?>
+                            <label class="flex items-center p-3 border border-slate-200 rounded-lg hover:bg-white hover:border-primary-200 cursor-pointer transition-all">
+                                <input type="checkbox" name="subprocessors[]" value="<?= $sub->id ?>" 
+                                    <?= in_array($sub->id, $selectedSubprocessors) ? 'checked' : '' ?>
+                                    class="w-4 h-4 text-primary-600 border-slate-300 rounded focus:ring-primary-500">
+                                <div class="ml-3">
+                                    <span class="block text-sm font-medium text-slate-700"><?= htmlspecialchars($sub->name) ?></span>
+                                    <span class="block text-xs text-slate-500"><?= htmlspecialchars($sub->service) ?></span>
+                                </div>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="bg-slate-50 -mx-8 px-8 py-6 border-b border-slate-200">
+                <div class="flex items-center gap-2 mb-4">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
                         </path>

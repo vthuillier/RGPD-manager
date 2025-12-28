@@ -47,10 +47,16 @@ class TreatmentController
 
     public function create(): void
     {
+        $subprocessorRepo = new \App\Repository\SubprocessorRepository();
+        $allSubprocessors = $subprocessorRepo->findAllByUserId($this->userId);
+
         $this->render('treatments/form', [
-            'title' => 'Nouveau traitement'
+            'title' => 'Nouveau traitement',
+            'allSubprocessors' => $allSubprocessors,
+            'selectedSubprocessors' => []
         ]);
     }
+
 
     public function store(): void
     {
@@ -77,10 +83,17 @@ class TreatmentController
             $this->redirect('index.php?page=treatment&action=list');
         }
 
+        $subprocessorRepo = new \App\Repository\SubprocessorRepository();
+        $allSubprocessors = $subprocessorRepo->findAllByUserId($this->userId);
+        $selectedSubprocessors = $this->service->getSubprocessorIds($id);
+
         $this->render('treatments/form', [
             'title' => 'Modifier le traitement',
-            'treatment' => $treatment
+            'treatment' => $treatment,
+            'allSubprocessors' => $allSubprocessors,
+            'selectedSubprocessors' => $selectedSubprocessors
         ]);
+
     }
 
     public function update(): void

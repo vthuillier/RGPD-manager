@@ -60,20 +60,23 @@ class TreatmentRepository
         return $data ? Treatment::fromArray($data) : null;
     }
 
-    public function save(Treatment $treatment): void
+    public function save(Treatment $treatment): int
     {
         if ($treatment->id === null) {
-            $this->insert($treatment);
+            return $this->insert($treatment);
         } else {
             $this->update($treatment);
+            return $treatment->id;
         }
     }
 
-    private function insert(Treatment $treatment): void
+
+    private function insert(Treatment $treatment): int
     {
         $stmt = $this->pdo->prepare(
             'INSERT INTO treatments (user_id, name, purpose, legal_basis, data_categories, retention_period, has_sensitive_data, is_large_scale, retention_years)
-            VALUES (:user_id, :name, :purpose, :legal_basis, :data_categories, :retention_period, :has_sensitive_data, :is_large_scale, :retention_years)'
+            VALUES (:user_id, :name, :purpose, :legal_basis, :data_categories, :retention_period, :has_sensitive_data, :is_large_scale, :retention_years)
+            RETURNING id'
         );
 
         $stmt->execute([
@@ -87,7 +90,10 @@ class TreatmentRepository
             'is_large_scale' => (int) $treatment->isLargeScale,
             'retention_years' => $treatment->retentionYears
         ]);
+
+        return (int) $stmt->fetchColumn();
     }
+
 
     private function update(Treatment $treatment): void
     {
@@ -141,5 +147,28 @@ class TreatmentRepository
         ');
         $stmt->execute(['user_id' => $userId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getSubprocessorIds(int $treatmentId): array
+    {
+        $stmt = $this->pdo->prepare('SELECT subprocessor_id FROM treatment_subprocessors WHERE treatment_id = :treatment_id');
+        $stmt->execute(['treatment_id' => $treatmentId]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public function linkSubprocessors(int $treatmentId, array $subprocessorIds): void
+    {
+        // First clear existing links
+        $stmt = $this->pdo->prepare('DELETE FROM treatment_subprocessors WHERE treatment_id = :treatment_id');
+        $stmt->execute(['treatment_id' => $treatmentId]);
+
+        // Then add new ones
+        if (empty($subprocessorIds))
+            return;
+
+        $stmt = $this->pdo->prepare('INSERT INTO treatment_subprocessors (treatment_id, subprocessor_id) VALUES (:treatment_id, :subprocessor_id)');
+        foreach ($subprocessorIds as $sid) {
+            $stmt->execute(['treatment_id' => $treatmentId, 'subprocessor_id' => (int) $sid]);
+        }
     }
 }

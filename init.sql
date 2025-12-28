@@ -22,3 +22,20 @@ CREATE TABLE treatments (
     retention_years INTEGER DEFAULT 5,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE subprocessors (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    service VARCHAR(255) NOT NULL,
+    location VARCHAR(100) NOT NULL,
+    guarantees TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE treatment_subprocessors (
+    treatment_id INTEGER REFERENCES treatments(id) ON DELETE CASCADE,
+    subprocessor_id INTEGER REFERENCES subprocessors(id) ON DELETE CASCADE,
+    PRIMARY KEY (treatment_id, subprocessor_id)
+);
+

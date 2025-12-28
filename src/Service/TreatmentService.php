@@ -32,7 +32,11 @@ class TreatmentService
     {
         $this->validate($data);
         $treatment = Treatment::fromArray($data);
-        $this->repository->save($treatment);
+        $id = $this->repository->save($treatment);
+
+        if (isset($data['subprocessors']) && is_array($data['subprocessors'])) {
+            $this->repository->linkSubprocessors($id, $data['subprocessors']);
+        }
     }
 
     public function updateTreatmentForUser(int $id, int $userId, array $data): void
@@ -42,7 +46,19 @@ class TreatmentService
         $data['user_id'] = $userId;
         $treatment = Treatment::fromArray($data);
         $this->repository->save($treatment);
+
+        if (isset($data['subprocessors']) && is_array($data['subprocessors'])) {
+            $this->repository->linkSubprocessors($id, $data['subprocessors']);
+        } else {
+            $this->repository->linkSubprocessors($id, []);
+        }
     }
+
+    public function getSubprocessorIds(int $treatmentId): array
+    {
+        return $this->repository->getSubprocessorIds($treatmentId);
+    }
+
 
     public function deleteTreatmentForUser(int $id, int $userId): void
     {
