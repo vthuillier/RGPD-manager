@@ -18,9 +18,9 @@ class TreatmentService
     /**
      * @return Treatment[]
      */
-    public function getTreatmentsForUser(int $userId): array
+    public function getTreatmentsForUser(int $userId, array $filters = []): array
     {
-        return $this->repository->findAllByUserId($userId);
+        return $this->repository->findByFilters($userId, $filters);
     }
 
     public function getTreatmentForUser(int $id, int $userId): ?Treatment

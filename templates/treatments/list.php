@@ -9,6 +9,43 @@
     </div>
 </div>
 
+<div class="card" style="margin-bottom: 2rem; padding: 1.5rem;">
+    <form action="index.php" method="GET"
+        style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: end;">
+        <input type="hidden" name="page" value="treatment">
+        <input type="hidden" name="action" value="list">
+
+        <div>
+            <label for="search" style="font-size: 0.8125rem; color: var(--text-muted);">Rechercher (Nom,
+                finalité...)</label>
+            <input type="text" id="search" name="search" value="<?= htmlspecialchars($filters['search'] ?? '') ?>"
+                placeholder="Ex: RH, Clients...">
+        </div>
+
+        <div>
+            <label for="legal_basis" style="font-size: 0.8125rem; color: var(--text-muted);">Base légale</label>
+            <select id="legal_basis" name="legal_basis">
+                <option value="">-- Toutes les bases --</option>
+                <option value="Consentement" <?= ($filters['legal_basis'] ?? '') === 'Consentement' ? 'selected' : '' ?>>
+                    Consentement</option>
+                <option value="Contrat" <?= ($filters['legal_basis'] ?? '') === 'Contrat' ? 'selected' : '' ?>>Contrat
+                </option>
+                <option value="Obligation légale" <?= ($filters['legal_basis'] ?? '') === 'Obligation légale' ? 'selected' : '' ?>>Obligation légale</option>
+                <option value="Mission d'intérêt public" <?= ($filters['legal_basis'] ?? '') === "Mission d'intérêt public" ? 'selected' : '' ?>>Mission d'intérêt public</option>
+                <option value="Intérêt légitime" <?= ($filters['legal_basis'] ?? '') === 'Intérêt légitime' ? 'selected' : '' ?>>Intérêt légitime</option>
+                <option value="Sauvegarde des intérêts vitaux" <?= ($filters['legal_basis'] ?? '') === 'Sauvegarde des intérêts vitaux' ? 'selected' : '' ?>>Sauvegarde des intérêts vitaux</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn">Filtrer</button>
+            <?php if (!empty($filters['search']) || !empty($filters['legal_basis'])): ?>
+                <a href="index.php?page=treatment&action=list" class="btn btn-outline">Réinitialiser</a>
+            <?php endif; ?>
+        </div>
+    </form>
+</div>
+
 <div class="card">
     <?php if (empty($treatments)): ?>
         <p>Aucun traitement enregistré pour le moment.</p>

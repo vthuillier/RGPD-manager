@@ -21,8 +21,31 @@ class TreatmentRepository
      */
     public function findAllByUserId(int $userId): array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM treatments WHERE user_id = :user_id ORDER BY created_at DESC');
-        $stmt->execute(['user_id' => $userId]);
+        return $this->findByFilters($userId, []);
+    }
+
+    /**
+     * @return Treatment[]
+     */
+    public function findByFilters(int $userId, array $filters): array
+    {
+        $sql = 'SELECT * FROM treatments WHERE user_id = :user_id';
+        $params = ['user_id' => $userId];
+
+        if (!empty($filters['search'])) {
+            $sql .= ' AND (name ILIKE :search OR purpose ILIKE :search)';
+            $params['search'] = '%' . $filters['search'] . '%';
+        }
+
+        if (!empty($filters['legal_basis'])) {
+            $sql .= ' AND legal_basis = :legal_basis';
+            $params['legal_basis'] = $filters['legal_basis'];
+        }
+
+        $sql .= ' ORDER BY created_at DESC';
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return array_map(fn($data) => Treatment::fromArray($data), $results);

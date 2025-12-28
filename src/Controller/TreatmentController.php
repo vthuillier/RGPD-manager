@@ -31,10 +31,17 @@ class TreatmentController
 
     public function list(): void
     {
-        $treatments = $this->service->getTreatmentsForUser($this->userId);
+        $filters = [
+            'search' => $_GET['search'] ?? '',
+            'legal_basis' => $_GET['legal_basis'] ?? ''
+        ];
+
+        $treatments = $this->service->getTreatmentsForUser($this->userId, $filters);
+
         $this->render('treatments/list', [
             'title' => 'Mon Registre',
-            'treatments' => $treatments
+            'treatments' => $treatments,
+            'filters' => $filters
         ]);
     }
 
