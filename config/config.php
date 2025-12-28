@@ -1,10 +1,11 @@
 <?php
 return [
     'db' => [
-        'host' => 'localhost',
-        'port' => 5432,
-        'name' => 'postgres',
-        'user' => 'postgres',
-        'password' => 'postgres'
+        'host' => getenv('DB_HOST') ?: 'localhost',
+        'port' => getenv('DB_PORT') ?: 5432,
+        'name' => getenv('DB_NAME') ?: 'postgres',
+        'user' => getenv('DB_USER') ?: 'postgres',
+        'password' => getenv('DB_PASSWORD') ?: 'postgres'
     ]
 ];
+

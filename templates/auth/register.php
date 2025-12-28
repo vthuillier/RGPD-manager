@@ -1,5 +1,6 @@
 <div class="max-w-lg mx-auto">
     <div class="text-center mb-8">
+        <img src="assets/logo.png" alt="Logo" class="h-20 w-auto mx-auto mb-4">
         <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Inscription</h1>
         <p class="text-slate-600">Créez votre compte pour commencer à gérer vos registres RGPD</p>
     </div>

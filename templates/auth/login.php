@@ -1,5 +1,6 @@
 <div class="max-w-md mx-auto">
     <div class="text-center mb-8">
+        <img src="assets/logo.png" alt="Logo" class="h-20 w-auto mx-auto mb-4">
         <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Connexion</h1>
         <p class="text-slate-600">Accédez à votre compte RGPD Manager</p>
     </div>

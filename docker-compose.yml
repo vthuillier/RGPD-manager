@@ -1,0 +1,39 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:80"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=rgpd_manager
+      - DB_USER=rgpd_admin
+      - DB_PASSWORD=secure_password_here
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - rgpd_net
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=rgpd_manager
+      - POSTGRES_USER=rgpd_admin
+      - POSTGRES_PASSWORD=secure_password_here
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rgpd_admin -d rgpd_manager"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rgpd_net
+
+networks:
+  rgpd_net:
+    driver: bridge
+
+volumes:
+  pgdata:

@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'RGPD Manager' ?></title>
+    <link rel="icon" type="image/png" href="assets/logo.png">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
@@ -62,20 +64,10 @@
 <body class="min-h-full">
     <nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
+            <div class="flex justify-between h-24">
                 <div class="flex items-center">
-                    <a href="index.php" class="flex-shrink-0 flex items-center gap-2">
-                        <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04M12 2.944a11.955 11.955 0 01-4.532 8.36 11.952 11.952 0 001.532 2.704m4.532-11.064a11.952 11.952 0 00-4.532 8.36 11.952 11.952 0 004.532 8.36m0-16.72a11.952 11.952 0 014.532 8.36 11.952 11.952 0 01-4.532 8.36m0-16.72v16.72">
-                                </path>
-                            </svg>
-                        </div>
-                        <span
-                            class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-800">
-                            RGPD Manager
-                        </span>
+                    <a href="index.php" class="flex-shrink-0 flex items-center">
+                        <img src="assets/logo_texte.png" alt="RGPD Manager" class="h-20 w-auto">
                     </a>
                     <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
                         <?php if (isset($_SESSION['user_id'])): ?>
@@ -158,7 +150,9 @@
     </main>
 
     <footer class="bg-white border-t border-slate-200 mt-auto">
-        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex flex-col items-center gap-4">
+            <img src="assets/logo.png" alt="Logo"
+                class="h-8 w-auto opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300">
             <p class="text-center text-sm text-slate-500">
                 &copy; <?= date('Y') ?> RGPD Manager - Solution de mise en conformité
             </p>
