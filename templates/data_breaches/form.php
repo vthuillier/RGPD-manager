@@ -11,7 +11,8 @@
             Retour au registre des violations
         </a>
         <h1 class="text-3xl font-extrabold text-slate-900">
-            <?= $isEdit ? 'Modifier le dossier d\'incident' : 'Déclarer une violation de données' ?></h1>
+            <?= $isEdit ? 'Modifier le dossier d\'incident' : 'Déclarer une violation de données' ?>
+        </h1>
         <p class="text-slate-500 mt-1">Saisie des informations requises pour l'audit et la conformité</p>
     </div>
 
@@ -125,11 +126,16 @@
 
         <div class="flex items-center justify-end gap-3">
             <a href="index.php?page=breach&action=list"
-                class="btn btn-outline border-none text-slate-500 hover:text-slate-700">Annuler</a>
-            <button type="submit"
-                class="btn btn-primary bg-red-600 hover:bg-red-700 px-8 border-none shadow-lg shadow-red-100">
-                <?= $isEdit ? 'Mettre à jour le dossier' : 'Enregistrer le signalement' ?>
-            </button>
+                class="btn btn-outline border-none text-slate-500 hover:text-slate-700">Retour</a>
+            <?php if (($_SESSION['user_role'] ?? '') !== 'guest'): ?>
+                <button type="submit"
+                    class="btn btn-primary bg-red-600 hover:bg-red-700 px-8 border-none shadow-lg shadow-red-100">
+                    <?= $isEdit ? 'Mettre à jour le dossier' : 'Enregistrer le signalement' ?>
+                </button>
+            <?php else: ?>
+                <span class="text-sm italic text-amber-600 font-medium">Lecture seule</span>
+            <?php endif; ?>
         </div>
+
     </form>
 </div>

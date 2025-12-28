@@ -10,11 +10,13 @@ class AuthController
 {
     private AuthService $authService;
     private \App\Service\AuditLogService $auditLogService;
+    private bool $allowGuest;
 
     public function __construct()
     {
         $this->authService = new AuthService();
         $this->auditLogService = new \App\Service\AuditLogService();
+        $this->allowGuest = (bool) (getenv('ALLOW_GUEST') ?: false);
     }
 
 
@@ -25,7 +27,8 @@ class AuthController
         }
 
         $this->render('auth/login', [
-            'title' => 'Connexion'
+            'title' => 'Connexion',
+            'allowGuest' => $this->allowGuest
         ]);
     }
 
@@ -52,8 +55,24 @@ class AuthController
             $_SESSION['flash_error'] = "Identifiants incorrects.";
             $this->redirect('index.php?page=auth&action=login');
         }
-
     }
+
+    public function loginGuest(): void
+    {
+        if (!$this->allowGuest) {
+            $this->redirect('index.php?page=auth&action=login');
+        }
+
+        $_SESSION['user_id'] = (int) (getenv('GUEST_TARGET_ID') ?: 1);
+        $_SESSION['user_name'] = "Invité";
+        $_SESSION['user_role'] = 'guest';
+        $_SESSION['flash_success'] = "Connecté en mode consultation.";
+
+        $this->auditLogService->log('LOGIN_GUEST', 'user', 0);
+
+        $this->redirect('index.php?page=treatment&action=dashboard');
+    }
+
 
     public function showRegister(): void
     {

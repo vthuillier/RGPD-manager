@@ -64,6 +64,7 @@ class TreatmentController
     public function store(): void
     {
         $this->validateCsrf();
+        $this->validateNotGuest();
         try {
             $data = $_POST;
             $data['user_id'] = $this->userId;
@@ -106,6 +107,7 @@ class TreatmentController
     public function update(): void
     {
         $this->validateCsrf();
+        $this->validateNotGuest();
         $id = (int) ($_POST['id'] ?? 0);
         try {
             $data = $_POST;
@@ -126,6 +128,7 @@ class TreatmentController
     public function delete(): void
     {
         $this->validateCsrf();
+        $this->validateNotGuest();
         $id = (int) ($_POST['id'] ?? 0);
         $this->service->deleteTreatmentForUser($id, $this->userId);
 
@@ -195,4 +198,13 @@ class TreatmentController
             exit;
         }
     }
+
+    private function validateNotGuest(): void
+    {
+        if (($_SESSION['user_role'] ?? '') === 'guest') {
+            $_SESSION['flash_error'] = "Action interdite en mode consultation.";
+            $this->redirect($_SERVER['HTTP_REFERER'] ?? 'index.php');
+        }
+    }
 }
+

@@ -11,7 +11,8 @@
             Retour au registre
         </a>
         <h1 class="text-3xl font-extrabold text-slate-900">
-            <?= $isEdit ? 'Modifier le dossier' : 'Nouvelle demande d\'exercice de droits' ?></h1>
+            <?= $isEdit ? 'Modifier le dossier' : 'Nouvelle demande d\'exercice de droits' ?>
+        </h1>
         <p class="text-slate-500 mt-1">Conformément aux Chapitre III du RGPD</p>
     </div>
 
@@ -77,10 +78,15 @@
         </div>
 
         <div class="flex items-center justify-end gap-3">
-            <a href="index.php?page=rights&action=list" class="btn btn-outline">Annuler</a>
-            <button type="submit" class="btn btn-primary px-8 shadow-lg shadow-primary-200">
-                <?= $isEdit ? 'Mettre à jour' : 'Enregistrer la demande' ?>
-            </button>
+            <a href="index.php?page=rights&action=list" class="btn btn-outline">Retour</a>
+            <?php if (($_SESSION['user_role'] ?? '') !== 'guest'): ?>
+                <button type="submit" class="btn btn-primary px-8 shadow-lg shadow-primary-200">
+                    <?= $isEdit ? 'Mettre à jour' : 'Enregistrer la demande' ?>
+                </button>
+            <?php else: ?>
+                <span class="text-sm italic text-amber-600 font-medium">Lecture seule</span>
+            <?php endif; ?>
         </div>
+
     </form>
 </div>

@@ -129,7 +129,14 @@
                             <span class="text-sm text-slate-600">
                                 Bonjour, <span
                                     class="font-semibold text-slate-900"><?= htmlspecialchars($_SESSION['user_name']) ?></span>
+                                <?php if (($_SESSION['user_role'] ?? '') === 'guest'): ?>
+                                    <span
+                                        class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                        Consultation
+                                    </span>
+                                <?php endif; ?>
                             </span>
+
                             <a href="index.php?page=auth&action=logout" class="btn btn-outline py-1.5">
                                 Déconnecter
                             </a>

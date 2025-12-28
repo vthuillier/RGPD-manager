@@ -3,15 +3,18 @@
         <h1 class="text-3xl font-extrabold text-slate-900">Registre des Violations de Données</h1>
         <p class="text-slate-500 mt-1">Documentation obligatoire des incidents de sécurité (Art. 33 et 34 du RGPD)</p>
     </div>
-    <a href="index.php?page=breach&action=create"
-        class="btn btn-primary bg-red-600 hover:bg-red-700 flex items-center justify-center gap-2 shadow-lg shadow-red-100 border-none">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-            </path>
-        </svg>
-        Déclarer un incident
-    </a>
+    <?php if (($_SESSION['user_role'] ?? '') !== 'guest'): ?>
+        <a href="index.php?page=breach&action=create"
+            class="btn btn-primary bg-red-600 hover:bg-red-700 flex items-center justify-center gap-2 shadow-lg shadow-red-100 border-none">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                </path>
+            </svg>
+            Déclarer un incident
+        </a>
+    <?php endif; ?>
+
 </div>
 
 <div class="card overflow-hidden">
@@ -53,7 +56,8 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm font-medium text-slate-900 truncate max-w-xs">
-                                    <?= htmlspecialchars($b->nature) ?></div>
+                                    <?= htmlspecialchars($b->nature) ?>
+                                </div>
                                 <div class="text-xs text-slate-500"><?= htmlspecialchars($b->dataCategories) ?></div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -83,7 +87,7 @@
                                 <div class="flex justify-end gap-2">
                                     <a href="index.php?page=breach&action=edit&id=<?= $b->id ?>"
                                         class="text-primary-600 hover:text-primary-900 p-1 rounded-md hover:bg-primary-50 transition-colors"
-                                        title="Détails / Modifier">
+                                        title="<?= (($_SESSION['user_role'] ?? '') === 'guest') ? 'Voir les détails' : 'Modifier' ?>">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -92,21 +96,24 @@
                                             </path>
                                         </svg>
                                     </a>
-                                    <form action="index.php?page=breach&action=delete" method="POST"
-                                        onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce dossier ?');"
-                                        class="inline">
-                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                        <input type="hidden" name="id" value="<?= $b->id ?>">
-                                        <button type="submit"
-                                            class="text-red-400 hover:text-red-600 p-1 rounded-md hover:bg-red-50 transition-colors">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                </path>
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <?php if (($_SESSION['user_role'] ?? '') !== 'guest'): ?>
+                                        <form action="index.php?page=breach&action=delete" method="POST"
+                                            onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce dossier ?');"
+                                            class="inline">
+                                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                            <input type="hidden" name="id" value="<?= $b->id ?>">
+                                            <button type="submit"
+                                                class="text-red-400 hover:text-red-600 p-1 rounded-md hover:bg-red-50 transition-colors">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 </div>
+
                             </td>
                         </tr>
                     <?php endforeach; ?>

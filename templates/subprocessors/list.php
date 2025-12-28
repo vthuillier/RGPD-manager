@@ -3,14 +3,17 @@
         <h1 class="text-3xl font-extrabold text-slate-900">Registre des Sous-traitants</h1>
         <p class="text-slate-500 mt-1">Gérez vos sous-traitants et partenaires manipulant des données</p>
     </div>
-    <div class="flex gap-3">
-        <a href="index.php?page=subprocessor&action=create" class="btn btn-primary px-5">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Nouveau sous-traitant
-        </a>
-    </div>
+    <?php if (($_SESSION['user_role'] ?? '') !== 'guest'): ?>
+        <div class="flex gap-3">
+            <a href="index.php?page=subprocessor&action=create" class="btn btn-primary px-5">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Nouveau sous-traitant
+            </a>
+        </div>
+    <?php endif; ?>
+
 </div>
 
 <div class="card overflow-hidden">
@@ -55,18 +58,21 @@
                                 <div class="flex justify-end gap-2">
                                     <a href="index.php?page=subprocessor&action=edit&id=<?= $sub->id ?>"
                                         class="text-primary-600 hover:text-primary-900 bg-primary-50 px-3 py-1 rounded-md transition-colors">
-                                        Modifier
+                                        <?= (($_SESSION['user_role'] ?? '') === 'guest') ? 'Voir' : 'Modifier' ?>
                                     </a>
-                                    <form action="index.php?page=subprocessor&action=delete" method="POST" class="inline-block"
-                                        onsubmit="return confirm('Supprimer ce sous-traitant ?');">
-                                        <input type="hidden" name="id" value="<?= $sub->id ?>">
-                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                        <button type="submit"
-                                            class="text-red-600 hover:text-red-900 bg-red-50 px-3 py-1 rounded-md transition-colors">
-                                            Supprimer
-                                        </button>
-                                    </form>
+                                    <?php if (($_SESSION['user_role'] ?? '') !== 'guest'): ?>
+                                        <form action="index.php?page=subprocessor&action=delete" method="POST" class="inline-block"
+                                            onsubmit="return confirm('Supprimer ce sous-traitant ?');">
+                                            <input type="hidden" name="id" value="<?= $sub->id ?>">
+                                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                            <button type="submit"
+                                                class="text-red-600 hover:text-red-900 bg-red-50 px-3 py-1 rounded-md transition-colors">
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 </div>
+
                             </td>
                         </tr>
                     <?php endforeach; ?>

@@ -51,6 +51,9 @@ try {
             case 'login_process':
                 $controller->login();
                 break;
+            case 'login_guest':
+                $controller->loginGuest();
+                break;
             case 'register':
                 $controller->showRegister();
                 break;

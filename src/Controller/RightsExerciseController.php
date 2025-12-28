@@ -44,6 +44,7 @@ class RightsExerciseController
     public function store(): void
     {
         $this->validateCsrf();
+        $this->validateNotGuest();
 
         $exercise = RightsExercise::fromArray($_POST);
         $exercise->userId = $this->userId;
@@ -75,6 +76,7 @@ class RightsExerciseController
     public function update(): void
     {
         $this->validateCsrf();
+        $this->validateNotGuest();
         $id = (int) ($_POST['id'] ?? 0);
         $exercise = $this->repository->findByIdAndUserId($id, $this->userId);
 
@@ -96,6 +98,7 @@ class RightsExerciseController
     public function delete(): void
     {
         $this->validateCsrf();
+        $this->validateNotGuest();
         $id = (int) ($_POST['id'] ?? 0);
         $this->repository->deleteAndUserId($id, $this->userId);
         $this->auditLogService->log('RIGHTS_EXERCISE_DELETE', 'rights_exercise', $id);
@@ -115,8 +118,18 @@ class RightsExerciseController
 
     private function validateCsrf(): void
     {
-        if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        if (($_POST['csrf_token'] ?? '') !== $_SESSION['csrf_token']) {
             die('CSRF token invalid');
         }
     }
+
+    private function validateNotGuest(): void
+    {
+        if (($_SESSION['user_role'] ?? '') === 'guest') {
+            $_SESSION['flash_error'] = "Action interdite en mode consultation.";
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php'));
+            exit;
+        }
+    }
 }
+

@@ -174,10 +174,15 @@
             <span class="text-xs font-bold uppercase tracking-widest text-primary-100">Action Rapide</span>
             <h3 class="text-lg font-bold mt-1">Nouveau registre</h3>
         </div>
-        <a href="index.php?page=treatment&action=create"
-            class="mt-4 bg-white text-primary-700 hover:bg-primary-50 px-4 py-2 rounded-lg text-sm font-bold transition-all text-center">
-            + Ajouter un traitement
-        </a>
+        <?php if (($_SESSION['user_role'] ?? '') !== 'guest'): ?>
+            <a href="index.php?page=treatment&action=create"
+                class="mt-4 bg-white text-primary-700 hover:bg-primary-50 px-4 py-2 rounded-lg text-sm font-bold transition-all text-center">
+                + Ajouter un traitement
+            </a>
+        <?php else: ?>
+            <p class="mt-4 text-xs text-primary-100 italic">Mode consultation uniquement</p>
+        <?php endif; ?>
+
     </div>
 </div>
 

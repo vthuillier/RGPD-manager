@@ -1,7 +1,8 @@
 <div class="max-w-2xl mx-auto">
     <div class="mb-8">
         <h1 class="text-3xl font-extrabold text-slate-900">
-            <?= isset($subprocessor) ? 'Modifier le sous-traitant' : 'Nouveau sous-traitant' ?></h1>
+            <?= isset($subprocessor) ? 'Modifier le sous-traitant' : 'Nouveau sous-traitant' ?>
+        </h1>
         <p class="text-slate-500 mt-1">Saisissez les informations relatives à votre sous-traitant.</p>
     </div>
 
@@ -43,11 +44,16 @@
 
             <div class="flex items-center justify-end gap-4 pt-4">
                 <a href="index.php?page=subprocessor&action=list"
-                    class="text-sm font-medium text-slate-500 hover:text-slate-700">Annuler</a>
-                <button type="submit" class="btn btn-primary px-8 py-2.5">
-                    <?= isset($subprocessor) ? 'Mettre à jour' : 'Enregistrer' ?>
-                </button>
+                    class="text-sm font-medium text-slate-500 hover:text-slate-700">Retour</a>
+                <?php if (($_SESSION['user_role'] ?? '') !== 'guest'): ?>
+                    <button type="submit" class="btn btn-primary px-8 py-2.5">
+                        <?= isset($subprocessor) ? 'Mettre à jour' : 'Enregistrer' ?>
+                    </button>
+                <?php else: ?>
+                    <span class="text-sm italic text-amber-600 font-medium">Lecture seule</span>
+                <?php endif; ?>
             </div>
+
         </form>
     </div>
 </div>

@@ -41,9 +41,8 @@ class SubprocessorController
 
     public function store(): void
     {
-        if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-            die('CSRF token invalid');
-        }
+        $this->validateCsrf();
+        $this->validateNotGuest();
 
         $subprocessor = new Subprocessor(
             null,
@@ -80,9 +79,8 @@ class SubprocessorController
 
     public function update(): void
     {
-        if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-            die('CSRF token invalid');
-        }
+        $this->validateCsrf();
+        $this->validateNotGuest();
 
         $id = (int) ($_POST['id'] ?? 0);
         $subprocessor = $this->repository->findByIdAndUserId($id, (int) $_SESSION['user_id']);
@@ -105,9 +103,8 @@ class SubprocessorController
 
     public function delete(): void
     {
-        if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-            die('CSRF token invalid');
-        }
+        $this->validateCsrf();
+        $this->validateNotGuest();
 
         $id = (int) ($_POST['id'] ?? 0);
         $this->repository->deleteAndUserId($id, (int) $_SESSION['user_id']);
@@ -126,4 +123,21 @@ class SubprocessorController
         $content = ob_get_clean();
         require __DIR__ . '/../../templates/layout.php';
     }
+
+    private function validateCsrf(): void
+    {
+        if (($_POST['csrf_token'] ?? '') !== $_SESSION['csrf_token']) {
+            die('CSRF token invalid');
+        }
+    }
+
+    private function validateNotGuest(): void
+    {
+        if (($_SESSION['user_role'] ?? '') === 'guest') {
+            $_SESSION['flash_error'] = "Action interdite en mode consultation.";
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php'));
+            exit;
+        }
+    }
 }
+

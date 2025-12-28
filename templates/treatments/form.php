@@ -165,11 +165,16 @@
 
             <div class="flex items-center justify-end gap-4 pt-4">
                 <a href="index.php?page=treatment&action=list"
-                    class="text-sm font-medium text-slate-500 hover:text-slate-700">Annuler</a>
-                <button type="submit" class="btn btn-primary px-8 py-2.5">
-                    <?= isset($treatment->id) ? 'Mettre à jour' : 'Enregistrer le traitement' ?>
-                </button>
+                    class="text-sm font-medium text-slate-500 hover:text-slate-700">Retour</a>
+                <?php if (($_SESSION['user_role'] ?? '') !== 'guest'): ?>
+                    <button type="submit" class="btn btn-primary px-8 py-2.5">
+                        <?= isset($treatment->id) ? 'Mettre à jour' : 'Enregistrer le traitement' ?>
+                    </button>
+                <?php else: ?>
+                    <span class="text-sm italic text-amber-600 font-medium">Lecture seule</span>
+                <?php endif; ?>
             </div>
+
         </form>
     </div>
 </div>
