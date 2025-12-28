@@ -1,0 +1,130 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Controller;
+
+use App\Entity\DataBreach;
+use App\Repository\DataBreachRepository;
+use App\Service\AuditLogService;
+
+class DataBreachController
+{
+    private DataBreachRepository $repository;
+    private AuditLogService $auditLogService;
+    private int $userId;
+
+    public function __construct()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?page=auth&action=login');
+            exit;
+        }
+
+        $this->repository = new DataBreachRepository();
+        $this->auditLogService = new AuditLogService();
+        $this->userId = (int) $_SESSION['user_id'];
+    }
+
+    public function list(): void
+    {
+        $breaches = $this->repository->findAllByUserId($this->userId);
+        $this->render('data_breaches/list', [
+            'breaches' => $breaches,
+            'title' => 'Registre des Violations de Données'
+        ]);
+    }
+
+    public function create(): void
+    {
+        $this->render('data_breaches/form', [
+            'title' => 'Déclarer une violation de données'
+        ]);
+    }
+
+    public function store(): void
+    {
+        $this->validateCsrf();
+
+        $data = $_POST;
+        $data['user_id'] = $this->userId;
+        $data['is_notified_authority'] = isset($_POST['is_notified_authority']);
+        $data['is_notified_individuals'] = isset($_POST['is_notified_individuals']);
+
+        $breach = DataBreach::fromArray($data);
+        $this->repository->save($breach);
+
+        $this->auditLogService->log('DATA_BREACH_CREATE', 'data_breach', null, ['nature' => substr($breach->nature, 0, 50)]);
+
+        $_SESSION['flash_success'] = 'Violation de données enregistrée avec succès.';
+        header('Location: index.php?page=breach&action=list');
+    }
+
+    public function edit(): void
+    {
+        $id = (int) ($_GET['id'] ?? 0);
+        $breach = $this->repository->findByIdAndUserId($id, $this->userId);
+
+        if (!$breach) {
+            $_SESSION['flash_error'] = 'Violation non trouvée.';
+            header('Location: index.php?page=breach&action=list');
+            exit;
+        }
+
+        $this->render('data_breaches/form', [
+            'breach' => $breach,
+            'title' => 'Modifier le dossier de violation'
+        ]);
+    }
+
+    public function update(): void
+    {
+        $this->validateCsrf();
+        $id = (int) ($_POST['id'] ?? 0);
+        $breach = $this->repository->findByIdAndUserId($id, $this->userId);
+
+        if (!$breach) {
+            die('Dossier non trouvé');
+        }
+
+        $data = $_POST;
+        $data['id'] = $id;
+        $data['user_id'] = $this->userId;
+        $data['is_notified_authority'] = isset($_POST['is_notified_authority']);
+        $data['is_notified_individuals'] = isset($_POST['is_notified_individuals']);
+
+        $updatedBreach = DataBreach::fromArray($data);
+        $this->repository->save($updatedBreach);
+
+        $this->auditLogService->log('DATA_BREACH_UPDATE', 'data_breach', $id, ['nature' => substr($updatedBreach->nature, 0, 50)]);
+
+        $_SESSION['flash_success'] = 'Dossier mis à jour.';
+        header('Location: index.php?page=breach&action=list');
+    }
+
+    public function delete(): void
+    {
+        $this->validateCsrf();
+        $id = (int) ($_POST['id'] ?? 0);
+        $this->repository->deleteAndUserId($id, $this->userId);
+        $this->auditLogService->log('DATA_BREACH_DELETE', 'data_breach', $id);
+
+        $_SESSION['flash_success'] = 'Dossier supprimé.';
+        header('Location: index.php?page=breach&action=list');
+    }
+
+    private function render(string $template, array $data = []): void
+    {
+        extract($data);
+        ob_start();
+        require __DIR__ . '/../../templates/' . $template . '.php';
+        $content = ob_get_clean();
+        require __DIR__ . '/../../templates/layout.php';
+    }
+
+    private function validateCsrf(): void
+    {
+        if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+            die('CSRF token invalid');
+        }
+    }
+}

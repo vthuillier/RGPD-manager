@@ -10,6 +10,10 @@ use App\Controller\AuthController;
 use App\Controller\SubprocessorController;
 use App\Controller\AuditLogController;
 use App\Controller\RightsExerciseController;
+use App\Controller\DataBreachController;
+use App\Controller\ReportController;
+
+
 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -136,7 +140,44 @@ try {
                 $controller->list();
                 break;
         }
+    } elseif ($page === 'breach') {
+        $controller = new DataBreachController();
+        switch ($action) {
+            case 'list':
+                $controller->list();
+                break;
+            case 'create':
+                $controller->create();
+                break;
+            case 'store':
+                $controller->store();
+                break;
+            case 'edit':
+                $controller->edit();
+                break;
+            case 'update':
+                $controller->update();
+                break;
+            case 'delete':
+                $controller->delete();
+                break;
+            default:
+                $controller->list();
+                break;
+        }
+    } elseif ($page === 'report') {
+        $controller = new ReportController();
+        switch ($action) {
+            case 'annual':
+                $controller->generateAnnual();
+                break;
+            default:
+                $controller->generateAnnual();
+                break;
+        }
     } elseif ($page === 'logs') {
+
+
 
         $controller = new AuditLogController();
         switch ($action) {

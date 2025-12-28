@@ -5,11 +5,16 @@ FROM php:8.2-apache
 RUN echo "ServerTokens Prod" >> /etc/apache2/apache2.conf \
     && echo "ServerSignature Off" >> /etc/apache2/apache2.conf
 
-# Install system dependencies for PostgreSQL
+# Install system dependencies for PostgreSQL and GD
 RUN apt-get update && apt-get install -y \
     libpq-dev \
-    && docker-php-ext-install pdo pdo_pgsql \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_pgsql gd \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 # Enable Apache modules
 RUN a2enmod rewrite headers

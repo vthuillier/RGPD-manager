@@ -41,7 +41,12 @@ class SchemaManager
             $stmt = $this->pdo->query("SELECT 1 FROM information_schema.tables WHERE table_name = 'rights_exercises' LIMIT 1");
             $rightsTableExists = $stmt !== false && $stmt->fetch() !== false;
 
-            return $columnExists && $rightsTableExists;
+            // Check if 'data_breaches' table exists
+            $stmt = $this->pdo->query("SELECT 1 FROM information_schema.tables WHERE table_name = 'data_breaches' LIMIT 1");
+            $breachesTableExists = $stmt !== false && $stmt->fetch() !== false;
+
+            return $columnExists && $rightsTableExists && $breachesTableExists;
+
         } catch (Exception $e) {
 
             return false;

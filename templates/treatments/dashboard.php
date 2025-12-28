@@ -1,7 +1,20 @@
-<div class="mb-8">
-    <h1 class="text-3xl font-extrabold text-slate-900">Tableau de bord de conformité</h1>
-    <p class="text-slate-500 mt-1">Vue d'ensemble de votre état de conformité RGPD</p>
+<div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900">Tableau de bord de conformité</h1>
+        <p class="text-slate-500 mt-1">Vue d'ensemble de votre état de conformité RGPD</p>
+    </div>
+    <div class="flex flex-wrap gap-3">
+        <a href="index.php?page=report&action=annual" class="btn btn-outline flex items-center justify-center gap-2">
+            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                </path>
+            </svg>
+            Rapport Annuel (PDF)
+        </a>
+    </div>
 </div>
+
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Carte Total -->
@@ -40,16 +53,40 @@
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
             </div>
-            <h3 class="font-bold text-slate-800">Urgences (J-7)</h3>
+            <h3 class="font-bold text-slate-800">Urgences Droits</h3>
         </div>
         <?php if ($stats['rights']['urgent'] > 0): ?>
             <p class="text-2xl font-black text-red-600"><?= $stats['rights']['urgent'] ?></p>
-            <p class="text-xs text-red-700 font-medium">Demandes dépassant bientôt le délai légal !</p>
+            <p class="text-xs text-red-700 font-medium">Réponse(s) en retard !</p>
         <?php else: ?>
             <p class="text-2xl font-black text-slate-400">0</p>
-            <p class="text-xs text-slate-500">Aucune demande urgente.</p>
+            <p class="text-xs text-slate-500">Délais respectés.</p>
         <?php endif; ?>
     </div>
+
+    <!-- Alertes Violations (72h) -->
+    <div
+        class="card p-6 border-l-4 <?= $stats['breaches']['urgent'] > 0 ? 'border-red-600 bg-red-50' : 'border-slate-300' ?>">
+        <div class="flex items-center gap-2 mb-3">
+            <div
+                class="p-2 <?= $stats['breaches']['urgent'] > 0 ? 'bg-red-600 text-white' : 'bg-slate-200 text-slate-600' ?> rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="font-bold text-slate-800">Violations (-72h)</h3>
+        </div>
+        <?php if ($stats['breaches']['urgent'] > 0): ?>
+            <p class="text-2xl font-black text-red-600 animate-pulse"><?= $stats['breaches']['urgent'] ?></p>
+            <p class="text-xs text-red-700 font-bold">ALERTE : Notification CNIL hors délai !</p>
+        <?php else: ?>
+            <p class="text-2xl font-black text-slate-400"><?= $stats['breaches']['total'] ?></p>
+            <p class="text-xs text-slate-500">Incident(s) répertorié(s).</p>
+        <?php endif; ?>
+    </div>
+
 
     <!-- Alerte AIPD -->
 

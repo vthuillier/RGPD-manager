@@ -71,3 +71,20 @@ CREATE TABLE IF NOT EXISTS rights_exercises (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS data_breaches (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    discovery_date TIMESTAMP NOT NULL,
+    nature TEXT NOT NULL,
+    data_categories TEXT NOT NULL,
+    subjects_count INTEGER,
+    records_count INTEGER,
+    consequences TEXT,
+    measures_taken TEXT,
+    is_notified_authority BOOLEAN DEFAULT FALSE,
+    notification_authority_date TIMESTAMP,
+    is_notified_individuals BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+

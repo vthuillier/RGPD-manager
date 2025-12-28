@@ -87,7 +87,12 @@
                                 class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($_GET['page'] === 'rights') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
                                 Exercice des droits
                             </a>
+                            <a href="index.php?page=breach&action=list"
+                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($_GET['page'] === 'breach') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
+                                Violations de données
+                            </a>
                             <?php if (($_SESSION['user_role'] ?? '') === 'admin'): ?>
+
 
                                 <a href="index.php?page=logs&action=list"
                                     class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($_GET['page'] === 'logs') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">

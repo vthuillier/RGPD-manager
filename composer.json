@@ -11,5 +11,7 @@
             "email": "valentin.thuillier@luxferre-code.fr"
         }
     ],
-    "require": {}
+    "require": {
+        "dompdf/dompdf": "^3.1"
+    }
 }

@@ -146,8 +146,9 @@ class TreatmentRepository
             GROUP BY legal_basis
         ');
         $stmt->execute(['user_id' => $userId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
     }
+
 
     public function getSubprocessorIds(int $treatmentId): array
     {

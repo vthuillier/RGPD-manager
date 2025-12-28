@@ -68,13 +68,16 @@ class TreatmentService
     public function getStats(int $userId): array
     {
         $rightsRepo = new \App\Repository\RightsExerciseRepository();
+        $breachRepo = new \App\Repository\DataBreachRepository();
         return [
             'total' => $this->repository->countAllByUserId($userId),
             'legal_basis' => $this->repository->countByLegalBasis($userId),
             'treatments' => $this->repository->findAllByUserId($userId),
-            'rights' => $rightsRepo->getStats($userId)
+            'rights' => $rightsRepo->getStats($userId),
+            'breaches' => $breachRepo->getStats($userId)
         ];
     }
+
 
 
     private function validate(array $data): void
