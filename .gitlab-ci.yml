@@ -2,37 +2,38 @@ stages:
   - test
   - build
 
-# Étape de test : Vérification de la syntaxe PHP
 lint:
   stage: test
   image: php:8.2-cli
   script:
     - find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
 
-# Étape de build : Construction et push sur le GitLab Registry
 build:
   stage: build
-  image: docker:latest
+  image: docker:24
   services:
-    - name: docker:dind
+    - name: docker:24-dind
       alias: docker
 
   variables:
-    DOCKER_TLS_CERTDIR: "/certs"
-    DOCKER_HOST: tcp://docker:2376
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+
   before_script:
+    - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
 
   script:
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag=""
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tagging as latest"
+        tag=":latest"
+        echo "Running on default branch: tagging as latest"
       else
         tag=":$CI_COMMIT_REF_SLUG"
         echo "Running on branch '$CI_COMMIT_BRANCH': tagging as $tag"
       fi
-    - docker build -t $CI_REGISTRY_IMAGE${tag} .
-    - docker push $CI_REGISTRY_IMAGE${tag}
+    - docker build -t $CI_REGISTRY_IMAGE$tag .
+    - docker push $CI_REGISTRY_IMAGE$tag
+
   rules:
     - if: $CI_COMMIT_BRANCH
