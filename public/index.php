@@ -30,8 +30,16 @@ try {
 }
 
 
-$page = $_GET['page'] ?? 'treatment';
-$action = $_GET['action'] ?? 'list';
+$page = $_GET['page'] ?? null;
+$action = $_GET['action'] ?? null;
+
+if (!$page && !isset($_SESSION['user_id'])) {
+    header('Location: landing.html');
+    exit;
+}
+
+$page = $page ?? 'treatment';
+$action = $action ?? 'dashboard';
 
 try {
     if ($page === 'auth') {
