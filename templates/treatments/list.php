@@ -1,7 +1,12 @@
 <h1>Registre des traitements</h1>
 
-<div style="margin-bottom: 1.5rem;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
     <a href="index.php?page=treatment&action=create" class="btn">Nouveau traitement</a>
+    <div>
+        <a href="index.php?page=treatment&action=export_csv" class="btn btn-outline"
+            style="margin-right: 0.5rem;">Exporter en CSV</a>
+        <a href="index.php?page=treatment&action=export_pdf" target="_blank" class="btn btn-outline">Imprimer / PDF</a>
+    </div>
 </div>
 
 <div class="card">

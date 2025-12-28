@@ -59,6 +59,12 @@ try {
             case 'delete':
                 $controller->delete();
                 break;
+            case 'export_csv':
+                $controller->exportCsv();
+                break;
+            case 'export_pdf':
+                $controller->exportPdf();
+                break;
             default:
                 $controller->list();
                 break;

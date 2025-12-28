@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\TreatmentService;
+use App\Service\ExportService;
 use App\Entity\Treatment;
 use Exception;
 
@@ -91,10 +92,32 @@ class TreatmentController
         $this->redirect('index.php?page=treatment&action=list');
     }
 
-    private function render(string $template, array $data = []): void
+    public function exportCsv(): void
+    {
+        $treatments = $this->service->getTreatmentsForUser($this->userId);
+        $exportService = new ExportService();
+        $exportService->exportCsv($treatments);
+    }
+
+    public function exportPdf(): void
+    {
+        $treatments = $this->service->getTreatmentsForUser($this->userId);
+        $this->render('treatments/print', [
+            'title' => 'Registre des activités de traitement',
+            'treatments' => $treatments,
+            'isPrint' => true
+        ], true);
+    }
+
+    private function render(string $template, array $data = [], bool $standalone = false): void
     {
         extract($data);
         $templatePath = __DIR__ . '/../../templates/' . $template . '.php';
+
+        if ($standalone) {
+            require $templatePath;
+            return;
+        }
 
         ob_start();
         require $templatePath;
