@@ -3,8 +3,8 @@ return [
     'db' => [
         'host' => 'localhost',
         'port' => 5432,
-        'name' => 'rgpd_manager',
+        'name' => 'postgres',
         'user' => 'postgres',
-        'password' => 'password'
+        'password' => 'postgres'
     ]
 ];

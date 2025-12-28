@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Database\Connection;
+use App\Entity\Treatment;
 use PDO;
 
 class TreatmentRepository
@@ -15,24 +16,79 @@ class TreatmentRepository
         $this->pdo = Connection::get();
     }
 
-    public function findAll(): array
+    /**
+     * @return Treatment[]
+     */
+    public function findAllByUserId(int $userId): array
     {
-        $stmt = $this->pdo->query('SELECT * FROM treatments');
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $this->pdo->prepare('SELECT * FROM treatments WHERE user_id = :user_id ORDER BY created_at DESC');
+        $stmt->execute(['user_id' => $userId]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(fn($data) => Treatment::fromArray($data), $results);
     }
 
-    public function create(string $name, string $purpose, string $legalBasis): void
+    public function findByIdAndUserId(int $id, int $userId): ?Treatment
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM treatments WHERE id = :id AND user_id = :user_id');
+        $stmt->execute(['id' => $id, 'user_id' => $userId]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $data ? Treatment::fromArray($data) : null;
+    }
+
+    public function save(Treatment $treatment): void
+    {
+        if ($treatment->id === null) {
+            $this->insert($treatment);
+        } else {
+            $this->update($treatment);
+        }
+    }
+
+    private function insert(Treatment $treatment): void
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO treatments (name, purpose, legal_basis)
-            VALUES (:name, :purpose, :legal_basis)'
+            'INSERT INTO treatments (user_id, name, purpose, legal_basis, data_categories, retention_period)
+            VALUES (:user_id, :name, :purpose, :legal_basis, :data_categories, :retention_period)'
         );
 
         $stmt->execute([
-            'name' => $name,
-            'purpose' => $purpose,
-            'legal_basis' => $legalBasis
+            'user_id' => $treatment->userId,
+            'name' => $treatment->name,
+            'purpose' => $treatment->purpose,
+            'legal_basis' => $treatment->legalBasis,
+            'data_categories' => $treatment->dataCategories,
+            'retention_period' => $treatment->retentionPeriod
         ]);
     }
 
+    private function update(Treatment $treatment): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE treatments SET 
+                name = :name, 
+                purpose = :purpose, 
+                legal_basis = :legal_basis, 
+                data_categories = :data_categories, 
+                retention_period = :retention_period 
+            WHERE id = :id AND user_id = :user_id'
+        );
+
+        $stmt->execute([
+            'id' => $treatment->id,
+            'user_id' => $treatment->userId,
+            'name' => $treatment->name,
+            'purpose' => $treatment->purpose,
+            'legal_basis' => $treatment->legalBasis,
+            'data_categories' => $treatment->dataCategories,
+            'retention_period' => $treatment->retentionPeriod
+        ]);
+    }
+
+    public function deleteAndUserId(int $id, int $userId): void
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM treatments WHERE id = :id AND user_id = :user_id');
+        $stmt->execute(['id' => $id, 'user_id' => $userId]);
+    }
 }
