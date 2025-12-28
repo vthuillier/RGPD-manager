@@ -10,6 +10,26 @@
         <span style="font-size: 3rem; font-weight: 800; color: var(--primary);"><?= $stats['total'] ?></span>
     </div>
 
+    <!-- Alerte AIPD -->
+    <div class="card" style="border-left: 4px solid var(--error); padding: 1.5rem;">
+        <h3 style="margin-top: 0; color: var(--error); font-size: 1rem;">⚠️ Alertes AIPD</h3>
+        <?php
+        $aipdNeeded = array_filter($stats['treatments'] ?? [], fn($t) => $t->hasSensitiveData && $t->isLargeScale);
+        ?>
+        <?php if (empty($aipdNeeded)): ?>
+            <p style="font-size: 0.875rem; color: var(--success); margin: 1rem 0;">Aucun traitement à risque élevé détecté.
+            </p>
+        <?php else: ?>
+            <p style="font-size: 0.875rem; color: var(--error); font-weight: 600; margin: 0.5rem 0;">
+                <?= count($aipdNeeded) ?> traitement(s) nécessitant une AIPD :</p>
+            <ul style="font-size: 0.8125rem; padding-left: 1.25rem; margin-top: 0;">
+                <?php foreach ($aipdNeeded as $t): ?>
+                    <li><?= htmlspecialchars($t->name) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+    </div>
+
     <!-- Carte Quick Action -->
     <div class="card"
         style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; background: linear-gradient(135deg, var(--primary), #4f46e5); color: white;">

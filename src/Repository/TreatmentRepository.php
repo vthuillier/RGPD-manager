@@ -72,8 +72,8 @@ class TreatmentRepository
     private function insert(Treatment $treatment): void
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO treatments (user_id, name, purpose, legal_basis, data_categories, retention_period)
-            VALUES (:user_id, :name, :purpose, :legal_basis, :data_categories, :retention_period)'
+            'INSERT INTO treatments (user_id, name, purpose, legal_basis, data_categories, retention_period, has_sensitive_data, is_large_scale)
+            VALUES (:user_id, :name, :purpose, :legal_basis, :data_categories, :retention_period, :has_sensitive_data, :is_large_scale)'
         );
 
         $stmt->execute([
@@ -82,7 +82,9 @@ class TreatmentRepository
             'purpose' => $treatment->purpose,
             'legal_basis' => $treatment->legalBasis,
             'data_categories' => $treatment->dataCategories,
-            'retention_period' => $treatment->retentionPeriod
+            'retention_period' => $treatment->retentionPeriod,
+            'has_sensitive_data' => (int) $treatment->hasSensitiveData,
+            'is_large_scale' => (int) $treatment->isLargeScale
         ]);
     }
 
@@ -94,7 +96,9 @@ class TreatmentRepository
                 purpose = :purpose, 
                 legal_basis = :legal_basis, 
                 data_categories = :data_categories, 
-                retention_period = :retention_period 
+                retention_period = :retention_period,
+                has_sensitive_data = :has_sensitive_data,
+                is_large_scale = :is_large_scale
             WHERE id = :id AND user_id = :user_id'
         );
 
@@ -105,7 +109,9 @@ class TreatmentRepository
             'purpose' => $treatment->purpose,
             'legal_basis' => $treatment->legalBasis,
             'data_categories' => $treatment->dataCategories,
-            'retention_period' => $treatment->retentionPeriod
+            'retention_period' => $treatment->retentionPeriod,
+            'has_sensitive_data' => (int) $treatment->hasSensitiveData,
+            'is_large_scale' => (int) $treatment->isLargeScale
         ]);
     }
 

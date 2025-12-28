@@ -17,5 +17,7 @@ CREATE TABLE treatments (
     legal_basis VARCHAR(100) NOT NULL,
     data_categories TEXT NOT NULL,
     retention_period VARCHAR(100) NOT NULL,
+    has_sensitive_data BOOLEAN DEFAULT FALSE,
+    is_large_scale BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

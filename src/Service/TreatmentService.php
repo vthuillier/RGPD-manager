@@ -54,6 +54,7 @@ class TreatmentService
         return [
             'total' => $this->repository->countAllByUserId($userId),
             'legal_basis' => $this->repository->countByLegalBasis($userId),
+            'treatments' => $this->repository->findAllByUserId($userId),
         ];
     }
 

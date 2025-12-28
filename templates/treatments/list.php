@@ -62,7 +62,14 @@
             <tbody>
                 <?php foreach ($treatments as $treatment): ?>
                     <tr>
-                        <td><?= htmlspecialchars($treatment->name) ?></td>
+                        <td>
+                            <?= htmlspecialchars($treatment->name) ?>
+                            <?php if ($treatment->hasSensitiveData && $treatment->isLargeScale): ?>
+                                <span
+                                    style="background: var(--error); color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; font-weight: bold; margin-left: 5px;"
+                                    title="AIPD fortement conseillée">AIPD</span>
+                            <?php endif; ?>
+                        </td>
                         <td><?= htmlspecialchars($treatment->purpose) ?></td>
                         <td><?= htmlspecialchars($treatment->legalBasis) ?></td>
                         <td>

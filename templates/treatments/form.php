@@ -48,6 +48,50 @@
                 value="<?= htmlspecialchars($treatment->retentionPeriod ?? '') ?>" required>
         </div>
 
+        <div
+            style="margin-top: 1.5rem; background: #f8fafc; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+            <h3 style="margin-top: 0; font-size: 1rem; color: var(--text);">Diagnostic AIPD</h3>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">Cochez les cases si le
+                traitement répond à l'un de ces critères :</p>
+
+            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 0.5rem;">
+                <input type="checkbox" id="has_sensitive_data" name="has_sensitive_data" value="1"
+                    <?= ($treatment->hasSensitiveData ?? false) ? 'checked' : '' ?> style="width: auto;">
+                <label for="has_sensitive_data" style="margin-bottom: 0;">Données sensibles (santé, opinions,
+                    biométrie...)</label>
+            </div>
+
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <input type="checkbox" id="is_large_scale" name="is_large_scale" value="1" <?= ($treatment->isLargeScale ?? false) ? 'checked' : '' ?> style="width: auto;">
+                <label for="is_large_scale" style="margin-bottom: 0;">Traitement à grande échelle</label>
+            </div>
+
+            <div id="aipd-warning" class="alert alert-error"
+                style="margin-top: 1.5rem; display: none; font-size: 0.875rem;">
+                ⚠️ <strong>AIPD Fortement conseillée :</strong> Ce traitement présente au moins deux critères de risque
+                (données sensibles + grande échelle). Une Analyse d'Impact relative à la Protection des Données devrait
+                être réalisée.
+            </div>
+        </div>
+
+        <script>
+            const sensBox = document.getElementById('has_sensitive_data');
+            const largeBox = document.getElementById('is_large_scale');
+            const warning = document.getElementById('aipd-warning');
+
+            function checkAipd() {
+                if (sensBox.checked && largeBox.checked) {
+                    warning.style.display = 'block';
+                } else {
+                    warning.style.display = 'none';
+                }
+            }
+
+            sensBox.addEventListener('change', checkAipd);
+            largeBox.addEventListener('change', checkAipd);
+            checkAipd(); // Run on load
+        </script>
+
         <div style="margin-top: 2rem;">
             <button type="submit" class="btn">Enregistrer</button>
             <a href="index.php?page=treatment&action=list"

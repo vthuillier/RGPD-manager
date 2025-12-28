@@ -13,6 +13,8 @@ class Treatment
         public string $legalBasis,
         public string $dataCategories,
         public string $retentionPeriod,
+        public bool $hasSensitiveData = false,
+        public bool $isLargeScale = false,
         public ?string $createdAt = null
     ) {
     }
@@ -27,6 +29,8 @@ class Treatment
             $data['legal_basis'] ?? '',
             $data['data_categories'] ?? '',
             $data['retention_period'] ?? '',
+            (bool) ($data['has_sensitive_data'] ?? false),
+            (bool) ($data['is_large_scale'] ?? false),
             $data['created_at'] ?? null
         );
     }
