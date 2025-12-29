@@ -1,71 +1,80 @@
 # 🛡️ RGPD Manager
 
-[![GitLab CI](https://img.shields.io/badge/CI%2FCD-GitLab-orange?style=flat-square&logo=gitlab)](https://gitlab.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![PHP](https://img.shields.io/badge/PHP-%3E%3D8.2-777bb4?style=flat-square&logo=php)](https://php.net)
-[![Docker](https://img.shields.io/badge/Docker-ready-2496ed?style=flat-square&logo=docker)](https://docker.com)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
+[![Tailwind CSS](https://img.shields.io/badge/CSS-Tailwind-38b2ac?style=flat-square&logo=tailwind-css)](https://tailwindcss.com)
 
-**RGPD Manager** est une application web moderne et intuitive conçue pour simplifier la mise en conformité au Règlement Général sur la Protection des Données (RGPD). Elle permet de centraliser le registre des traitements, de gérer les sous-traitants, de suivre les exercices de droits et de documenter les violations de données.
+**RGPD Manager** est une solution complète, moderne et sécurisée pour le pilotage de la conformité RGPD. Conçue pour les DPO et les organisations soucieuses de la protection des données, elle offre une interface intuitive pour centraliser et automatiser les obligations légales.
 
 ---
 
 ## ✨ Fonctionnalités clés
 
-- 📊 **Tableau de bord intelligent** : Visualisation en temps réel de votre état de conformité.
-- 📝 **Registre des traitements** : Gestion complète des activités (Art. 30).
-- 🤝 **Gestion des sous-traitants** : Cartographie des flux et garanties.
-- 📂 **Exercice des droits** : Suivi rigoureux des demandes (Accès, Oubli, etc.) avec alertes de délais.
-- 🚨 **Registre des violations** : Documentation des incidents et aide à la notification (72h).
-- 📈 **Reporting Stratégique** : Génération d'un rapport annuel complet en **PDF** avec logo personnalisé.
-- 📱 **Interface Responsive** : Accessible sur PC, tablette et smartphone.
+L'application couvre l'intégralité des besoins opérationnels d'un DPO :
+
+- 📊 **Tableau de bord de pilotage** : Vue d'ensemble des traitements, alertes sur les délais de rétention, rappels d'AIPD et urgences (droits/violations).
+- 📝 **Registre des traitements (Art. 30)** : Gestion exhaustive des activités de traitement avec catégorisation des données et bases légales.
+- 🎯 **Module AIPD (DPIA)** : Réalisation d'Analyses d'Impact, évaluation des risques pour les droits et libertés, et workflow de validation (DPO/Responsable).
+- 🤝 **Gestion des sous-traitants** : Inventaire des services tiers et partenaires manipulant des données personnelles.
+- 📂 **Exercice des droits** : Gestion centralisée des demandes (Accès, Rectification, Suppression, etc.) avec suivi strict des délais.
+- 🚨 **Registre des violations** : Documentation des incidents de sécurité et aide à la notification de la CNIL (délai de 72h).
+- 📈 **Reporting & PDF** : Génération de fiches individuelles et d'un **Rapport Annuel de Conformité** consolidé, prêt pour la direction.
 
 ---
 
-## 🚀 Installation & Démarrage
+## 🔒 Sécurité & Privacy by Design
 
-### Via Docker (Recommandé)
+Le projet a été refondu avec une exigence de sécurité maximale :
 
-1. Clonez le dépôt.
-2. Configurez votre fichier `.env` (voir `.env.example`).
-3. Lancez les conteneurs :
-   ```bash
-   docker compose up -d
-   ```
-4. L'application est accessible sur `http://localhost:8080`.
-
-### Installation manuelle
-
-1. Installez les dépendances PHP via Composer :
-   ```bash
-   composer install
-   ```
-2. Assurez-vous d'avoir une base de données **PostgreSQL** active.
-3. Configurez les accès dans `config.php` ou via les variables d'environnement.
-4. Activez l'extension PHP **GD** pour la génération des rapports PDF avec logos.
-5. Lancez le serveur :
-   ```bash
-   php -S localhost:8000 -t public
-   ```
+- **Multi-tenancy (Multi-organisations)** : Isolation stricte des données entre les différentes organisations.
+- **Contrôle d'accès (RBAC)** : Rôles hiérarchisés (Super Admin, Organisme Admin, Utilisateur, Guest).
+- **Hardening HTTP** : Politique de sécurité du contenu (CSP) stricte, protection XSS, CSRF et injection SQL.
+- **Audit Logs** : Journalisation complète de toutes les actions sensibles (création, modification, suppression).
+- **Session Security** : Cookies sécurisés (HttpOnly, SameSite, Secure).
 
 ---
 
 ## 🛠️ Stack Technique
 
-- **Backend** : PHP 8.2+ (Architecture MVC légère)
-- **Frontend** : Tailwind CSS, Vanilla JS
-- **Base de données** : PostgreSQL
-- **PDF Engine** : Dompdf
-- **DevOps** : Docker, CI/CD GitLab, Docker-in-Docker (Build & Lint)
+- **Langage** : PHP 8.2+ (Architecture MVC modulaire et légère)
+- **Base de données** : PostgreSQL (pour la robustesse des données et les transactions)
+- **Style** : Tailwind CSS (Design premium, responsive et mode sombre prêt)
+- **Génération PDF** : Dompdf
+- **Outils de Qualité** : ESLint, Prettier (Frontend), PHP CodeSniffer (Backend)
 
 ---
 
-## 📜 Licence
+## 🚀 Installation
 
-Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+### Prérequis
+
+- PHP 8.2 ou supérieur
+- PostgreSQL
+- Extension PHP `gd`, `pdo_pgsql`, `openssl`
+
+### Mise en place rapide
+
+1. **Clonez le projet**
+2. **Initialisation de la base** : Importez le schéma situé dans `init.sql`.
+3. **Configuration** : Copiez le fichier `.env.example` en `.env` et renseignez vos accès base de données.
+4. **Premier démarrage** :
+   ```bash
+   # Création du premier compte admin (page setup au premier accès)
+   php -S localhost:8000 -t public
+   ```
+5. Accédez à `http://localhost:8000` pour finaliser l'installation via l'assistant.
 
 ---
 
 ## 🤝 Crédits
 
-Développé par **Valentin Thuillier** ([valentin-thuillier.fr](https://valentin-thuillier.fr))
-Propulsé par **Antigravity de Google**, technologie IA de pointe pour le codage agentique.
+Développé par **Valentin Thuillier** ([valentin-thuillier.fr](https://valentin-thuillier.fr)).
+
+🚀 Ce projet a été développé en collaboration avec **Antigravity**, l'agent IA de codage de pointe conçu par **Google DeepMind**. L'utilisation de cette technologie a permis d'implémenter des logiques métier complexes et des standards de sécurité élevés en un temps record.
+
+---
+
+## 📜 Licence
+
+Ce projet est sous licence **MIT**. Vous êtes libre de l'utiliser, de le modifier et de le distribuer.
