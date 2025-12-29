@@ -5,23 +5,13 @@ namespace App\Controller;
 
 use App\Service\AuditLogService;
 
-class AuditLogController
+class AuditLogController extends BaseController
 {
     private AuditLogService $service;
 
     public function __construct()
     {
-        if (!isset($_SESSION['user_id'])) {
-            header('Location: index.php?page=auth&action=login');
-            exit;
-        }
-
-        if (($_SESSION['user_role'] ?? 'user') !== 'super_admin') {
-            $_SESSION['flash_error'] = "Accès réservé à l'administrateur logiciel.";
-            header('Location: index.php?page=treatment&action=dashboard');
-            exit;
-        }
-
+        $this->ensureRole(['super_admin']);
         $this->service = new AuditLogService();
     }
 
@@ -33,14 +23,5 @@ class AuditLogController
             'logs' => $logs,
             'title' => 'Journaux d\'audit (Logs)'
         ]);
-    }
-
-    private function render(string $template, array $data = []): void
-    {
-        extract($data);
-        ob_start();
-        require __DIR__ . '/../../templates/' . $template . '.php';
-        $content = ob_get_clean();
-        require __DIR__ . '/../../templates/layout.php';
     }
 }

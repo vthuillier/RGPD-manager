@@ -6,16 +6,14 @@ namespace App\Controller;
 use App\Service\AuthService;
 use Exception;
 
-class AuthController
+class AuthController extends BaseController
 {
     private AuthService $authService;
-    private \App\Service\AuditLogService $auditLogService;
     private bool $allowGuest;
 
     public function __construct()
     {
         $this->authService = new AuthService();
-        $this->auditLogService = new \App\Service\AuditLogService();
         $this->allowGuest = (bool) (getenv('ALLOW_GUEST') ?: false);
     }
 
@@ -41,6 +39,9 @@ class AuthController
         $user = $this->authService->login($email, $password);
 
         if ($user) {
+            // Prevent session fixation
+            session_regenerate_id(true);
+
             $_SESSION['user_id'] = $user->id;
             $_SESSION['organization_id'] = $user->organizationId;
             $_SESSION['user_name'] = $user->name;
@@ -48,11 +49,14 @@ class AuthController
             $_SESSION['flash_success'] = "Bienvenue, " . $user->name;
 
 
-            $this->auditLogService->log('LOGIN', 'user', $user->id, ['email' => $email]);
+            $this->auditLog('LOGIN', 'user', $user->id, ['email' => $email]);
 
             $this->redirect('index.php?page=treatment&action=dashboard');
         } else {
-            $this->auditLogService->log('LOGIN_FAILED', 'user', null, ['email' => $email]);
+            // Brute force mitigation: small delay
+            usleep(500000); // 500ms
+
+            $this->auditLog('LOGIN_FAILED', 'user', null, ['email' => $email]);
             $_SESSION['flash_error'] = "Identifiants incorrects.";
             $this->redirect('index.php?page=auth&action=login');
         }
@@ -70,7 +74,7 @@ class AuthController
         $_SESSION['user_role'] = 'guest';
         $_SESSION['flash_success'] = "Connecté en mode consultation.";
 
-        $this->auditLogService->log('LOGIN_GUEST', 'user', 0);
+        $this->auditLog('LOGIN_GUEST', 'user', 0);
 
         $this->redirect('index.php?page=treatment&action=dashboard');
     }
@@ -130,39 +134,12 @@ class AuthController
     {
         $userId = $_SESSION['user_id'] ?? null;
         if ($userId) {
-            $this->auditLogService->log('LOGOUT', 'user', (int) $userId);
+            $this->auditLog('LOGOUT', 'user', (int) $userId);
         }
 
         session_destroy();
         session_start();
         $_SESSION['flash_success'] = "Vous avez été déconnecté.";
         $this->redirect('index.php?page=auth&action=login');
-    }
-
-
-    private function render(string $template, array $data = []): void
-    {
-        extract($data);
-        $templatePath = __DIR__ . '/../../templates/' . $template . '.php';
-
-        ob_start();
-        require $templatePath;
-        $content = ob_get_clean();
-
-        require __DIR__ . '/../../templates/layout.php';
-    }
-
-    private function redirect(string $url): void
-    {
-        header("Location: $url");
-        exit;
-    }
-
-    private function validateCsrf(): void
-    {
-        $token = $_POST['csrf_token'] ?? '';
-        if (!$token || $token !== ($_SESSION['csrf_token'] ?? '')) {
-            die('Erreur de sécurité CSRF');
-        }
     }
 }

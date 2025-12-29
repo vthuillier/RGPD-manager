@@ -7,16 +7,13 @@ use App\Service\ReportService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
-class ReportController
+class ReportController extends BaseController
 {
     private ReportService $service;
 
     public function __construct()
     {
-        if (!isset($_SESSION['user_id'])) {
-            header('Location: index.php?page=auth&action=login');
-            exit;
-        }
+        $this->ensureAuthenticated();
         $this->service = new ReportService();
     }
 

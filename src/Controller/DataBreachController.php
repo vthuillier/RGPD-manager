@@ -7,22 +7,16 @@ use App\Entity\DataBreach;
 use App\Repository\DataBreachRepository;
 use App\Service\AuditLogService;
 
-class DataBreachController
+class DataBreachController extends BaseController
 {
     private DataBreachRepository $repository;
-    private AuditLogService $auditLogService;
     private int $userId;
     private int $organizationId;
 
     public function __construct()
     {
-        if (!isset($_SESSION['user_id'])) {
-            header('Location: index.php?page=auth&action=login');
-            exit;
-        }
-
+        $this->ensureAuthenticated();
         $this->repository = new DataBreachRepository();
-        $this->auditLogService = new AuditLogService();
         $this->userId = (int) $_SESSION['user_id'];
         $this->organizationId = (int) $_SESSION['organization_id'];
     }
@@ -57,10 +51,10 @@ class DataBreachController
         $breach = DataBreach::fromArray($data);
         $this->repository->save($breach);
 
-        $this->auditLogService->log('DATA_BREACH_CREATE', 'data_breach', null, ['nature' => substr($breach->nature, 0, 50)]);
+        $this->auditLog('DATA_BREACH_CREATE', 'data_breach', null, ['nature' => substr($breach->nature, 0, 50)]);
 
         $_SESSION['flash_success'] = 'Violation de données enregistrée avec succès.';
-        header('Location: index.php?page=breach&action=list');
+        $this->redirect('index.php?page=breach&action=list');
     }
 
     public function edit(): void
@@ -70,8 +64,7 @@ class DataBreachController
 
         if (!$breach) {
             $_SESSION['flash_error'] = 'Violation non trouvée.';
-            header('Location: index.php?page=breach&action=list');
-            exit;
+            $this->redirect('index.php?page=breach&action=list');
         }
 
         $this->render('data_breaches/form', [
@@ -101,10 +94,10 @@ class DataBreachController
         $updatedBreach = DataBreach::fromArray($data);
         $this->repository->save($updatedBreach);
 
-        $this->auditLogService->log('DATA_BREACH_UPDATE', 'data_breach', $id, ['nature' => substr($updatedBreach->nature, 0, 50)]);
+        $this->auditLog('DATA_BREACH_UPDATE', 'data_breach', $id, ['nature' => substr($updatedBreach->nature, 0, 50)]);
 
         $_SESSION['flash_success'] = 'Dossier mis à jour.';
-        header('Location: index.php?page=breach&action=list');
+        $this->redirect('index.php?page=breach&action=list');
     }
 
     public function delete(): void
@@ -113,36 +106,10 @@ class DataBreachController
         $this->validateNotGuest();
         $id = (int) ($_POST['id'] ?? 0);
         $this->repository->deleteAndOrganizationId($id, $this->organizationId);
-        $this->auditLogService->log('DATA_BREACH_DELETE', 'data_breach', $id);
+        $this->auditLog('DATA_BREACH_DELETE', 'data_breach', $id);
 
         $_SESSION['flash_success'] = 'Dossier supprimé.';
-        header('Location: index.php?page=breach&action=list');
-    }
-
-
-    private function render(string $template, array $data = []): void
-    {
-        extract($data);
-        ob_start();
-        require __DIR__ . '/../../templates/' . $template . '.php';
-        $content = ob_get_clean();
-        require __DIR__ . '/../../templates/layout.php';
-    }
-
-    private function validateCsrf(): void
-    {
-        if (($_POST['csrf_token'] ?? '') !== $_SESSION['csrf_token']) {
-            die('CSRF token invalid');
-        }
-    }
-
-    private function validateNotGuest(): void
-    {
-        if (($_SESSION['user_role'] ?? '') === 'guest') {
-            $_SESSION['flash_error'] = "Action interdite en mode consultation.";
-            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php'));
-            exit;
-        }
+        $this->redirect('index.php?page=breach&action=list');
     }
 }
 

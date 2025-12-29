@@ -28,15 +28,17 @@ class TreatmentService
         return $this->repository->findByIdAndOrganizationId($id, $organizationId);
     }
 
-    public function createTreatment(array $data): void
+    public function createTreatment(array $data): int
     {
         $this->validate($data);
         $treatment = Treatment::fromArray($data);
         $id = $this->repository->save($treatment);
 
         if (isset($data['subprocessors']) && is_array($data['subprocessors'])) {
-            $this->repository->linkSubprocessors($id, $data['subprocessors']);
+            $this->repository->linkSubprocessors($id, $data['subprocessors'], (int) $data['organization_id']);
         }
+
+        return $id;
     }
 
     public function updateTreatmentForOrganization(int $id, int $organizationId, array $data): void
@@ -48,9 +50,9 @@ class TreatmentService
         $this->repository->save($treatment);
 
         if (isset($data['subprocessors']) && is_array($data['subprocessors'])) {
-            $this->repository->linkSubprocessors($id, $data['subprocessors']);
+            $this->repository->linkSubprocessors($id, $data['subprocessors'], $organizationId);
         } else {
-            $this->repository->linkSubprocessors($id, []);
+            $this->repository->linkSubprocessors($id, [], $organizationId);
         }
     }
 

@@ -8,28 +8,15 @@ use App\Repository\UserRepository;
 use App\Service\AuditLogService;
 use Exception;
 
-class UserController
+class UserController extends BaseController
 {
     private UserRepository $repository;
-    private AuditLogService $auditLogService;
     private int $organizationId;
 
     public function __construct()
     {
-        if (!isset($_SESSION['user_id'])) {
-            header('Location: index.php?page=auth&action=login');
-            exit;
-        }
-
-        $userRole = $_SESSION['user_role'] ?? 'user';
-        if ($userRole !== 'super_admin' && $userRole !== 'org_admin') {
-            $_SESSION['flash_error'] = "Accès réservé aux administrateurs.";
-            header('Location: index.php?page=treatment&action=dashboard');
-            exit;
-        }
-
+        $this->ensureRole(['super_admin', 'org_admin']);
         $this->repository = new UserRepository();
-        $this->auditLogService = new AuditLogService();
         $this->organizationId = (int) $_SESSION['organization_id'];
     }
 
@@ -88,16 +75,25 @@ class UserController
             $name = $_POST['name'] ?? '';
             $password = $_POST['password'] ?? '';
             $role = $_POST['role'] ?? 'user';
+            $userRole = $_SESSION['user_role'] ?? 'user';
 
             if (!$email || !$name || !$password) {
                 throw new Exception("Tous les champs sont obligatoires.");
             }
+
+            $this->validatePasswordStrength($password);
 
             if ($this->repository->findByEmail($email)) {
                 throw new Exception("Cet email est déjà utilisé.");
             }
 
             $selectedOrgs = $_POST['organizations'] ?? [];
+            $orgRepo = new \App\Repository\OrganizationRepository();
+            $allowedOrgs = ($userRole === 'super_admin')
+                ? array_map(fn($o) => $o->id, $orgRepo->findAll())
+                : array_map(fn($o) => $o->id, $orgRepo->findAllByUserId((int) $_SESSION['user_id']));
+
+            $validOrgs = array_intersect($selectedOrgs, $allowedOrgs);
 
             $user = new User(
                 null,
@@ -105,7 +101,7 @@ class UserController
                 password_hash($password, PASSWORD_DEFAULT),
                 $name,
                 $role,
-                !empty($selectedOrgs) ? (int) $selectedOrgs[0] : $this->organizationId
+                !empty($validOrgs) ? (int) $validOrgs[0] : $this->organizationId
             );
 
             $this->repository->save($user);
@@ -116,17 +112,17 @@ class UserController
                 $userId = $savedUser->id;
             }
 
-            foreach ($selectedOrgs as $orgId) {
+            foreach ($validOrgs as $orgId) {
                 $this->repository->addOrganization($userId, (int) $orgId);
             }
 
-            $this->auditLogService->log('USER_CREATE', 'user', $userId, ['email' => $email, 'role' => $role, 'orgs' => $selectedOrgs]);
+            $this->auditLog('USER_CREATE', 'user', $userId, ['email' => $email, 'role' => $role, 'orgs' => $validOrgs]);
 
             $_SESSION['flash_success'] = "Utilisateur créé avec succès.";
-            header('Location: index.php?page=user&action=list');
+            $this->redirect('index.php?page=user&action=list');
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
-            header('Location: index.php?page=user&action=create');
+            $this->redirect('index.php?page=user&action=create');
         }
     }
 
@@ -137,8 +133,7 @@ class UserController
 
         if (!$user) {
             $_SESSION['flash_error'] = "Utilisateur non trouvé.";
-            header('Location: index.php?page=user&action=list');
-            exit;
+            $this->redirect('index.php?page=user&action=list');
         }
 
         $orgRepo = new \App\Repository\OrganizationRepository();
@@ -181,6 +176,10 @@ class UserController
                 throw new Exception("Nom et email sont obligatoires.");
             }
 
+            if ($password) {
+                $this->validatePasswordStrength($password);
+            }
+
             if ($email !== $user->email && $this->repository->findByEmail($email)) {
                 throw new Exception("Cet email est déjà utilisé.");
             }
@@ -193,24 +192,32 @@ class UserController
             }
 
             $selectedOrgs = $_POST['organizations'] ?? [];
-            if (!empty($selectedOrgs)) {
-                $user->organizationId = (int) $selectedOrgs[0];
+            $orgRepo = new \App\Repository\OrganizationRepository();
+            $userRole = $_SESSION['user_role'] ?? 'user';
+            $allowedOrgs = ($userRole === 'super_admin')
+                ? array_map(fn($o) => $o->id, $orgRepo->findAll())
+                : array_map(fn($o) => $o->id, $orgRepo->findAllByUserId((int) $_SESSION['user_id']));
+
+            $validOrgs = array_intersect($selectedOrgs, $allowedOrgs);
+
+            if (!empty($validOrgs)) {
+                $user->organizationId = (int) $validOrgs[0];
             }
 
             $this->repository->save($user);
 
             $this->repository->clearOrganizations($id);
-            foreach ($selectedOrgs as $orgId) {
+            foreach ($validOrgs as $orgId) {
                 $this->repository->addOrganization($id, (int) $orgId);
             }
 
-            $this->auditLogService->log('USER_UPDATE', 'user', $id, ['email' => $email, 'orgs' => $selectedOrgs]);
+            $this->auditLog('USER_UPDATE', 'user', $id, ['email' => $email, 'orgs' => $validOrgs]);
 
             $_SESSION['flash_success'] = "Utilisateur mis à jour.";
-            header('Location: index.php?page=user&action=list');
+            $this->redirect('index.php?page=user&action=list');
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
-            header('Location: index.php?page=user&action=edit&id=' . ($id ?? 0));
+            $this->redirect('index.php?page=user&action=edit&id=' . ($id ?? 0));
         }
     }
 
@@ -221,30 +228,13 @@ class UserController
 
         if ($id === (int) $_SESSION['user_id']) {
             $_SESSION['flash_error'] = "Vous ne pouvez pas supprimer votre propre compte.";
-            header('Location: index.php?page=user&action=list');
-            exit;
+            $this->redirect('index.php?page=user&action=list');
         }
 
         $this->repository->delete($id, $this->organizationId);
 
-        $this->auditLogService->log('USER_DELETE', 'user', $id);
+        $this->auditLog('USER_DELETE', 'user', $id);
         $_SESSION['flash_success'] = "Utilisateur supprimé.";
-        header('Location: index.php?page=user&action=list');
-    }
-
-    private function render(string $template, array $data = []): void
-    {
-        extract($data);
-        ob_start();
-        require __DIR__ . '/../../templates/' . $template . '.php';
-        $content = ob_get_clean();
-        require __DIR__ . '/../../templates/layout.php';
-    }
-
-    private function validateCsrf(): void
-    {
-        if (($_POST['csrf_token'] ?? '') !== $_SESSION['csrf_token']) {
-            die('CSRF token invalid');
-        }
+        $this->redirect('index.php?page=user&action=list');
     }
 }

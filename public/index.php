@@ -1,7 +1,21 @@
 <?php
-declare(strict_types=1);
+// Secure session configuration
+ini_set('session.cookie_httponly', '1');
+ini_set('session.use_only_cookies', '1');
+ini_set('session.cookie_samesite', 'Lax');
+
+// Set secure flag if over HTTPS
+if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+    ini_set('session.cookie_secure', '1');
+}
 
 session_start();
+
+// Security Headers
+header('X-Frame-Options: DENY');
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -13,12 +27,9 @@ use App\Controller\RightsExerciseController;
 use App\Controller\DataBreachController;
 use App\Controller\ReportController;
 
-
-
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-
 
 // Auto-initialize database
 try {
@@ -45,7 +56,6 @@ if ($isInstalled && !$page && !isset($_SESSION['user_id'])) {
 
 $page = $page ?? 'treatment';
 $action = $action ?? 'dashboard';
-
 
 try {
     if ($page === 'auth') {
@@ -205,15 +215,6 @@ try {
                 $controller->showSetup();
                 break;
         }
-    } elseif ($page === 'credits') {
-
-        $title = 'Crédits';
-        extract(['title' => $title]);
-        ob_start();
-        require __DIR__ . '/../templates/credits.php';
-        $content = ob_get_clean();
-        require __DIR__ . '/../templates/layout.php';
-        exit;
     } elseif ($page === 'user') {
         $controller = new \App\Controller\UserController();
         switch ($action) {
@@ -268,11 +269,6 @@ try {
                 break;
         }
     } elseif ($page === 'logs') {
-
-
-
-
-
         $controller = new AuditLogController();
         switch ($action) {
             case 'list':
@@ -282,11 +278,23 @@ try {
                 $controller->list();
                 break;
         }
+    } elseif ($page === 'credits') {
+        $title = 'Crédits';
+        extract(['title' => $title]);
+        ob_start();
+        require __DIR__ . '/../templates/credits.php';
+        $content = ob_get_clean();
+        require __DIR__ . '/../templates/layout.php';
+        exit;
     } else {
         header('Location: index.php?page=treatment&action=dashboard');
     }
-
-
-} catch (\Exception $e) {
-    echo "Une erreur est survenue : " . $e->getMessage();
+} catch (\Throwable $e) {
+    error_log($e->getMessage() . "\n" . $e->getTraceAsString());
+    $displayErrors = getenv('DISPLAY_ERRORS') === '1';
+    if ($displayErrors) {
+        echo "Une erreur est survenue : " . htmlspecialchars($e->getMessage());
+    } else {
+        echo "Une erreur interne est survenue. L'administrateur a été notifié.";
+    }
 }

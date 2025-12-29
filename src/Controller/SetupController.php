@@ -10,7 +10,7 @@ use App\Repository\OrganizationRepository;
 use App\Repository\UserRepository;
 use Exception;
 
-class SetupController
+class SetupController extends BaseController
 {
     private OrganizationRepository $orgRepo;
     private UserRepository $userRepo;
@@ -35,8 +35,7 @@ class SetupController
     public function showSetup(): void
     {
         if (self::isInstalled()) {
-            header('Location: index.php');
-            exit;
+            $this->redirect('index.php');
         }
 
         $this->render('setup/index', [
@@ -59,6 +58,8 @@ class SetupController
             if (!$orgName || !$adminName || !$adminEmail || !$adminPassword) {
                 throw new Exception("Tous les champs sont obligatoires.");
             }
+
+            $this->validatePasswordStrength($adminPassword);
 
             // Create Organization
             $orgId = $this->orgRepo->save(new Organization(null, $orgName));
@@ -89,25 +90,11 @@ class SetupController
                 $_SESSION['flash_success'] = "Installation terminée ! Bienvenue, Administrateur Logiciel.";
             }
 
-            header('Location: index.php?page=treatment&action=dashboard');
-            exit;
+            $this->redirect('index.php?page=treatment&action=dashboard');
 
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
-            header('Location: index.php?page=setup');
-            exit;
+            $this->redirect('index.php?page=setup');
         }
-    }
-
-    private function render(string $template, array $data = []): void
-    {
-        extract($data);
-        $templatePath = __DIR__ . '/../../templates/' . $template . '.php';
-
-        ob_start();
-        require $templatePath;
-        $content = ob_get_clean();
-
-        require __DIR__ . '/../../templates/layout.php';
     }
 }

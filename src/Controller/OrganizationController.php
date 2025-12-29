@@ -3,31 +3,24 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Controller\BaseController;
 use App\Entity\Organization;
+use App\Repository\DataBreachRepository;
 use App\Repository\OrganizationRepository;
-use App\Service\AuditLogService;
+use App\Repository\RightsExerciseRepository;
+use App\Repository\SubprocessorRepository;
+use App\Repository\TreatmentRepository;
+use App\Repository\UserRepository;
 use Exception;
 
-class OrganizationController
+class OrganizationController extends BaseController
 {
     private OrganizationRepository $repository;
-    private AuditLogService $auditLogService;
 
     public function __construct()
     {
-        if (!isset($_SESSION['user_id'])) {
-            header('Location: index.php?page=auth&action=login');
-            exit;
-        }
-
-        if (($_SESSION['user_role'] ?? 'user') !== 'super_admin') {
-            $_SESSION['flash_error'] = "Accès réservé à l'administrateur logiciel.";
-            header('Location: index.php?page=treatment&action=dashboard');
-            exit;
-        }
-
+        $this->ensureRole(['super_admin']);
         $this->repository = new OrganizationRepository();
-        $this->auditLogService = new AuditLogService();
     }
 
     public function list(): void
@@ -52,36 +45,33 @@ class OrganizationController
         try {
             $name = $_POST['name'] ?? '';
             if (!$name) {
-                throw new Exception("Le nom est obligatoire.");
+                throw new Exception("Le nom de l'organisme est obligatoire.");
             }
 
-            $org = new Organization(null, $name);
-            $id = $this->repository->save($org);
-
-            $this->auditLogService->log('ORG_CREATE', 'organization', $id, ['name' => $name]);
+            $id = $this->repository->save(new Organization(null, $name));
+            $this->auditLog('ORG_CREATE', 'organization', $id, ['name' => $name]);
 
             $_SESSION['flash_success'] = "Organisme créé avec succès.";
-            header('Location: index.php?page=organization&action=list');
+            $this->redirect('index.php?page=organization&action=list');
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
-            header('Location: index.php?page=organization&action=create');
+            $this->redirect('index.php?page=organization&action=create');
         }
     }
 
     public function edit(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
-        $org = $this->repository->find($id);
+        $organization = $this->repository->find($id);
 
-        if (!$org) {
+        if (!$organization) {
             $_SESSION['flash_error'] = "Organisme non trouvé.";
-            header('Location: index.php?page=organization&action=list');
-            exit;
+            $this->redirect('index.php?page=organization&action=list');
         }
 
         $this->render('organizations/form', [
             'title' => 'Modifier l\'organisme',
-            'organization' => $org
+            'organization' => $organization
         ]);
     }
 
@@ -90,27 +80,20 @@ class OrganizationController
         $this->validateCsrf();
         try {
             $id = (int) ($_POST['id'] ?? 0);
-            $org = $this->repository->find($id);
-
-            if (!$org) {
-                throw new Exception("Organisme non trouvé.");
-            }
-
             $name = $_POST['name'] ?? '';
-            if (!$name) {
-                throw new Exception("Le nom est obligatoire.");
+
+            if (!$id || !$name) {
+                throw new Exception("Données manquantes.");
             }
 
-            $org->name = $name;
-            $this->repository->save($org);
-
-            $this->auditLogService->log('ORG_UPDATE', 'organization', $id, ['name' => $name]);
+            $this->repository->save(new Organization($id, $name));
+            $this->auditLog('ORG_UPDATE', 'organization', $id, ['name' => $name]);
 
             $_SESSION['flash_success'] = "Organisme mis à jour.";
-            header('Location: index.php?page=organization&action=list');
+            $this->redirect('index.php?page=organization&action=list');
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
-            header('Location: index.php?page=organization&action=edit&id=' . ($id ?? 0));
+            $this->redirect('index.php?page=organization&action=edit&id=' . ($id ?? 0));
         }
     }
 
@@ -129,85 +112,52 @@ class OrganizationController
             }
 
             $this->repository->delete($id);
-            $this->auditLogService->log('ORG_DELETE', 'organization', $id);
+            $this->auditLog('ORG_DELETE', 'organization', $id);
 
             $_SESSION['flash_success'] = "Organisme supprimé avec succès.";
         } catch (Exception $e) {
             $_SESSION['flash_error'] = "Erreur lors de la suppression : " . $e->getMessage();
         }
 
-        header('Location: index.php?page=organization&action=list');
+        $this->redirect('index.php?page=organization&action=list');
     }
 
     public function backup(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
-        $org = $this->repository->find($id);
+        $organization = $this->repository->find($id);
 
-        if (!$org) {
+        if (!$organization) {
             $_SESSION['flash_error'] = "Organisme non trouvé.";
-            header('Location: index.php?page=organization&action=list');
-            exit;
+            $this->redirect('index.php?page=organization&action=list');
         }
 
-        // Simple backup logic: gather all data for this org
-        $data = [
-            'organization' => [
-                'id' => $org->id,
-                'name' => $org->name
-            ],
-            'export_date' => date('Y-m-d H:i:s'),
-            'data' => $this->gatherOrganizationData($id)
-        ];
+        $data = $this->gatherOrganizationData($id);
+        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+        $this->auditLog('ORG_BACKUP', 'organization', $id);
 
         header('Content-Type: application/json');
-        header('Content-Disposition: attachment; filename="backup_' . strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $org->name)) . '_' . date('Y-m-d') . '.json"');
-        echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        header('Content-Disposition: attachment; filename="backup_' . urlencode($organization->name) . '_' . date('Y-m-d') . '.json"');
+        echo $json;
         exit;
     }
 
     private function gatherOrganizationData(int $orgId): array
     {
-        $pdo = \App\Database\Connection::get();
-        $tables = ['treatments', 'subprocessors', 'rights_exercises', 'data_breaches'];
-        $allData = [];
+        $treatRepo = new TreatmentRepository();
+        $subRepo = new SubprocessorRepository();
+        $rightsRepo = new RightsExerciseRepository();
+        $breachRepo = new DataBreachRepository();
+        $userRepo = new UserRepository();
 
-        foreach ($tables as $table) {
-            $stmt = $pdo->prepare("SELECT * FROM $table WHERE organization_id = :org_id");
-            $stmt->execute(['org_id' => $orgId]);
-            $allData[$table] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        }
-
-        // Get users linked to this org
-        $stmt = $pdo->prepare("
-            SELECT u.* FROM users u
-            JOIN user_organizations uo ON u.id = uo.user_id
-            WHERE uo.organization_id = :org_id
-        ");
-        $stmt->execute(['org_id' => $orgId]);
-        $allData['users'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        return $allData;
-    }
-
-    private function render(string $template, array $data = []): void
-    {
-        extract($data);
-        ob_start();
-        $templatePath = __DIR__ . '/../../templates/' . $template . '.php';
-        if (!file_exists($templatePath)) {
-            echo "Template not found: $templatePath";
-        } else {
-            require $templatePath;
-        }
-        $content = ob_get_clean();
-        require __DIR__ . '/../../templates/layout.php';
-    }
-
-    private function validateCsrf(): void
-    {
-        if (($_POST['csrf_token'] ?? '') !== $_SESSION['csrf_token']) {
-            die('CSRF token invalid');
-        }
+        return [
+            'organization' => $this->repository->find($orgId),
+            'treatments' => $treatRepo->findAllByOrganizationId($orgId),
+            'subprocessors' => $subRepo->findAllByOrganizationId($orgId),
+            'rights_exercises' => $rightsRepo->findAllByOrganizationId($orgId),
+            'data_breaches' => $breachRepo->findAllByOrganizationId($orgId),
+            'users' => $userRepo->findAllByOrganizationId($orgId)
+        ];
     }
 }

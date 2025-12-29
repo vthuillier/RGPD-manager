@@ -159,19 +159,28 @@ class TreatmentRepository
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    public function linkSubprocessors(int $treatmentId, array $subprocessorIds): void
+    public function linkSubprocessors(int $treatmentId, array $subprocessorIds, int $organizationId): void
     {
         // First clear existing links
         $stmt = $this->pdo->prepare('DELETE FROM treatment_subprocessors WHERE treatment_id = :treatment_id');
         $stmt->execute(['treatment_id' => $treatmentId]);
 
-        // Then add new ones
+        // Then add new ones, but only if they belong to the correct organization
         if (empty($subprocessorIds))
             return;
 
-        $stmt = $this->pdo->prepare('INSERT INTO treatment_subprocessors (treatment_id, subprocessor_id) VALUES (:treatment_id, :subprocessor_id)');
+        $stmt = $this->pdo->prepare('
+            INSERT INTO treatment_subprocessors (treatment_id, subprocessor_id)
+            SELECT :treatment_id, id FROM subprocessors 
+            WHERE id = :subprocessor_id AND organization_id = :organization_id
+        ');
+
         foreach ($subprocessorIds as $sid) {
-            $stmt->execute(['treatment_id' => $treatmentId, 'subprocessor_id' => (int) $sid]);
+            $stmt->execute([
+                'treatment_id' => $treatmentId,
+                'subprocessor_id' => (int) $sid,
+                'organization_id' => $organizationId
+            ]);
         }
     }
 }
