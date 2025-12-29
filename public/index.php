@@ -66,6 +66,9 @@ try {
             case 'register_process':
                 $controller->register();
                 break;
+            case 'switch_org':
+                $controller->switchOrganization();
+                break;
             case 'logout':
                 $controller->logout();
                 break;
@@ -220,11 +223,45 @@ try {
             case 'create':
                 $controller->create();
                 break;
+            case 'edit':
+                $controller->edit();
+                break;
+            case 'update':
+                $controller->update();
+                break;
             case 'store':
                 $controller->store();
                 break;
             case 'delete':
                 $controller->delete();
+                break;
+            default:
+                $controller->list();
+                break;
+        }
+    } elseif ($page === 'organization') {
+        $controller = new \App\Controller\OrganizationController();
+        switch ($action) {
+            case 'list':
+                $controller->list();
+                break;
+            case 'create':
+                $controller->create();
+                break;
+            case 'store':
+                $controller->store();
+                break;
+            case 'edit':
+                $controller->edit();
+                break;
+            case 'update':
+                $controller->update();
+                break;
+            case 'delete':
+                $controller->delete();
+                break;
+            case 'backup':
+                $controller->backup();
                 break;
             default:
                 $controller->list();

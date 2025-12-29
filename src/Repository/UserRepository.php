@@ -78,4 +78,37 @@ class UserRepository
 
 
 
+    public function addOrganization(int $userId, int $organizationId): void
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO user_organizations (user_id, organization_id) VALUES (:user_id, :organization_id) ON CONFLICT DO NOTHING'
+        );
+        $stmt->execute(['user_id' => $userId, 'organization_id' => $organizationId]);
+    }
+
+    public function removeOrganization(int $userId, int $organizationId): void
+    {
+        $stmt = $this->pdo->prepare(
+            'DELETE FROM user_organizations WHERE user_id = :user_id AND organization_id = :organization_id'
+        );
+        $stmt->execute(['user_id' => $userId, 'organization_id' => $organizationId]);
+    }
+
+    public function clearOrganizations(int $userId): void
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM user_organizations WHERE user_id = :user_id');
+        $stmt->execute(['user_id' => $userId]);
+    }
+
+    /**
+     * @return User[]
+     */
+    public function findAll(): array
+    {
+        $stmt = $this->pdo->query('SELECT * FROM users ORDER BY name ASC');
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(fn($data) => User::fromArray($data), $results);
+    }
 }
+

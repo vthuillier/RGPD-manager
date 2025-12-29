@@ -44,6 +44,13 @@ class SchemaManager
             $stmt = $this->pdo->query("SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'organization_id' LIMIT 1");
             $orgColumnExists = $stmt !== false && $stmt->fetch() !== false;
 
+            // Check if 'user_organizations' table exists
+            $stmt = $this->pdo->query("SELECT 1 FROM information_schema.tables WHERE table_name = 'user_organizations' LIMIT 1");
+            $userOrgTableExists = $stmt !== false && $stmt->fetch() !== false;
+
+            if (!$userOrgTableExists)
+                return false;
+
             return $orgColumnExists;
 
         } catch (Exception $e) {

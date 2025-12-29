@@ -19,6 +19,12 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS user_organizations (
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, organization_id)
+);
+
 -- Migrate existing users to default org if needed
 UPDATE users SET organization_id = -1 WHERE organization_id IS NULL;
 
@@ -33,6 +39,11 @@ BEGIN
         UPDATE users SET organization_id = -1;
     END IF;
 END $$;
+
+-- Populate user_organizations from existing users
+INSERT INTO user_organizations (user_id, organization_id)
+SELECT id, organization_id FROM users WHERE organization_id IS NOT NULL
+ON CONFLICT DO NOTHING;
 
 
 CREATE TABLE IF NOT EXISTS treatments (

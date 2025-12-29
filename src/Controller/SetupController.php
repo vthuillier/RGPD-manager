@@ -70,27 +70,29 @@ class SetupController
                 $adminEmail,
                 $hashedPassword,
                 $adminName,
-                'admin',
+                'super_admin',
                 $orgId
             );
             $this->userRepo->save($user);
 
-            // Log in the new admin
-            session_start();
+            // Fetch created user to get the ID
             $dbUser = $this->userRepo->findByEmail($adminEmail);
             if ($dbUser) {
+                // Link user to organization in pivot table
+                $this->userRepo->addOrganization($dbUser->id, $orgId);
+
+                // Log in the new admin
                 $_SESSION['user_id'] = $dbUser->id;
                 $_SESSION['organization_id'] = $dbUser->organizationId;
                 $_SESSION['user_name'] = $dbUser->name;
                 $_SESSION['user_role'] = $dbUser->role;
-                $_SESSION['flash_success'] = "Installation terminée ! Bienvenue.";
+                $_SESSION['flash_success'] = "Installation terminée ! Bienvenue, Administrateur Logiciel.";
             }
 
             header('Location: index.php?page=treatment&action=dashboard');
             exit;
 
         } catch (Exception $e) {
-            session_start();
             $_SESSION['flash_error'] = $e->getMessage();
             header('Location: index.php?page=setup');
             exit;

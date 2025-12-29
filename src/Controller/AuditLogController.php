@@ -16,8 +16,8 @@ class AuditLogController
             exit;
         }
 
-        if (($_SESSION['user_role'] ?? 'user') !== 'admin') {
-            $_SESSION['flash_error'] = "Accès réservé aux administrateurs.";
+        if (($_SESSION['user_role'] ?? 'user') !== 'super_admin') {
+            $_SESSION['flash_error'] = "Accès réservé à l'administrateur logiciel.";
             header('Location: index.php?page=treatment&action=dashboard');
             exit;
         }

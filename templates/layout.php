@@ -69,140 +69,170 @@
                     <a href="index.php" class="flex-shrink-0 flex items-center">
                         <img src="assets/logo_texte.png" alt="RGPD Manager" class="h-20 w-auto">
                     </a>
-                    <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
+                    <div class="hidden lg:ml-10 lg:flex lg:space-x-8">
                         <?php if (isset($_SESSION['user_id'])): ?>
                             <?php
-                            $currentPage = $_GET['page'] ?? 'treatment'; // Default if logged in
+                            $currentPage = $_GET['page'] ?? 'treatment';
                             $currentAction = $_GET['action'] ?? '';
+                            $userRole = $_SESSION['user_role'] ?? 'user';
                             ?>
-                            <a href="index.php?page=treatment&action=dashboard"
-                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentAction === 'dashboard') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
-                                Tableau de bord
-                            </a>
-                            <a href="index.php?page=treatment&action=list"
-                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'treatment' && $currentAction === 'list') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
-                                Registre
-                            </a>
-                            <a href="index.php?page=subprocessor&action=list"
-                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'subprocessor') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
-                                Sous-traitants
-                            </a>
-                            <a href="index.php?page=rights&action=list"
-                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'rights') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
-                                Exercice des droits
-                            </a>
-                            <a href="index.php?page=breach&action=list"
-                                class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'breach') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
-                                Violations de données
-                            </a>
 
-                            <?php if (($_SESSION['user_role'] ?? '') === 'admin'): ?>
-                                <a href="index.php?page=user&action=list"
-                                    class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'user') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
-                                    Utilisateurs
+                            <!-- Groupe Registre -->
+                            <div class="flex items-center space-x-4 border-r border-slate-200 pr-6">
+                                <a href="index.php?page=treatment&action=dashboard"
+                                    class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentAction === 'dashboard') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700' ?> text-sm font-medium">
+                                    Tableau de bord
                                 </a>
+                                <a href="index.php?page=treatment&action=list"
+                                    class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'treatment' && $currentAction === 'list') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700' ?> text-sm font-medium">
+                                    Registre
+                                </a>
+                                <a href="index.php?page=subprocessor&action=list"
+                                    class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'subprocessor') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700' ?> text-sm font-medium">
+                                    Sous-traitants
+                                </a>
+                            </div>
 
-                                <a href="index.php?page=logs&action=list"
-                                    class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'logs') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700' ?> text-sm font-medium">
-                                    Journaux (Audit)
+                            <!-- Groupe Incidents/Droits -->
+                            <div class="flex items-center space-x-4 border-r border-slate-200 pr-6">
+                                <a href="index.php?page=rights&action=list"
+                                    class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'rights') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700' ?> text-sm font-medium">
+                                    Droits
                                 </a>
+                                <a href="index.php?page=breach&action=list"
+                                    class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'breach') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700' ?> text-sm font-medium">
+                                    Violations
+                                </a>
+                            </div>
+
+                            <!-- Groupe Admin -->
+                            <?php if ($userRole === 'org_admin' || $userRole === 'super_admin'): ?>
+                                <div class="relative flex items-center group">
+                                    <button
+                                        class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-slate-500 hover:text-slate-700 text-sm font-medium h-full gap-1">
+                                        Administration
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                    </button>
+                                    <div
+                                        class="absolute top-full left-0 w-48 bg-white border border-slate-200 shadow-xl rounded-b-lg py-2 hidden group-hover:block z-50 animate-fade-in">
+                                        <a href="index.php?page=user&action=list"
+                                            class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 <?= $currentPage === 'user' ? 'bg-slate-50 font-bold text-primary-600' : '' ?>">Utilisateurs</a>
+                                        <?php if ($userRole === 'super_admin'): ?>
+                                            <a href="index.php?page=organization&action=list"
+                                                class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 <?= $currentPage === 'organization' ? 'bg-slate-50 font-bold text-primary-600' : '' ?>">Organismes</a>
+                                            <a href="index.php?page=logs&action=list"
+                                                class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 <?= $currentPage === 'logs' ? 'bg-slate-50 font-bold text-primary-600' : '' ?>">Logs
+                                                d'audit</a>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
                             <?php endif; ?>
                         <?php endif; ?>
-
-
-
                     </div>
                 </div>
-                <div class="-mr-2 flex items-center sm:hidden">
-                    <!-- Mobile menu button -->
-                    <button type="button" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"
-                        class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
-                        aria-controls="mobile-menu" aria-expanded="false">
-                        <span class="sr-only">Ouvrir le menu</span>
-                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+
+                <div class="flex items-center">
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <div class="flex items-center gap-4">
-                            <span class="text-sm text-slate-600">
-                                Bonjour, <span
-                                    class="font-semibold text-slate-900"><?= htmlspecialchars($_SESSION['user_name']) ?></span>
-                                <?php if (($_SESSION['user_role'] ?? '') === 'guest'): ?>
+                        <div class="hidden md:flex items-center space-x-6">
+                            <!-- Context Switcher -->
+                            <?php
+                            $orgRepo = new \App\Repository\OrganizationRepository();
+                            if ($userRole === 'super_admin') {
+                                $userOrgs = $orgRepo->findAll();
+                            } else {
+                                $userOrgs = $orgRepo->findAllByUserId((int) $_SESSION['user_id']);
+                            }
+                            ?>
+                            <div class="relative">
+                                <select
+                                    onchange="window.location.href='index.php?page=auth&action=switch_org&org_id=' + this.value"
+                                    class="text-xs border-slate-200 rounded-lg focus:ring-primary-500 focus:border-primary-500 bg-slate-50 py-1.5 pl-3 pr-8 font-semibold text-slate-700 shadow-sm cursor-pointer hover:bg-white transition-colors">
+                                    <?php if (empty($userOrgs)): ?>
+                                        <option value="">Aucun organisme</option>
+                                    <?php endif; ?>
+                                    <?php foreach ($userOrgs as $org): ?>
+                                        <option value="<?= $org->id ?>" <?= $org->id === ($_SESSION['organization_id'] ?? 0) ? 'selected' : '' ?>>
+                                            🏢 <?= htmlspecialchars($org->name) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <!-- User Profile & Logout -->
+                            <div
+                                class="flex items-center gap-4 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200">
+                                <span class="text-xs flex flex-col">
                                     <span
-                                        class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                                        Consultation
-                                    </span>
-                                <?php endif; ?>
-                            </span>
-
-                            <a href="index.php?page=auth&action=logout" class="btn btn-outline py-1.5">
-                                Déconnecter
-                            </a>
-                        </div>
-                    <?php else: ?>
-                        <div class="flex items-center gap-3">
-                            <a href="index.php?page=auth&action=login" class="btn btn-primary py-1.5 px-6 shadow-none">
-                                Connexion
-                            </a>
-                        </div>
-                    <?php endif; ?>
-
-                </div>
-            </div>
-        </div>
-
-        <!-- Mobile menu, show/hide based on menu state. -->
-        <div class="hidden sm:hidden" id="mobile-menu">
-            <div class="pt-2 pb-3 space-y-1 bg-white border-t border-slate-100 px-4">
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="index.php?page=treatment&action=dashboard"
-                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentAction === 'dashboard') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Tableau
-                        de bord</a>
-                    <a href="index.php?page=treatment&action=list"
-                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'treatment' && $currentAction === 'list') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Registre</a>
-                    <a href="index.php?page=subprocessor&action=list"
-                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'subprocessor') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Sous-traitants</a>
-                    <a href="index.php?page=rights&action=list"
-                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'rights') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Exercice
-                        des droits</a>
-                    <a href="index.php?page=breach&action=list"
-                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'breach') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Violations
-                        de données</a>
-
-                    <?php if (($_SESSION['user_role'] ?? '') === 'admin'): ?>
-                        <a href="index.php?page=user&action=list"
-                            class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'user') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Utilisateurs</a>
-                        <a href="index.php?page=logs&action=list"
-                            class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'logs') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800' ?> text-base font-medium">Journaux
-                            (Audit)</a>
-                    <?php endif; ?>
-
-                    <div class="pt-4 pb-3 border-t border-slate-200 mt-4">
-                        <div class="flex items-center px-4">
-                            <div class="ml-3">
-                                <div class="text-base font-medium text-slate-800">
-                                    <?= htmlspecialchars($_SESSION['user_name']) ?>
-                                </div>
-                                <div class="text-sm font-medium text-slate-500">
-                                    <?= htmlspecialchars($_SESSION['user_email'] ?? '') ?>
-                                </div>
+                                        class="font-bold text-slate-900"><?= htmlspecialchars($_SESSION['user_name']) ?></span>
+                                    <span
+                                        class="text-[10px] uppercase tracking-tighter text-slate-500 font-medium"><?= $userRole === 'super_admin' ? 'Master' : ($userRole === 'org_admin' ? 'Admin' : 'Utilisateur') ?></span>
+                                </span>
+                                <a href="index.php?page=auth&action=logout"
+                                    class="text-slate-400 hover:text-red-600 transition-colors" title="Déconnexion">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </a>
                             </div>
                         </div>
+
+                        <!-- Mobile toggle -->
+                        <div class="lg:hidden flex items-center">
+                            <button type="button"
+                                onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"
+                                class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round" />
+                                </svg>
+                            </button>
+                        </div>
+                    <?php else: ?>
+                        <a href="index.php?page=auth&action=login" class="btn btn-primary py-1.5 px-6">Connexion</a>
+                    <?php endif; ?>
+                </div>
+
+            </div>
+        </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div class="hidden lg:hidden" id="mobile-menu">
+            <div class="pt-2 pb-3 space-y-1 bg-white border-t border-slate-100 px-4">
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <div class="py-2 text-xs font-bold text-slate-400 uppercase tracking-widest px-3">Données RGPD</div>
+                    <a href="index.php?page=treatment&action=dashboard" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentAction === 'dashboard') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Tableau de bord</a>
+                    <a href="index.php?page=treatment&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'treatment' && $currentAction === 'list') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Registre</a>
+                    <a href="index.php?page=subprocessor&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'subprocessor') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Sous-traitants</a>
+                    
+                    <div class="py-2 text-xs font-bold text-slate-400 uppercase tracking-widest px-3 mt-4">Opérations</div>
+                    <a href="index.php?page=rights&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'rights') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Droits</a>
+                    <a href="index.php?page=breach&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'breach') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Violations</a>
+
+                    <?php if ($userRole === 'org_admin' || $userRole === 'super_admin'): ?>
+                        <div class="py-2 text-xs font-bold text-slate-400 uppercase tracking-widest px-3 mt-4">Administration</div>
+                        <a href="index.php?page=user&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'user') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Utilisateurs</a>
+                        <?php if ($userRole === 'super_admin'): ?>
+                            <a href="index.php?page=organization&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'organization') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Organismes</a>
+                            <a href="index.php?page=logs&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'logs') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Audit</a>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
+                    <div class="pt-4 pb-3 border-t border-slate-200 mt-6">
+                        <div class="flex items-center px-4">
+                            <div class="text-base font-medium text-slate-800"><?= htmlspecialchars($_SESSION['user_name']) ?></div>
+                        </div>
                         <div class="mt-3 space-y-1">
-                            <a href="index.php?page=auth&action=logout"
-                                class="block px-4 py-2 text-base font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100">Déconnexion</a>
+                            <a href="index.php?page=auth&action=logout" class="block px-4 py-2 text-base font-medium text-red-600">Déconnexion</a>
                         </div>
                     </div>
                 <?php else: ?>
-                    <a href="index.php?page=auth&action=login"
-                        class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800 text-base font-medium">Connexion</a>
+                    <a href="index.php?page=auth&action=login" class="block px-4 py-2 text-base font-medium text-primary-600">Connexion</a>
                 <?php endif; ?>
-
             </div>
         </div>
     </nav>

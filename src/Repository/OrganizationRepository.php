@@ -44,4 +44,36 @@ class OrganizationRepository
             return $organization->id;
         }
     }
+    /**
+     * @return Organization[]
+     */
+    public function findAllByUserId(int $userId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT o.* FROM organizations o 
+             JOIN user_organizations uo ON o.id = uo.organization_id 
+             WHERE uo.user_id = :user_id 
+             ORDER BY o.name ASC'
+        );
+        $stmt->execute(['user_id' => $userId]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(fn($data) => Organization::fromArray($data), $results);
+    }
+
+    /**
+     * @return Organization[]
+     */
+    public function findAll(): array
+    {
+        $stmt = $this->pdo->query('SELECT * FROM organizations WHERE id != -1 ORDER BY name ASC');
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return array_map(fn($data) => Organization::fromArray($data), $results);
+    }
+
+    public function delete(int $id): void
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM organizations WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+    }
 }

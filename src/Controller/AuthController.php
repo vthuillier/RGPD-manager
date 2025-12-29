@@ -89,6 +89,43 @@ class AuthController
     }
 
 
+    public function switchOrganization(): void
+    {
+        $orgId = (int) ($_GET['org_id'] ?? 0);
+        $userId = (int) ($_SESSION['user_id'] ?? 0);
+
+        if (!$orgId || !$userId) {
+            $this->redirect('index.php');
+        }
+
+        // Verify user has access to this organization
+        $role = $_SESSION['user_role'] ?? 'user';
+        $hasAccess = false;
+
+        if ($role === 'super_admin') {
+            $hasAccess = true;
+        } else {
+            $orgRepo = new \App\Repository\OrganizationRepository();
+            $userOrgs = $orgRepo->findAllByUserId($userId);
+
+            foreach ($userOrgs as $org) {
+                if ($org->id === $orgId) {
+                    $hasAccess = true;
+                    break;
+                }
+            }
+        }
+
+        if ($hasAccess) {
+            $_SESSION['organization_id'] = $orgId;
+            $_SESSION['flash_success'] = "Organisme changé avec succès.";
+        } else {
+            $_SESSION['flash_error'] = "Vous n'avez pas accès à cet organisme.";
+        }
+
+        $this->redirect('index.php?page=treatment&action=dashboard');
+    }
+
     public function logout(): void
     {
         $userId = $_SESSION['user_id'] ?? null;
