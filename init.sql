@@ -168,3 +168,20 @@ BEGIN
 END $$;
 
 
+CREATE TABLE IF NOT EXISTS aipds (
+    id SERIAL PRIMARY KEY,
+    treatment_id INTEGER NOT NULL REFERENCES treatments(id) ON DELETE CASCADE,
+    organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    status VARCHAR(50) DEFAULT 'draft',
+    necessity_assessment TEXT,
+    risk_assessment TEXT,
+    measures_planned TEXT,
+    dpo_opinion TEXT,
+    manager_decision TEXT,
+    is_high_risk BOOLEAN DEFAULT TRUE,
+    dpo_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    manager_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

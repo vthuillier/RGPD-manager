@@ -165,7 +165,32 @@
         <?php endif; ?>
     </ul>
 
-    <h2>4. Violations de Données & Incidents</h2>
+    <h2>4. Analyses d'Impact (AIPD)</h2>
+    <?php if (empty($aipds['list'])): ?>
+        <p>Aucune analyse d'impact n'a été réalisée cette année.</p>
+    <?php else: ?>
+        <p>Bilan des analyses d'impact relatives à la protection des données :</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Traitement</th>
+                    <th>Statut</th>
+                    <th>Risque Résiduel</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($aipds['list'] as $a): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($a->treatmentName) ?></td>
+                        <td><?= ucfirst($a->status) ?></td>
+                        <td><?= $a->isHighRisk ? 'ÉLEVÉ' : 'Acceptable' ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+
+    <h2>5. Violations de Données & Incidents</h2>
     <?php if (empty($recent_breaches)): ?>
         <p>Aucune violation de données n'a été signalée durant cette période.</p>
     <?php else: ?>

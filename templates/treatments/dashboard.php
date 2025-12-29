@@ -100,7 +100,12 @@
                     </path>
                 </svg>
             </div>
-            <h3 class="font-bold text-slate-800">Alertes AIPD</h3>
+            <div class="flex flex-col">
+                <h3 class="font-bold text-slate-800">Alertes AIPD</h3>
+                <span
+                    class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter"><?= $stats['aipd_count'] ?? 0 ?>
+                    analyse(s) réalisée(s)</span>
+            </div>
         </div>
         <?php
         $aipdNeeded = array_filter($stats['treatments'] ?? [], fn($t) => $t->hasSensitiveData && $t->isLargeScale);

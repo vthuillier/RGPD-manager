@@ -110,5 +110,23 @@ class UserRepository
 
         return array_map(fn($data) => User::fromArray($data), $results);
     }
+
+    /**
+     * @return User[]
+     */
+    public function findAllByOrganizationContext(int $organizationId): array
+    {
+        $stmt = $this->pdo->prepare('
+            SELECT u.* 
+            FROM users u
+            JOIN user_organizations uo ON u.id = uo.user_id
+            WHERE uo.organization_id = :organization_id
+            ORDER BY u.name ASC
+        ');
+        $stmt->execute(['organization_id' => $organizationId]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(fn($data) => User::fromArray($data), $results);
+    }
 }
 

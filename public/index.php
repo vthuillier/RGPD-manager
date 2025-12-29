@@ -201,6 +201,9 @@ try {
             case 'annual':
                 $controller->generateAnnual();
                 break;
+            case 'aipd':
+                $controller->generateAipd();
+                break;
             default:
                 $controller->generateAnnual();
                 break;
@@ -263,6 +266,34 @@ try {
                 break;
             case 'backup':
                 $controller->backup();
+                break;
+            default:
+                $controller->list();
+                break;
+        }
+    } elseif ($page === 'aipd') {
+        $controller = new \App\Controller\AipdController();
+        switch ($action) {
+            case 'list':
+                $controller->list();
+                break;
+            case 'create':
+                $controller->create();
+                break;
+            case 'store':
+                $controller->store();
+                break;
+            case 'edit':
+                $controller->edit();
+                break;
+            case 'update':
+                $controller->update();
+                break;
+            case 'view':
+                $controller->view();
+                break;
+            case 'delete':
+                $controller->delete();
                 break;
             default:
                 $controller->list();

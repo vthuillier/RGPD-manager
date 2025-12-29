@@ -91,6 +91,10 @@
                                     class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'subprocessor') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700' ?> text-sm font-medium">
                                     Sous-traitants
                                 </a>
+                                <a href="index.php?page=aipd&action=list"
+                                    class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'aipd') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700' ?> text-sm font-medium">
+                                    AIPD
+                                </a>
                             </div>
 
                             <!-- Groupe Incidents/Droits -->
@@ -205,33 +209,49 @@
             <div class="pt-2 pb-3 space-y-1 bg-white border-t border-slate-100 px-4">
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <div class="py-2 text-xs font-bold text-slate-400 uppercase tracking-widest px-3">Données RGPD</div>
-                    <a href="index.php?page=treatment&action=dashboard" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentAction === 'dashboard') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Tableau de bord</a>
-                    <a href="index.php?page=treatment&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'treatment' && $currentAction === 'list') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Registre</a>
-                    <a href="index.php?page=subprocessor&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'subprocessor') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Sous-traitants</a>
-                    
+                    <a href="index.php?page=treatment&action=dashboard"
+                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentAction === 'dashboard') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Tableau
+                        de bord</a>
+                    <a href="index.php?page=treatment&action=list"
+                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'treatment' && $currentAction === 'list') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Registre</a>
+                    <a href="index.php?page=subprocessor&action=list"
+                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'subprocessor') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Sous-traitants</a>
+                    <a href="index.php?page=aipd&action=list"
+                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'aipd') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">AIPD</a>
+
                     <div class="py-2 text-xs font-bold text-slate-400 uppercase tracking-widest px-3 mt-4">Opérations</div>
-                    <a href="index.php?page=rights&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'rights') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Droits</a>
-                    <a href="index.php?page=breach&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'breach') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Violations</a>
+                    <a href="index.php?page=rights&action=list"
+                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'rights') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Droits</a>
+                    <a href="index.php?page=breach&action=list"
+                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'breach') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Violations</a>
 
                     <?php if ($userRole === 'org_admin' || $userRole === 'super_admin'): ?>
-                        <div class="py-2 text-xs font-bold text-slate-400 uppercase tracking-widest px-3 mt-4">Administration</div>
-                        <a href="index.php?page=user&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'user') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Utilisateurs</a>
+                        <div class="py-2 text-xs font-bold text-slate-400 uppercase tracking-widest px-3 mt-4">Administration
+                        </div>
+                        <a href="index.php?page=user&action=list"
+                            class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'user') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Utilisateurs</a>
                         <?php if ($userRole === 'super_admin'): ?>
-                            <a href="index.php?page=organization&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'organization') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Organismes</a>
-                            <a href="index.php?page=logs&action=list" class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'logs') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Audit</a>
+                            <a href="index.php?page=organization&action=list"
+                                class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'organization') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Organismes</a>
+                            <a href="index.php?page=logs&action=list"
+                                class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'logs') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Audit</a>
                         <?php endif; ?>
                     <?php endif; ?>
 
                     <div class="pt-4 pb-3 border-t border-slate-200 mt-6">
                         <div class="flex items-center px-4">
-                            <div class="text-base font-medium text-slate-800"><?= htmlspecialchars($_SESSION['user_name']) ?></div>
+                            <div class="text-base font-medium text-slate-800">
+                                <?= htmlspecialchars($_SESSION['user_name']) ?>
+                            </div>
                         </div>
                         <div class="mt-3 space-y-1">
-                            <a href="index.php?page=auth&action=logout" class="block px-4 py-2 text-base font-medium text-red-600">Déconnexion</a>
+                            <a href="index.php?page=auth&action=logout"
+                                class="block px-4 py-2 text-base font-medium text-red-600">Déconnexion</a>
                         </div>
                     </div>
                 <?php else: ?>
-                    <a href="index.php?page=auth&action=login" class="block px-4 py-2 text-base font-medium text-primary-600">Connexion</a>
+                    <a href="index.php?page=auth&action=login"
+                        class="block px-4 py-2 text-base font-medium text-primary-600">Connexion</a>
                 <?php endif; ?>
             </div>
         </div>

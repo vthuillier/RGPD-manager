@@ -14,6 +14,7 @@ class ReportService
     private SubprocessorRepository $subprocessorRepo;
     private RightsExerciseRepository $rightsRepo;
     private DataBreachRepository $breachRepo;
+    private \App\Repository\AipdRepository $aipdRepo;
 
     public function __construct()
     {
@@ -21,6 +22,7 @@ class ReportService
         $this->subprocessorRepo = new SubprocessorRepository();
         $this->rightsRepo = new RightsExerciseRepository();
         $this->breachRepo = new DataBreachRepository();
+        $this->aipdRepo = new \App\Repository\AipdRepository();
     }
 
     public function getAnnualData(int $organizationId): array
@@ -36,11 +38,25 @@ class ReportService
             'subprocessors' => [
                 'total' => count($this->subprocessorRepo->findAllByOrganizationId($organizationId)),
             ],
-
+            'aipds' => [
+                'total' => $this->aipdRepo->countByOrganizationId($organizationId),
+                'list' => $this->aipdRepo->findAllByOrganizationId($organizationId),
+            ],
             'rights' => $this->rightsRepo->getStats($organizationId),
             'breaches' => $this->breachRepo->getStats($organizationId),
             'recent_breaches' => $this->breachRepo->findAllByOrganizationId($organizationId),
         ];
     }
+    public function getAipdData(int $id, int $organizationId): array
+    {
+        $aipd = $this->aipdRepo->findByIdAndOrganizationId($id, $organizationId);
+        if (!$aipd) {
+            throw new \Exception("Analyse d'impact non trouvée.");
+        }
 
+        return [
+            'date' => date('d/m/Y'),
+            'aipd' => $aipd
+        ];
+    }
 }

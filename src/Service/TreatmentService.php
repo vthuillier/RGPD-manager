@@ -71,12 +71,14 @@ class TreatmentService
     {
         $rightsRepo = new \App\Repository\RightsExerciseRepository();
         $breachRepo = new \App\Repository\DataBreachRepository();
+        $aipdRepo = new \App\Repository\AipdRepository();
         return [
             'total' => $this->repository->countAllByOrganizationId($organizationId),
             'legal_basis' => $this->repository->countByLegalBasis($organizationId),
             'treatments' => $this->repository->findAllByOrganizationId($organizationId),
             'rights' => $rightsRepo->getStats($organizationId),
-            'breaches' => $breachRepo->getStats($organizationId)
+            'breaches' => $breachRepo->getStats($organizationId),
+            'aipd_count' => $aipdRepo->countByOrganizationId($organizationId)
         ];
     }
 
