@@ -8,7 +8,7 @@
 
     <div class="card p-8">
         <form action="index.php?page=subprocessor&action=<?= isset($subprocessor) ? 'update' : 'store' ?>" method="POST"
-            class="space-y-6">
+            enctype="multipart/form-data" class="space-y-6">
             <?php if (isset($subprocessor)): ?>
                 <input type="hidden" name="id" value="<?= $subprocessor->id ?>">
             <?php endif; ?>
@@ -41,6 +41,12 @@
                 <textarea id="guarantees" name="guarantees" rows="3" class="form-input"
                     placeholder="Décrivez les garanties de protection des données..."><?= htmlspecialchars($subprocessor->guarantees ?? '') ?></textarea>
             </div>
+
+            <?php
+            $entityType = 'subprocessor';
+            $entityId = $subprocessor->id ?? 0;
+            require __DIR__ . '/../shared/document_list.php';
+            ?>
 
             <div class="flex items-center justify-end gap-4 pt-4">
                 <a href="index.php?page=subprocessor&action=list"

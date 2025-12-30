@@ -9,11 +9,13 @@ use App\Repository\SubprocessorRepository;
 class SubprocessorController extends BaseController
 {
     private SubprocessorRepository $repository;
+    private \App\Service\DocumentService $documentService;
 
     public function __construct()
     {
         $this->ensureAuthenticated();
         $this->repository = new SubprocessorRepository();
+        $this->documentService = new \App\Service\DocumentService();
     }
 
     public function list(): void
@@ -28,7 +30,8 @@ class SubprocessorController extends BaseController
     public function create(): void
     {
         $this->render('subprocessors/form', [
-            'title' => 'Nouveau Sous-traitant'
+            'title' => 'Nouveau Sous-traitant',
+            'documents' => []
         ]);
     }
 
@@ -47,8 +50,13 @@ class SubprocessorController extends BaseController
             (int) $_SESSION['organization_id']
         );
 
-        $this->repository->save($subprocessor);
-        $this->auditLog('SUBPROCESSOR_CREATE', 'subprocessor', null, ['name' => $_POST['name']]);
+        $subId = $this->repository->save($subprocessor);
+
+        if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK) {
+            $this->documentService->upload($_FILES['document'], 'subprocessor', $subId, (int) $_SESSION['organization_id']);
+        }
+
+        $this->auditLog('SUBPROCESSOR_CREATE', 'subprocessor', $subId, ['name' => $_POST['name']]);
         $_SESSION['flash_success'] = 'Sous-traitant ajouté avec succès.';
         $this->redirect('index.php?page=subprocessor&action=list');
     }
@@ -64,9 +72,12 @@ class SubprocessorController extends BaseController
             $this->redirect('index.php?page=subprocessor&action=list');
         }
 
+        $documents = $this->documentService->getDocuments('subprocessor', $id, (int) $_SESSION['organization_id']);
+
         $this->render('subprocessors/form', [
             'subprocessor' => $subprocessor,
-            'title' => 'Modifier le Sous-traitant'
+            'title' => 'Modifier le Sous-traitant',
+            'documents' => $documents
         ]);
     }
 
@@ -88,6 +99,11 @@ class SubprocessorController extends BaseController
         $subprocessor->guarantees = $_POST['guarantees'];
 
         $this->repository->save($subprocessor);
+
+        if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK) {
+            $this->documentService->upload($_FILES['document'], 'subprocessor', $id, (int) $_SESSION['organization_id']);
+        }
+
         $this->auditLog('SUBPROCESSOR_UPDATE', 'subprocessor', $id, ['name' => $_POST['name']]);
         $_SESSION['flash_success'] = 'Sous-traitant mis à jour.';
         $this->redirect('index.php?page=subprocessor&action=list');

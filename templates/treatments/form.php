@@ -16,7 +16,7 @@
 
     <div class="card p-8">
         <form action="index.php?page=treatment&action=<?= isset($treatment->id) ? 'update' : 'store' ?>" method="POST"
-            class="space-y-6">
+            enctype="multipart/form-data" class="space-y-6">
             <?php if (isset($treatment->id)): ?>
                 <input type="hidden" name="id" value="<?= $treatment->id ?>">
             <?php endif; ?>
@@ -162,6 +162,12 @@
                     </div>
                 </div>
             </div>
+
+            <?php 
+                $entityType = 'treatment';
+                $entityId = $treatment->id ?? 0;
+                require __DIR__ . '/../shared/document_list.php';
+            ?>
 
             <div class="flex items-center justify-end gap-4 pt-4">
                 <a href="index.php?page=treatment&action=list"

@@ -299,6 +299,19 @@ try {
                 $controller->list();
                 break;
         }
+    } elseif ($page === 'document') {
+        $controller = new \App\Controller\DocumentController();
+        switch ($action) {
+            case 'upload':
+                $controller->upload();
+                break;
+            case 'delete':
+                $controller->delete();
+                break;
+            default:
+                header('Location: index.php');
+                break;
+        }
     } elseif ($page === 'logs') {
         $controller = new AuditLogController();
         switch ($action) {

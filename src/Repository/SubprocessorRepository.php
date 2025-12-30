@@ -37,16 +37,17 @@ class SubprocessorRepository
         return $data ? Subprocessor::fromArray($data) : null;
     }
 
-    public function save(Subprocessor $subprocessor): void
+    public function save(Subprocessor $subprocessor): int
     {
         if ($subprocessor->id === null) {
-            $this->insert($subprocessor);
+            return $this->insert($subprocessor);
         } else {
             $this->update($subprocessor);
+            return $subprocessor->id;
         }
     }
 
-    private function insert(Subprocessor $subprocessor): void
+    private function insert(Subprocessor $subprocessor): int
     {
         $stmt = $this->pdo->prepare(
             'INSERT INTO subprocessors (user_id, organization_id, name, service, location, guarantees)
@@ -61,6 +62,8 @@ class SubprocessorRepository
             'location' => $subprocessor->location,
             'guarantees' => $subprocessor->guarantees
         ]);
+
+        return (int) $this->pdo->lastInsertId();
     }
 
     private function update(Subprocessor $subprocessor): void

@@ -11,6 +11,7 @@ use Exception;
 class TreatmentController extends BaseController
 {
     private TreatmentService $service;
+    private \App\Service\DocumentService $documentService;
     private int $userId;
     private int $organizationId;
 
@@ -18,6 +19,7 @@ class TreatmentController extends BaseController
     {
         $this->ensureAuthenticated();
         $this->service = new TreatmentService();
+        $this->documentService = new \App\Service\DocumentService();
         $this->userId = (int) $_SESSION['user_id'];
         $this->organizationId = (int) $_SESSION['organization_id'];
     }
@@ -56,7 +58,8 @@ class TreatmentController extends BaseController
         $this->render('treatments/form', [
             'title' => 'Nouveau traitement',
             'allSubprocessors' => $allSubprocessors,
-            'selectedSubprocessors' => []
+            'selectedSubprocessors' => [],
+            'documents' => []
         ]);
     }
 
@@ -70,6 +73,10 @@ class TreatmentController extends BaseController
             $data['user_id'] = $this->userId;
             $data['organization_id'] = $this->organizationId;
             $treatmentId = $this->service->createTreatment($data);
+
+            if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK) {
+                $this->documentService->upload($_FILES['document'], 'treatment', $treatmentId, $this->organizationId);
+            }
 
             $this->auditLog('TREATMENT_CREATE', 'treatment', $treatmentId, ['name' => $data['name'] ?? '']);
 
@@ -96,11 +103,14 @@ class TreatmentController extends BaseController
         $allSubprocessors = $subprocessorRepo->findAllByOrganizationId($this->organizationId);
         $selectedSubprocessors = $this->service->getSubprocessorIds($id);
 
+        $documents = $this->documentService->getDocuments('treatment', $id, $this->organizationId);
+
         $this->render('treatments/form', [
             'title' => 'Modifier le traitement',
             'treatment' => $treatment,
             'allSubprocessors' => $allSubprocessors,
-            'selectedSubprocessors' => $selectedSubprocessors
+            'selectedSubprocessors' => $selectedSubprocessors,
+            'documents' => $documents
         ]);
 
     }
@@ -115,6 +125,10 @@ class TreatmentController extends BaseController
             $data['user_id'] = $this->userId;
             $data['organization_id'] = $this->organizationId;
             $this->service->updateTreatmentForOrganization($id, $this->organizationId, $data);
+
+            if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK) {
+                $this->documentService->upload($_FILES['document'], 'treatment', $id, $this->organizationId);
+            }
 
             $this->auditLog('TREATMENT_UPDATE', 'treatment', $id, ['name' => $data['name'] ?? '']);
 
