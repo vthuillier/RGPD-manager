@@ -43,6 +43,11 @@ class TreatmentController extends BaseController
 
         $treatments = $this->service->getTreatmentsForOrganization($this->organizationId, $filters);
 
+        // Enrichir avec le score de sécurité
+        foreach ($treatments as $treatment) {
+            $treatment->securityScore = $this->service->getSecurityScore($treatment->id, $this->organizationId);
+        }
+
         $this->render('treatments/list', [
             'title' => 'Mon Registre',
             'treatments' => $treatments,
@@ -55,10 +60,16 @@ class TreatmentController extends BaseController
         $subprocessorRepo = new \App\Repository\SubprocessorRepository();
         $allSubprocessors = $subprocessorRepo->findAllByOrganizationId($this->organizationId);
 
+        $measureRepo = new \App\Repository\SecurityMeasureRepository();
+        $allMeasures = $measureRepo->findAllForOrganization($this->organizationId);
+
         $this->render('treatments/form', [
             'title' => 'Nouveau traitement',
+            'treatment' => null,
             'allSubprocessors' => $allSubprocessors,
             'selectedSubprocessors' => [],
+            'allMeasures' => $allMeasures,
+            'selectedMeasures' => [],
             'documents' => []
         ]);
     }
@@ -103,6 +114,10 @@ class TreatmentController extends BaseController
         $allSubprocessors = $subprocessorRepo->findAllByOrganizationId($this->organizationId);
         $selectedSubprocessors = $this->service->getSubprocessorIds($id);
 
+        $measureRepo = new \App\Repository\SecurityMeasureRepository();
+        $allMeasures = $measureRepo->findAllForOrganization($this->organizationId);
+        $selectedMeasures = $this->service->getSecurityMeasureIds($id);
+
         $documents = $this->documentService->getDocuments('treatment', $id, $this->organizationId);
 
         $this->render('treatments/form', [
@@ -110,6 +125,8 @@ class TreatmentController extends BaseController
             'treatment' => $treatment,
             'allSubprocessors' => $allSubprocessors,
             'selectedSubprocessors' => $selectedSubprocessors,
+            'allMeasures' => $allMeasures,
+            'selectedMeasures' => $selectedMeasures,
             'documents' => $documents
         ]);
 

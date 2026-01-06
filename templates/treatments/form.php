@@ -9,7 +9,7 @@
             Retour au registre
         </a>
         <h1 class="text-3xl font-extrabold text-slate-900">
-            <?= isset($treatment->id) ? 'Modifier le traitement' : 'Nouveau traitement' ?>
+            <?= ($treatment?->id) ? 'Modifier le traitement' : 'Nouveau traitement' ?>
         </h1>
         <p class="text-slate-500 mt-1">Saisissez les informations relatives à votre activité de traitement.</p>
     </div>
@@ -17,7 +17,7 @@
     <div class="card p-8">
         <form action="index.php?page=treatment&action=<?= isset($treatment->id) ? 'update' : 'store' ?>" method="POST"
             enctype="multipart/form-data" class="space-y-6">
-            <?php if (isset($treatment->id)): ?>
+            <?php if ($treatment?->id): ?>
                 <input type="hidden" name="id" value="<?= $treatment->id ?>">
             <?php endif; ?>
 
@@ -25,14 +25,14 @@
 
             <div>
                 <label for="name" class="form-label">Nom du traitement</label>
-                <input type="text" id="name" name="name" value="<?= htmlspecialchars($treatment->name ?? '') ?>"
+                <input type="text" id="name" name="name" value="<?= htmlspecialchars($treatment?->name ?? '') ?>"
                     required class="form-input" placeholder="Ex: Gestion de la paie, CRM Clients...">
             </div>
 
             <div>
                 <label for="purpose" class="form-label">Finalité principale</label>
                 <textarea id="purpose" name="purpose" rows="3" required class="form-input"
-                    placeholder="Décrivez l'objectif du traitement..."><?= htmlspecialchars($treatment->purpose ?? '') ?></textarea>
+                    placeholder="Décrivez l'objectif du traitement..."><?= htmlspecialchars($treatment?->purpose ?? '') ?></textarea>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -52,7 +52,7 @@
                 <div>
                     <label for="data_categories" class="form-label">Catégories de données</label>
                     <input type="text" id="data_categories" name="data_categories"
-                        value="<?= htmlspecialchars($treatment->dataCategories ?? '') ?>" required class="form-input"
+                        value="<?= htmlspecialchars($treatment?->dataCategories ?? '') ?>" required class="form-input"
                         placeholder="Ex: État civil, Identité...">
                 </div>
             </div>
@@ -61,13 +61,13 @@
                 <div class="md:col-span-2">
                     <label for="retention_period" class="form-label">Règle de conservation</label>
                     <input type="text" id="retention_period" name="retention_period"
-                        value="<?= htmlspecialchars($treatment->retentionPeriod ?? '') ?>" required class="form-input"
+                        value="<?= htmlspecialchars($treatment?->retentionPeriod ?? '') ?>" required class="form-input"
                         placeholder="Ex: 5 ans après la rupture du contrat">
                 </div>
                 <div>
                     <label for="retention_years" class="form-label">Alerte (années)</label>
                     <input type="number" id="retention_years" name="retention_years" min="1" max="99"
-                        value="<?= htmlspecialchars($treatment->retentionYears ?? '5') ?>" required class="form-input">
+                        value="<?= htmlspecialchars((string) ($treatment?->retentionYears ?? '5')) ?>" required class="form-input">
                 </div>
             </div>
 
@@ -102,6 +102,59 @@
                 <?php endif; ?>
             </div>
 
+            <div class="bg-indigo-50 -mx-8 px-8 py-6 border-b border-indigo-100">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        <h3 class="font-bold text-indigo-900 uppercase tracking-wider text-xs">Mesures de Sécurité (TOMs - Art. 32)</h3>
+                    </div>
+                    <div class="flex items-center gap-2 bg-white px-3 py-1 rounded-full border border-indigo-200 shadow-sm">
+                        <span class="text-xs font-semibold text-indigo-600 uppercase">Score :</span>
+                        <span id="security-score" class="text-sm font-bold text-indigo-700">0%</span>
+                    </div>
+                </div>
+                
+                <p class="text-sm text-indigo-700/70 mb-6">Sélectionnez les mesures techniques et organisationnelles appliquées à ce traitement :</p>
+
+                <?php 
+                $groupedMeasures = [];
+                foreach ($allMeasures as $measure) {
+                    $groupedMeasures[$measure->category][] = $measure;
+                }
+                ?>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <?php foreach ($groupedMeasures as $category => $measures): ?>
+                        <div class="space-y-3">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                <?= htmlspecialchars($category) ?>
+                            </h4>
+                            <div class="space-y-2">
+                                <?php foreach ($measures as $m): ?>
+                                    <label class="flex items-start group cursor-pointer">
+                                        <div class="flex items-center h-5">
+                                            <input type="checkbox" name="security_measures[]" value="<?= $m->id ?>" 
+                                                data-weight="<?= $m->weight ?>"
+                                                <?= in_array($m->id, $selectedMeasures) ? 'checked' : '' ?>
+                                                class="measure-checkbox w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <span class="block font-medium text-slate-700 group-hover:text-indigo-900 transition-colors"><?= htmlspecialchars($m->name) ?></span>
+                                            <?php if ($m->description): ?>
+                                                <p class="text-[11px] text-slate-500 leading-tight"><?= htmlspecialchars($m->description) ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
             <div class="bg-slate-50 -mx-8 px-8 py-6 border-b border-slate-200">
                 <div class="flex items-center gap-2 mb-4">
                     <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,7 +170,7 @@
                     <label class="relative flex items-start cursor-pointer group">
                         <div class="flex items-center h-5">
                             <input type="checkbox" id="has_sensitive_data" name="has_sensitive_data" value="1"
-                                <?= ($treatment->hasSensitiveData ?? false) ? 'checked' : '' ?>
+                                <?= ($treatment?->hasSensitiveData ?? false) ? 'checked' : '' ?>
                                 class="w-4 h-4 text-primary-600 border-slate-300 rounded focus:ring-primary-500">
                         </div>
                         <div class="ml-3 text-sm">
@@ -132,7 +185,7 @@
                     <label class="relative flex items-start cursor-pointer group">
                         <div class="flex items-center h-5">
                             <input type="checkbox" id="is_large_scale" name="is_large_scale" value="1"
-                                <?= ($treatment->isLargeScale ?? false) ? 'checked' : '' ?>
+                                <?= ($treatment?->isLargeScale ?? false) ? 'checked' : '' ?>
                                 class="w-4 h-4 text-primary-600 border-slate-300 rounded focus:ring-primary-500">
                         </div>
                         <div class="ml-3 text-sm">
@@ -165,7 +218,7 @@
 
             <?php 
                 $entityType = 'treatment';
-                $entityId = $treatment->id ?? 0;
+                $entityId = $treatment?->id ?? 0;
                 require __DIR__ . '/../shared/document_list.php';
             ?>
 
@@ -174,7 +227,7 @@
                     class="text-sm font-medium text-slate-500 hover:text-slate-700">Retour</a>
                 <?php if (($_SESSION['user_role'] ?? '') !== 'guest'): ?>
                     <button type="submit" class="btn btn-primary px-8 py-2.5">
-                        <?= isset($treatment->id) ? 'Mettre à jour' : 'Enregistrer le traitement' ?>
+                        <?= $treatment?->id ? 'Mettre à jour' : 'Enregistrer le traitement' ?>
                     </button>
                 <?php else: ?>
                     <span class="text-sm italic text-amber-600 font-medium">Lecture seule</span>
@@ -201,4 +254,33 @@
     sensBox.addEventListener('change', checkAipd);
     largeBox.addEventListener('change', checkAipd);
     checkAipd();
+
+    // Score de sécurité
+    const measures = document.querySelectorAll('.measure-checkbox');
+    const scoreDisplay = document.getElementById('security-score');
+
+    function calculateScore() {
+        let totalWeight = 0;
+        let appliedWeight = 0;
+
+        measures.forEach(m => {
+            const weight = parseInt(m.getAttribute('data-weight') || '1');
+            totalWeight += weight;
+            if (m.checked) {
+                appliedWeight += weight;
+            }
+        });
+
+        const score = totalWeight > 0 ? Math.round((appliedWeight / totalWeight) * 100) : 0;
+        scoreDisplay.textContent = score + '%';
+        
+        // Color coding
+        scoreDisplay.classList.remove('text-red-600', 'text-amber-600', 'text-indigo-700', 'text-green-600');
+        if (score < 40) scoreDisplay.classList.add('text-red-600');
+        else if (score < 75) scoreDisplay.classList.add('text-amber-600');
+        else scoreDisplay.classList.add('text-green-600');
+    }
+
+    measures.forEach(m => m.addEventListener('change', calculateScore));
+    calculateScore();
 </script>

@@ -32,7 +32,12 @@ class AuditLogService
             $organizationId ? (int) $organizationId : null
         );
 
-        $this->repository->save($log);
+        try {
+            $this->repository->save($log);
+        } catch (\Exception $e) {
+            // Log to error log but don't crash the app
+            error_log("Failed to save audit log: " . $e->getMessage());
+        }
     }
 
     /**

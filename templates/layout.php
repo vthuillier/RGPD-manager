@@ -127,6 +127,9 @@
                                         class="absolute top-full left-0 w-48 bg-white border border-slate-200 shadow-xl rounded-b-lg py-2 hidden group-hover:block z-50 animate-fade-in">
                                         <a href="index.php?page=user&action=list"
                                             class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 <?= $currentPage === 'user' ? 'bg-slate-50 font-bold text-primary-600' : '' ?>">Utilisateurs</a>
+                                        <a href="index.php?page=security_measure&action=list"
+                                            class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 <?= $currentPage === 'security_measure' ? 'bg-slate-50 font-bold text-primary-600' : '' ?>">Mesures
+                                            de sécurité</a>
                                         <a href="index.php?page=settings&action=notifications"
                                             class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 <?= $currentPage === 'settings' ? 'bg-slate-50 font-bold text-primary-600' : '' ?>">Notifications</a>
                                         <?php if ($userRole === 'super_admin'): ?>

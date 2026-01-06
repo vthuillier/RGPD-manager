@@ -95,12 +95,22 @@
                             Finalité principale</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Base
                             Légale</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            Sécurité</th>
                         <th class="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">
                             Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-slate-200">
-                    <?php foreach ($treatments as $treatment): ?>
+                    <?php foreach ($treatments as $treatment):
+                        $scoreClass = 'text-slate-500 bg-slate-100';
+                        if ($treatment->securityScore < 40)
+                            $scoreClass = 'text-red-700 bg-red-100 border-red-200';
+                        elseif ($treatment->securityScore < 75)
+                            $scoreClass = 'text-amber-700 bg-amber-100 border-amber-200';
+                        else
+                            $scoreClass = 'text-green-700 bg-green-100 border-green-200';
+                        ?>
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center gap-2">
@@ -122,6 +132,12 @@
                                 <span
                                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-700 border border-primary-100">
                                     <?= htmlspecialchars($treatment->legalBasis) ?>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border <?= $scoreClass ?>">
+                                    <?= $treatment->securityScore ?>%
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

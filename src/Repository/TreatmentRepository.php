@@ -184,4 +184,24 @@ class TreatmentRepository
             ]);
         }
     }
+    public function linkSecurityMeasures(int $treatmentId, array $measureIds): void
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM treatment_security_measures WHERE treatment_id = :treatment_id');
+        $stmt->execute(['treatment_id' => $treatmentId]);
+
+        if (empty($measureIds))
+            return;
+
+        $stmt = $this->pdo->prepare('
+            INSERT INTO treatment_security_measures (treatment_id, measure_id)
+            VALUES (:treatment_id, :measure_id)
+        ');
+
+        foreach ($measureIds as $mid) {
+            $stmt->execute([
+                'treatment_id' => $treatmentId,
+                'measure_id' => (int) $mid
+            ]);
+        }
+    }
 }

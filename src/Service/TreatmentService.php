@@ -38,6 +38,10 @@ class TreatmentService
             $this->repository->linkSubprocessors($id, $data['subprocessors'], (int) $data['organization_id']);
         }
 
+        if (isset($data['security_measures']) && is_array($data['security_measures'])) {
+            $this->repository->linkSecurityMeasures($id, $data['security_measures']);
+        }
+
         return $id;
     }
 
@@ -54,11 +58,37 @@ class TreatmentService
         } else {
             $this->repository->linkSubprocessors($id, [], $organizationId);
         }
+
+        if (isset($data['security_measures']) && is_array($data['security_measures'])) {
+            $this->repository->linkSecurityMeasures($id, $data['security_measures']);
+        } else {
+            $this->repository->linkSecurityMeasures($id, []);
+        }
     }
 
     public function getSubprocessorIds(int $treatmentId): array
     {
         return $this->repository->getSubprocessorIds($treatmentId);
+    }
+
+    public function getSecurityMeasureIds(int $treatmentId): array
+    {
+        $measureRepo = new \App\Repository\SecurityMeasureRepository();
+        return $measureRepo->getMeasureIdsByTreatmentId($treatmentId);
+    }
+
+    public function getSecurityScore(int $treatmentId, int $organizationId): int
+    {
+        $measureRepo = new \App\Repository\SecurityMeasureRepository();
+        $measures = $measureRepo->findAllByTreatmentId($treatmentId);
+        $allMeasures = $measureRepo->findAllForOrganization($organizationId);
+
+        $totalWeight = array_reduce($allMeasures, fn($sum, $m) => $sum + $m->weight, 0);
+        $appliedWeight = array_reduce($measures, fn($sum, $m) => $sum + $m->weight, 0);
+
+        if ($totalWeight === 0)
+            return 0;
+        return (int) round(($appliedWeight / $totalWeight) * 100);
     }
 
 
