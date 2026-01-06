@@ -73,7 +73,10 @@
                         <img src="assets/logo_texte.png" alt="RGPD Manager" class="h-20 w-auto">
                     </a>
                     <div class="hidden lg:ml-10 lg:flex lg:space-x-8">
-                        <?php if (isset($_SESSION['user_id'])): ?>
+                        <?php
+                        $currentPage = $_GET['page'] ?? 'treatment';
+                        if (isset($_SESSION['user_id']) && !in_array($currentPage, ['setup', 'upgrade'])):
+                            ?>
                             <?php
                             $currentPage = $_GET['page'] ?? 'treatment';
                             $currentAction = $_GET['action'] ?? '';
@@ -150,7 +153,7 @@
                 </div>
 
                 <div class="flex items-center">
-                    <?php if (isset($_SESSION['user_id'])): ?>
+                    <?php if (isset($_SESSION['user_id']) && !in_array($currentPage, ['setup', 'upgrade'])): ?>
                         <div class="hidden md:flex items-center space-x-6">
                             <!-- Context Switcher -->
                             <?php
@@ -218,7 +221,7 @@
         <!-- Mobile menu -->
         <div class="hidden lg:hidden" id="mobile-menu">
             <div class="pt-2 pb-3 space-y-1 bg-white border-t border-slate-100 px-4">
-                <?php if (isset($_SESSION['user_id'])): ?>
+                <?php if (isset($_SESSION['user_id']) && !in_array($currentPage, ['setup', 'upgrade'])): ?>
                     <div class="py-2 text-xs font-bold text-slate-400 uppercase tracking-widest px-3">Données RGPD</div>
                     <a href="index.php?page=treatment&action=dashboard"
                         class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentAction === 'dashboard') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Tableau

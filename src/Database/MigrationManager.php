@@ -17,6 +17,13 @@ class MigrationManager
         $this->migrationsPath = __DIR__ . '/../../migrations';
     }
 
+    public function hasAppliedMigrations(): bool
+    {
+        $this->ensureMigrationsTable();
+        $applied = $this->getAppliedMigrations();
+        return count($applied) > 0;
+    }
+
     public function getPendingMigrations(): array
     {
         $this->ensureMigrationsTable();

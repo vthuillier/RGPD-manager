@@ -33,17 +33,23 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Migration Check
+// Migration & Installation Logic
 $page = $_GET['page'] ?? null;
 $action = $_GET['action'] ?? null;
 
 try {
     $migrationManager = new \App\Database\MigrationManager(\App\Database\Connection::get());
-    $pendingMigrations = $migrationManager->getPendingMigrations();
 
-    if (!empty($pendingMigrations) && $page !== 'upgrade') {
-        header('Location: index.php?page=upgrade');
-        exit;
+    if (!$migrationManager->hasAppliedMigrations()) {
+        // Fresh Install: Apply all migrations silently
+        $migrationManager->migrate();
+    } else {
+        // Upgrade: Check for pending migrations
+        $pendingMigrations = $migrationManager->getPendingMigrations();
+        if (!empty($pendingMigrations) && $page !== 'upgrade') {
+            header('Location: index.php?page=upgrade');
+            exit;
+        }
     }
 } catch (\Exception $e) {
     // DB might not be ready, SetupController will handle it
@@ -54,7 +60,7 @@ $isInstalled = \App\Controller\SetupController::isInstalled();
 $page = $_GET['page'] ?? null;
 $action = $_GET['action'] ?? null;
 
-if (!$isInstalled && $page !== 'setup') {
+if (!$isInstalled && $page !== 'setup' && $page !== 'upgrade') {
     header('Location: index.php?page=setup');
     exit;
 }
