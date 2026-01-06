@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -10,7 +11,6 @@ class SubprocessorController extends BaseController
 {
     private SubprocessorRepository $repository;
     private \App\Service\DocumentService $documentService;
-
     public function __construct()
     {
         $this->ensureAuthenticated();
@@ -39,19 +39,8 @@ class SubprocessorController extends BaseController
     {
         $this->validateCsrf();
         $this->validateNotGuest();
-
-        $subprocessor = new Subprocessor(
-            null,
-            (int) $_SESSION['user_id'],
-            $_POST['name'],
-            $_POST['service'],
-            $_POST['location'],
-            $_POST['guarantees'],
-            (int) $_SESSION['organization_id']
-        );
-
+        $subprocessor = new Subprocessor(null, (int) $_SESSION['user_id'], $_POST['name'], $_POST['service'], $_POST['location'], $_POST['guarantees'], (int) $_SESSION['organization_id']);
         $subId = $this->repository->save($subprocessor);
-
         if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK) {
             $this->documentService->upload($_FILES['document'], 'subprocessor', $subId, (int) $_SESSION['organization_id']);
         }
@@ -66,14 +55,12 @@ class SubprocessorController extends BaseController
     {
         $id = (int) ($_GET['id'] ?? 0);
         $subprocessor = $this->repository->findByIdAndOrganizationId($id, (int) $_SESSION['organization_id']);
-
         if (!$subprocessor) {
             $_SESSION['flash_error'] = 'Sous-traitant non trouvé.';
             $this->redirect('index.php?page=subprocessor&action=list');
         }
 
         $documents = $this->documentService->getDocuments('subprocessor', $id, (int) $_SESSION['organization_id']);
-
         $this->render('subprocessors/form', [
             'subprocessor' => $subprocessor,
             'title' => 'Modifier le Sous-traitant',
@@ -85,10 +72,8 @@ class SubprocessorController extends BaseController
     {
         $this->validateCsrf();
         $this->validateNotGuest();
-
         $id = (int) ($_POST['id'] ?? 0);
         $subprocessor = $this->repository->findByIdAndOrganizationId($id, (int) $_SESSION['organization_id']);
-
         if (!$subprocessor) {
             die('Subprocessor not found');
         }
@@ -97,9 +82,7 @@ class SubprocessorController extends BaseController
         $subprocessor->service = $_POST['service'];
         $subprocessor->location = $_POST['location'];
         $subprocessor->guarantees = $_POST['guarantees'];
-
         $this->repository->save($subprocessor);
-
         if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK) {
             $this->documentService->upload($_FILES['document'], 'subprocessor', $id, (int) $_SESSION['organization_id']);
         }
@@ -114,13 +97,10 @@ class SubprocessorController extends BaseController
     {
         $this->validateCsrf();
         $this->validateNotGuest();
-
         $id = (int) ($_POST['id'] ?? 0);
         $this->repository->deleteAndOrganizationId($id, (int) $_SESSION['organization_id']);
         $this->auditLog('SUBPROCESSOR_DELETE', 'subprocessor', $id);
-
         $_SESSION['flash_success'] = 'Sous-traitant supprimé.';
         $this->redirect('index.php?page=subprocessor&action=list');
     }
 }
-

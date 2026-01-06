@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Router;
@@ -6,7 +7,6 @@ namespace App\Router;
 class Router
 {
     private array $routes = [];
-
     public function get(string $path, callable $handle): void
     {
         $this->routes['GET'][$path] = $handle;
@@ -21,7 +21,6 @@ class Router
     {
         $method = $_SERVER['REQUEST_METHOD'];
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
         if (isset($this->routes[$method][$uri])) {
             $handle = $this->routes[$method][$uri];
             $handle();

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<phpcs name="RGPD Manager Ruleset">
+    <description>Règles de codage PSR-12 pour RGPD Manager.</description>
+
+    <!-- Dossiers à analyser -->
+    <file>src</file>
+    <file>public</file>
+    <file>config</file>
+
+    <!-- Exclure les dépendances -->
+    <exclude-pattern>vendor/*</exclude-pattern>
+
+    <!-- Utiliser le standard PSR-12 -->
+    <rule ref="PSR12"/>
+
+    <!-- Options d'affichage -->
+    <arg value="sp"/> <!-- s: show sniff names, p: show progress -->
+    <arg name="colors"/>
+</phpcs>

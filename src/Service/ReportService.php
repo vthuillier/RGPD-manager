@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Service;
@@ -15,7 +16,6 @@ class ReportService
     private RightsExerciseRepository $rightsRepo;
     private DataBreachRepository $breachRepo;
     private \App\Repository\AipdRepository $aipdRepo;
-
     public function __construct()
     {
         $this->treatmentRepo = new TreatmentRepository();

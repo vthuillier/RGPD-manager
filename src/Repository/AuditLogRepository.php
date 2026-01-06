@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Repository;
@@ -10,7 +11,6 @@ use PDO;
 class AuditLogRepository
 {
     private PDO $pdo;
-
     public function __construct()
     {
         $this->pdo = Connection::get();
@@ -18,11 +18,8 @@ class AuditLogRepository
 
     public function save(AuditLog $log): void
     {
-        $stmt = $this->pdo->prepare(
-            'INSERT INTO audit_logs (user_id, organization_id, action, entity_type, entity_id, details, ip_address)
-            VALUES (:user_id, :organization_id, :action, :entity_type, :entity_id, :details, :ip_address)'
-        );
-
+        $stmt = $this->pdo->prepare('INSERT INTO audit_logs (user_id, organization_id, action, entity_type, entity_id, details, ip_address)
+            VALUES (:user_id, :organization_id, :action, :entity_type, :entity_id, :details, :ip_address)');
         $stmt->execute([
             'user_id' => $log->userId,
             'organization_id' => $log->organizationId,
@@ -51,8 +48,6 @@ class AuditLogRepository
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         return array_map(fn($data) => AuditLog::fromArray($data), $results);
     }
-
 }

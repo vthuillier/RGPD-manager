@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Service;
@@ -12,7 +13,6 @@ use Exception;
 class MailService
 {
     private NotificationRepository $notificationRepo;
-
     public function __construct()
     {
         $this->notificationRepo = new NotificationRepository();
@@ -43,28 +43,25 @@ class MailService
     {
         // Toujours loguer l'intention d'envoi pour le debug
         $this->logToMailLog($settings, $to, $subject, $body);
-
-        // Si le SMTP n'est pas configuré, on s'arrête au log
+// Si le SMTP n'est pas configuré, on s'arrête au log
         if (empty($settings->smtpHost)) {
             return true;
         }
 
         // Augmenter le temps d'exécution pour le SMTP (éviter le timeout 30s)
         set_time_limit(60);
-
         $mail = new PHPMailer(true);
-
         try {
-            // Server settings
+        // Server settings
             $mail->isSMTP();
-            $mail->SMTPDebug = 0; // Disable debug output for production
+            $mail->SMTPDebug = 0;
+        // Disable debug output for production
 
             $mail->Host = $settings->smtpHost;
             $mail->SMTPAuth = true;
             $mail->Username = $settings->smtpUser;
             $mail->Password = $settings->smtpPass;
-
-            // Auto-correction du mode de chiffrement selon le port
+        // Auto-correction du mode de chiffrement selon le port
             if ($settings->smtpPort == 465) {
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
             } else {
@@ -74,7 +71,6 @@ class MailService
             $mail->Port = $settings->smtpPort;
             $mail->Timeout = 10;
             $mail->CharSet = 'UTF-8';
-
             $mail->SMTPOptions = [
                 'ssl' => [
                     'verify_peer' => false,
@@ -82,18 +78,12 @@ class MailService
                     'allow_self_signed' => true
                 ]
             ];
-
-            // Recipients
-            $mail->setFrom(
-                $settings->fromEmail ?? 'noreply@rgpd-manager.local',
-                $settings->fromName ?? 'RGPD Manager'
-            );
+        // Recipients
+            $mail->setFrom($settings->fromEmail ?? 'noreply@rgpd-manager.local', $settings->fromName ?? 'RGPD Manager');
             $mail->addAddress($to);
-
-            // Content
+        // Content
             $mail->isHTML(true);
             $mail->Subject = $subject;
-
             if ($isHtml) {
                 $mail->Body = $body;
                 $mail->AltBody = strip_tags(str_replace(['<br>', '<br/>', '</p>'], "\n", $body));
@@ -166,26 +156,9 @@ class MailService
             mkdir(dirname($logPath), 0777, true);
         }
 
-        $smtpInfo = $settings->smtpHost ? sprintf(
-            "SMTP[%s:%d | User:%s | Enc:%s]",
-            $settings->smtpHost,
-            $settings->smtpPort,
-            $settings->smtpUser,
-            $settings->smtpEncryption
-        ) : "INTERNAL_LOG_ONLY";
-
+        $smtpInfo = $settings->smtpHost ? sprintf("SMTP[%s:%d | User:%s | Enc:%s]", $settings->smtpHost, $settings->smtpPort, $settings->smtpUser, $settings->smtpEncryption) : "INTERNAL_LOG_ONLY";
         $from = sprintf("%s <%s>", $settings->fromName ?? 'RGPD Manager', $settings->fromEmail ?? 'noreply@rgpd-manager.local');
-
-        $content = sprintf(
-            "[%s] %s\nFrom: %s\nTo: %s\nSubject: %s\nBody: %s\n-------------------\n",
-            date('Y-m-d H:i:s'),
-            $smtpInfo,
-            $from,
-            $to,
-            $subject,
-            $body
-        );
-
+        $content = sprintf("[%s] %s\nFrom: %s\nTo: %s\nSubject: %s\nBody: %s\n-------------------\n", date('Y-m-d H:i:s'), $smtpInfo, $from, $to, $subject, $body);
         file_put_contents($logPath, $content, FILE_APPEND);
     }
 }

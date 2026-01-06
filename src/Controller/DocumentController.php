@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -10,7 +11,6 @@ class DocumentController extends BaseController
 {
     private DocumentService $service;
     private int $organizationId;
-
     public function __construct()
     {
         $this->ensureAuthenticated();
@@ -22,11 +22,9 @@ class DocumentController extends BaseController
     {
         $this->validateCsrf();
         $this->validateNotGuest();
-
         $entityType = $_POST['entity_type'] ?? '';
         $entityId = (int) ($_POST['entity_id'] ?? 0);
         $redirect = $_POST['redirect'] ?? 'index.php';
-
         if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK) {
             try {
                 $this->service->upload($_FILES['document'], $entityType, $entityId, $this->organizationId);
@@ -44,10 +42,8 @@ class DocumentController extends BaseController
     {
         $this->validateCsrf();
         $this->validateNotGuest();
-
         $id = (int) ($_POST['id'] ?? 0);
         $redirect = $_POST['redirect'] ?? 'index.php';
-
         try {
             $this->service->deleteDocument($id, $this->organizationId);
             $this->auditLog('DOCUMENT_DELETE', 'document', $id);

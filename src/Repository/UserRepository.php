@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Repository;
@@ -10,7 +11,6 @@ use PDO;
 class UserRepository
 {
     private PDO $pdo;
-
     public function __construct()
     {
         $this->pdo = Connection::get();
@@ -21,7 +21,6 @@ class UserRepository
         $stmt = $this->pdo->prepare('SELECT * FROM users WHERE id = :id');
         $stmt->execute(['id' => $id]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
         return $data ? User::fromArray($data) : null;
     }
 
@@ -30,25 +29,20 @@ class UserRepository
         $stmt = $this->pdo->prepare('SELECT * FROM users WHERE email = :email');
         $stmt->execute(['email' => $email]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
         return $data ? User::fromArray($data) : null;
     }
 
     public function save(User $user): int
     {
         if ($user->id === null) {
-            $stmt = $this->pdo->prepare(
-                'INSERT INTO users (email, password, name, role, organization_id, reset_token, reset_expires_at) 
+            $stmt = $this->pdo->prepare('INSERT INTO users (email, password, name, role, organization_id, reset_token, reset_expires_at) 
                  VALUES (:email, :password, :name, :role, :organization_id, :reset_token, :reset_expires_at)
-                 RETURNING id'
-            );
+                 RETURNING id');
         } else {
-            $stmt = $this->pdo->prepare(
-                'UPDATE users SET email = :email, password = :password, name = :name, role = :role, 
+            $stmt = $this->pdo->prepare('UPDATE users SET email = :email, password = :password, name = :name, role = :role, 
                                 organization_id = :organization_id, reset_token = :reset_token, 
                                 reset_expires_at = :reset_expires_at 
-                 WHERE id = :id'
-            );
+                 WHERE id = :id');
             $stmt->bindValue(':id', $user->id, PDO::PARAM_INT);
         }
 
@@ -59,9 +53,7 @@ class UserRepository
         $stmt->bindValue(':organization_id', $user->organizationId, PDO::PARAM_INT);
         $stmt->bindValue(':reset_token', $user->resetToken);
         $stmt->bindValue(':reset_expires_at', $user->resetExpiresAt);
-
         $stmt->execute();
-
         if ($user->id === null) {
             return (int) $stmt->fetchColumn();
         }
@@ -73,7 +65,6 @@ class UserRepository
         $stmt = $this->pdo->prepare('SELECT * FROM users WHERE reset_token = :token AND reset_expires_at > CURRENT_TIMESTAMP');
         $stmt->execute(['token' => $token]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
         return $data ? User::fromArray($data) : null;
     }
 
@@ -85,7 +76,6 @@ class UserRepository
         $stmt = $this->pdo->prepare('SELECT * FROM users WHERE organization_id = :organization_id ORDER BY name ASC');
         $stmt->execute(['organization_id' => $organizationId]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         return array_map(fn($data) => User::fromArray($data), $results);
     }
 
@@ -100,17 +90,13 @@ class UserRepository
 
     public function addOrganization(int $userId, int $organizationId): void
     {
-        $stmt = $this->pdo->prepare(
-            'INSERT INTO user_organizations (user_id, organization_id) VALUES (:user_id, :organization_id) ON CONFLICT DO NOTHING'
-        );
+        $stmt = $this->pdo->prepare('INSERT INTO user_organizations (user_id, organization_id) VALUES (:user_id, :organization_id) ON CONFLICT DO NOTHING');
         $stmt->execute(['user_id' => $userId, 'organization_id' => $organizationId]);
     }
 
     public function removeOrganization(int $userId, int $organizationId): void
     {
-        $stmt = $this->pdo->prepare(
-            'DELETE FROM user_organizations WHERE user_id = :user_id AND organization_id = :organization_id'
-        );
+        $stmt = $this->pdo->prepare('DELETE FROM user_organizations WHERE user_id = :user_id AND organization_id = :organization_id');
         $stmt->execute(['user_id' => $userId, 'organization_id' => $organizationId]);
     }
 
@@ -127,7 +113,6 @@ class UserRepository
     {
         $stmt = $this->pdo->query('SELECT * FROM users ORDER BY name ASC');
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         return array_map(fn($data) => User::fromArray($data), $results);
     }
 
@@ -145,8 +130,6 @@ class UserRepository
         ');
         $stmt->execute(['organization_id' => $organizationId]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         return array_map(fn($data) => User::fromArray($data), $results);
     }
 }
-

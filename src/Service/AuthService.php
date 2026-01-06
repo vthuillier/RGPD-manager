@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Service;
@@ -10,7 +11,6 @@ use InvalidArgumentException;
 class AuthService
 {
     private UserRepository $repository;
-
     public function __construct()
     {
         $this->repository = new UserRepository();
@@ -34,18 +34,8 @@ class AuthService
         $orgRepo = new \App\Repository\OrganizationRepository();
         $orgName = $data['organization_name'] ?? "Organisation de " . $data['name'];
         $orgId = $orgRepo->save(new \App\Entity\Organization(null, $orgName));
-
         $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
-
-        $user = new User(
-            null,
-            $data['email'],
-            $hashedPassword,
-            $data['name'],
-            'user',
-            $orgId
-        );
-
+        $user = new User(null, $data['email'], $hashedPassword, $data['name'], 'user', $orgId);
         $this->repository->save($user);
     }
 
@@ -53,7 +43,6 @@ class AuthService
     public function login(string $email, string $password): ?User
     {
         $user = $this->repository->findByEmail($email);
-
         if ($user && password_verify($password, $user->password)) {
             return $user;
         }

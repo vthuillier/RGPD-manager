@@ -23,5 +23,9 @@
     "config": {
         "optimize-autoloader": true,
         "sort-packages": true
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.12",
+        "squizlabs/php_codesniffer": "^3.11"
     }
 }

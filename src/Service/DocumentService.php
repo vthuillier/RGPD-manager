@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Service;
@@ -11,11 +12,10 @@ class DocumentService
 {
     private DocumentRepository $repository;
     private string $uploadDir;
-
     public function __construct()
     {
         $this->repository = new DocumentRepository();
-        // Le dossier public/uploads doit exister et être accessible en écriture
+    // Le dossier public/uploads doit exister et être accessible en écriture
         $this->uploadDir = __DIR__ . '/../../public/uploads/';
     }
 
@@ -31,7 +31,6 @@ class DocumentService
         // Sécurité de base sur les types de fichiers (extensibilité possible)
         $allowedExtensions = ['pdf', 'docx', 'jpg', 'png', 'txt', 'xlsx'];
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-
         if (!in_array($ext, $allowedExtensions)) {
             throw new Exception("Type de fichier non autorisé. Autorisés : " . implode(', ', $allowedExtensions));
         }
@@ -40,29 +39,17 @@ class DocumentService
         $newFileName = bin2hex(random_bytes(16)) . '.' . $ext;
         $relativeDir = $organizationId . '/' . $entityType;
         $targetDir = $this->uploadDir . $relativeDir;
-
         if (!is_dir($targetDir)) {
             mkdir($targetDir, 0777, true);
         }
 
         $targetPath = $targetDir . '/' . $newFileName;
         $relativeFilePath = 'uploads/' . $relativeDir . '/' . $newFileName;
-
         if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
             throw new Exception("Impossible de déplacer le fichier vers sa destination.");
         }
 
-        $document = new Document(
-            null,
-            $organizationId,
-            $entityType,
-            $entityId,
-            $relativeFilePath,
-            $file['name'],
-            $file['type'],
-            (int) $file['size']
-        );
-
+        $document = new Document(null, $organizationId, $entityType, $entityId, $relativeFilePath, $file['name'], $file['type'], (int) $file['size']);
         return $this->repository->save($document);
     }
 

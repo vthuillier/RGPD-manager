@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -12,7 +13,6 @@ class RightsExerciseController extends BaseController
     private RightsExerciseRepository $repository;
     private int $userId;
     private int $organizationId;
-
     public function __construct()
     {
         $this->ensureAuthenticated();
@@ -41,14 +41,11 @@ class RightsExerciseController extends BaseController
     {
         $this->validateCsrf();
         $this->validateNotGuest();
-
         $exercise = RightsExercise::fromArray($_POST);
         $exercise->userId = $this->userId;
         $exercise->organizationId = $this->organizationId;
-
         $this->repository->save($exercise);
         $this->auditLog('RIGHTS_EXERCISE_CREATE', 'rights_exercise', null, ['applicant' => $exercise->applicantName]);
-
         $_SESSION['flash_success'] = 'Demande enregistrée avec succès.';
         $this->redirect('index.php?page=rights&action=list');
     }
@@ -57,7 +54,6 @@ class RightsExerciseController extends BaseController
     {
         $id = (int) ($_GET['id'] ?? 0);
         $exercise = $this->repository->findByIdAndOrganizationId($id, $this->organizationId);
-
         if (!$exercise) {
             $_SESSION['flash_error'] = 'Dossier non trouvé.';
             $this->redirect('index.php?page=rights&action=list');
@@ -75,7 +71,6 @@ class RightsExerciseController extends BaseController
         $this->validateNotGuest();
         $id = (int) ($_POST['id'] ?? 0);
         $exercise = $this->repository->findByIdAndOrganizationId($id, $this->organizationId);
-
         if (!$exercise) {
             die('Dossier non trouvé');
         }
@@ -84,10 +79,8 @@ class RightsExerciseController extends BaseController
         $updatedExercise->id = $id;
         $updatedExercise->userId = $this->userId;
         $updatedExercise->organizationId = $this->organizationId;
-
         $this->repository->save($updatedExercise);
         $this->auditLog('RIGHTS_EXERCISE_UPDATE', 'rights_exercise', $id, ['applicant' => $updatedExercise->applicantName]);
-
         $_SESSION['flash_success'] = 'Dossier mis à jour.';
         $this->redirect('index.php?page=rights&action=list');
     }
@@ -99,9 +92,7 @@ class RightsExerciseController extends BaseController
         $id = (int) ($_POST['id'] ?? 0);
         $this->repository->deleteAndOrganizationId($id, $this->organizationId);
         $this->auditLog('RIGHTS_EXERCISE_DELETE', 'rights_exercise', $id);
-
         $_SESSION['flash_success'] = 'Dossier supprimé.';
         $this->redirect('index.php?page=rights&action=list');
     }
 }
-

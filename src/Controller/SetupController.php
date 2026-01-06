@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -14,7 +15,6 @@ class SetupController extends BaseController
 {
     private OrganizationRepository $orgRepo;
     private UserRepository $userRepo;
-
     public function __construct()
     {
         $this->orgRepo = new OrganizationRepository();
@@ -54,35 +54,23 @@ class SetupController extends BaseController
             $adminName = $_POST['admin_name'] ?? '';
             $adminEmail = $_POST['admin_email'] ?? '';
             $adminPassword = $_POST['admin_password'] ?? '';
-
             if (!$orgName || !$adminName || !$adminEmail || !$adminPassword) {
                 throw new Exception("Tous les champs sont obligatoires.");
             }
 
             $this->validatePasswordStrength($adminPassword);
-
-            // Create Organization
+// Create Organization
             $orgId = $this->orgRepo->save(new Organization(null, $orgName));
-
-            // Create Admin User
+// Create Admin User
             $hashedPassword = password_hash($adminPassword, PASSWORD_DEFAULT);
-            $user = new User(
-                null,
-                $adminEmail,
-                $hashedPassword,
-                $adminName,
-                'super_admin',
-                $orgId
-            );
+            $user = new User(null, $adminEmail, $hashedPassword, $adminName, 'super_admin', $orgId);
             $this->userRepo->save($user);
-
-            // Fetch created user to get the ID
+// Fetch created user to get the ID
             $dbUser = $this->userRepo->findByEmail($adminEmail);
             if ($dbUser) {
-                // Link user to organization in pivot table
+            // Link user to organization in pivot table
                 $this->userRepo->addOrganization($dbUser->id, $orgId);
-
-                // Log in the new admin
+            // Log in the new admin
                 $_SESSION['user_id'] = $dbUser->id;
                 $_SESSION['organization_id'] = $dbUser->organizationId;
                 $_SESSION['user_name'] = $dbUser->name;
@@ -91,7 +79,6 @@ class SetupController extends BaseController
             }
 
             $this->redirect('index.php?page=treatment&action=dashboard');
-
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
             $this->redirect('index.php?page=setup');

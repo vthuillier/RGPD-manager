@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Repository;
@@ -10,7 +11,6 @@ use PDO;
 class NotificationRepository
 {
     private PDO $pdo;
-
     public function __construct()
     {
         $this->pdo = Connection::get();
@@ -21,9 +21,8 @@ class NotificationRepository
         $stmt = $this->pdo->prepare('SELECT * FROM notification_settings WHERE organization_id = :org_id');
         $stmt->execute(['org_id' => $organizationId]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
         if (!$data) {
-            // Create default settings if not exists
+        // Create default settings if not exists
             $this->pdo->prepare('INSERT INTO notification_settings (organization_id) VALUES (?)')
                 ->execute([$organizationId]);
             return $this->getSettingsByOrganizationId($organizationId);
@@ -34,8 +33,7 @@ class NotificationRepository
 
     public function saveSettings(NotificationSetting $settings): void
     {
-        $stmt = $this->pdo->prepare(
-            'UPDATE notification_settings SET 
+        $stmt = $this->pdo->prepare('UPDATE notification_settings SET 
                 enable_rights_reminders = :err,
                 rights_reminder_days = :rrd,
                 enable_treatment_review_reminders = :etrr,
@@ -51,9 +49,7 @@ class NotificationRepository
                 from_email = :fe,
                 from_name = :fn,
                 updated_at = CURRENT_TIMESTAMP
-            WHERE organization_id = :org_id'
-        );
-
+            WHERE organization_id = :org_id');
         $stmt->execute([
             'err' => (int) $settings->enableRightsReminders,
             'rrd' => $settings->rightsReminderDays,

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Database;
@@ -9,7 +10,6 @@ use Exception;
 class SchemaManager
 {
     private PDO $pdo;
-
     public function __construct()
     {
         $this->pdo = Connection::get();

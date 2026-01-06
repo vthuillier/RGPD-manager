@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Database;
@@ -10,7 +11,6 @@ class MigrationManager
 {
     private PDO $pdo;
     private string $migrationsPath;
-
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
@@ -29,7 +29,6 @@ class MigrationManager
         $this->ensureMigrationsTable();
         $appliedMigrations = $this->getAppliedMigrations();
         $migrationFiles = $this->getMigrationFiles();
-
         $pending = [];
         foreach ($migrationFiles as $file) {
             $migrationName = basename($file, '.sql');
@@ -58,10 +57,8 @@ class MigrationManager
     public function migrate(): void
     {
         $this->ensureMigrationsTable();
-
         $appliedMigrations = $this->getAppliedMigrations();
         $migrationFiles = $this->getMigrationFiles();
-
         foreach ($migrationFiles as $file) {
             $migrationName = basename($file, '.sql');
             if (!in_array($migrationName, $appliedMigrations)) {
@@ -106,13 +103,10 @@ class MigrationManager
 
         try {
             $this->pdo->beginTransaction();
-
-            // Execute SQL (might contain multiple statements)
+// Execute SQL (might contain multiple statements)
             $this->pdo->exec($sql);
-
             $stmt = $this->pdo->prepare("INSERT INTO migrations (migration) VALUES (?)");
             $stmt->execute([$migrationName]);
-
             $this->pdo->commit();
         } catch (Exception $e) {
             if ($this->pdo->inTransaction()) {

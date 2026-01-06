@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Entity;
@@ -42,5 +43,4 @@ class DataBreach
             $data['created_at'] ?? null
         );
     }
-
 }

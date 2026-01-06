@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Repository;
@@ -10,7 +11,6 @@ use PDO;
 class SubprocessorRepository
 {
     private PDO $pdo;
-
     public function __construct()
     {
         $this->pdo = Connection::get();
@@ -24,7 +24,6 @@ class SubprocessorRepository
         $stmt = $this->pdo->prepare('SELECT * FROM subprocessors WHERE organization_id = :organization_id ORDER BY name ASC');
         $stmt->execute(['organization_id' => $organizationId]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         return array_map(fn($data) => Subprocessor::fromArray($data), $results);
     }
 
@@ -33,7 +32,6 @@ class SubprocessorRepository
         $stmt = $this->pdo->prepare('SELECT * FROM subprocessors WHERE id = :id AND organization_id = :organization_id');
         $stmt->execute(['id' => $id, 'organization_id' => $organizationId]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
         return $data ? Subprocessor::fromArray($data) : null;
     }
 
@@ -49,11 +47,8 @@ class SubprocessorRepository
 
     private function insert(Subprocessor $subprocessor): int
     {
-        $stmt = $this->pdo->prepare(
-            'INSERT INTO subprocessors (user_id, organization_id, name, service, location, guarantees)
-            VALUES (:user_id, :organization_id, :name, :service, :location, :guarantees)'
-        );
-
+        $stmt = $this->pdo->prepare('INSERT INTO subprocessors (user_id, organization_id, name, service, location, guarantees)
+            VALUES (:user_id, :organization_id, :name, :service, :location, :guarantees)');
         $stmt->execute([
             'user_id' => $subprocessor->userId,
             'organization_id' => $subprocessor->organizationId,
@@ -62,21 +57,17 @@ class SubprocessorRepository
             'location' => $subprocessor->location,
             'guarantees' => $subprocessor->guarantees
         ]);
-
         return (int) $this->pdo->lastInsertId();
     }
 
     private function update(Subprocessor $subprocessor): void
     {
-        $stmt = $this->pdo->prepare(
-            'UPDATE subprocessors SET 
+        $stmt = $this->pdo->prepare('UPDATE subprocessors SET 
                 name = :name, 
                 service = :service, 
                 location = :location, 
                 guarantees = :guarantees
-            WHERE id = :id AND organization_id = :organization_id'
-        );
-
+            WHERE id = :id AND organization_id = :organization_id');
         $stmt->execute([
             'id' => $subprocessor->id,
             'organization_id' => $subprocessor->organizationId,
@@ -126,7 +117,6 @@ class SubprocessorRepository
         ');
         $stmt->execute(['treatment_id' => $treatmentId]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         return array_map(fn($data) => Subprocessor::fromArray($data), $results);
     }
 }

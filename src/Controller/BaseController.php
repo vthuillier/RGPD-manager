@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -11,7 +12,6 @@ abstract class BaseController
     {
         extract($data);
         $templatePath = __DIR__ . '/../../templates/' . $template . '.php';
-
         if ($standalone) {
             require $templatePath;
             return;
@@ -20,7 +20,6 @@ abstract class BaseController
         ob_start();
         require $templatePath;
         $content = ob_get_clean();
-
         require __DIR__ . '/../../templates/layout.php';
     }
 
@@ -51,7 +50,6 @@ abstract class BaseController
     {
         $this->ensureAuthenticated();
         $userRole = $_SESSION['user_role'] ?? 'user';
-
         if (!in_array($userRole, $roles)) {
             $this->auditLog('ACCESS_DENIED', 'internal', null, ['required_roles' => $roles, 'current_role' => $userRole]);
             $_SESSION['flash_error'] = "Accès refusé : Vous n'avez pas les droits nécessaires.";

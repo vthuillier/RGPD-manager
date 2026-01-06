@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Service;
@@ -9,7 +10,6 @@ use App\Repository\TreatmentRepository;
 class TreatmentService
 {
     private TreatmentRepository $repository;
-
     public function __construct()
     {
         $this->repository = new TreatmentRepository();
@@ -33,7 +33,6 @@ class TreatmentService
         $this->validate($data);
         $treatment = Treatment::fromArray($data);
         $id = $this->repository->save($treatment);
-
         if (isset($data['subprocessors']) && is_array($data['subprocessors'])) {
             $this->repository->linkSubprocessors($id, $data['subprocessors'], (int) $data['organization_id']);
         }
@@ -52,7 +51,6 @@ class TreatmentService
         $data['organization_id'] = $organizationId;
         $treatment = Treatment::fromArray($data);
         $this->repository->save($treatment);
-
         if (isset($data['subprocessors']) && is_array($data['subprocessors'])) {
             $this->repository->linkSubprocessors($id, $data['subprocessors'], $organizationId);
         } else {
@@ -82,12 +80,11 @@ class TreatmentService
         $measureRepo = new \App\Repository\SecurityMeasureRepository();
         $measures = $measureRepo->findAllByTreatmentId($treatmentId);
         $allMeasures = $measureRepo->findAllForOrganization($organizationId);
-
         $totalWeight = array_reduce($allMeasures, fn($sum, $m) => $sum + $m->weight, 0);
         $appliedWeight = array_reduce($measures, fn($sum, $m) => $sum + $m->weight, 0);
-
-        if ($totalWeight === 0)
+        if ($totalWeight === 0) {
             return 0;
+        }
         return (int) round(($appliedWeight / $totalWeight) * 100);
     }
 
@@ -118,12 +115,15 @@ class TreatmentService
     private function validate(array $data): void
     {
         $errors = [];
-        if (empty($data['name']))
+        if (empty($data['name'])) {
             $errors[] = "Le nom est obligatoire.";
-        if (empty($data['purpose']))
+        }
+        if (empty($data['purpose'])) {
             $errors[] = "La finalité est obligatoire.";
-        if (empty($data['user_id']))
+        }
+        if (empty($data['user_id'])) {
             $errors[] = "L'utilisateur est manquant.";
+        }
 
         if (!empty($errors)) {
             throw new \InvalidArgumentException(implode(' ', $errors));

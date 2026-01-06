@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Repository;
@@ -10,7 +11,6 @@ use PDO;
 class DocumentRepository
 {
     private PDO $db;
-
     public function __construct()
     {
         $this->db = Connection::get();
@@ -61,7 +61,6 @@ class DocumentRepository
             ORDER BY created_at DESC
         ");
         $stmt->execute([$entityType, $entityId, $organizationId]);
-
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map(fn($data) => Document::fromArray($data), $results);
     }
@@ -71,7 +70,6 @@ class DocumentRepository
         $stmt = $this->db->prepare("SELECT * FROM documents WHERE id = ? AND organization_id = ?");
         $stmt->execute([$id, $organizationId]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
         return $data ? Document::fromArray($data) : null;
     }
 

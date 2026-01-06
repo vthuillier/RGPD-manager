@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -10,7 +11,6 @@ use Dompdf\Options;
 class ReportController extends BaseController
 {
     private ReportService $service;
-
     public function __construct()
     {
         $this->ensureAuthenticated();
@@ -20,8 +20,6 @@ class ReportController extends BaseController
     public function generateAnnual(): void
     {
         $data = $this->service->getAnnualData((int) $_SESSION['organization_id']);
-
-
         // Add logo base64 (only if GD is available for Dompdf)
         $logoPath = __DIR__ . '/../../public/assets/logo_texte.png';
         $logoBase64 = '';
@@ -33,21 +31,17 @@ class ReportController extends BaseController
 
         // Render HTML
         extract($data);
-
         ob_start();
         require __DIR__ . '/../../templates/reports/annual_pdf.php';
         $html = ob_get_clean();
-
         // Setup Dompdf
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
         $options->set('isRemoteEnabled', true);
-
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
-
         // Output to browser
         $filename = "Rapport_Annuel_RGPD_" . date('Y') . ".pdf";
         $dompdf->stream($filename, ["Attachment" => true]);
@@ -58,7 +52,6 @@ class ReportController extends BaseController
     {
         $id = (int) ($_GET['id'] ?? 0);
         $data = $this->service->getAipdData($id, (int) $_SESSION['organization_id']);
-
         // Add logo base64
         $logoPath = __DIR__ . '/../../public/assets/logo_texte.png';
         $logoBase64 = '';
@@ -68,21 +61,18 @@ class ReportController extends BaseController
         }
 
         extract($data);
-
         ob_start();
         require __DIR__ . '/../../templates/reports/aipd_pdf.php';
         $html = ob_get_clean();
-
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
         $options->set('isRemoteEnabled', true);
-
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
-
-        $filename = "AIPD_" . preg_replace('/[^a-z0-9]/i', '_', $aipd->treatmentName) . ".pdf";
+        $aipd = $data['aipd'];
+        $filename = "AIPD_" . preg_replace('/[^a-z0-9]/i', '_', $aipd->treatmentName ?? 'Export') . ".pdf";
         $dompdf->stream($filename, ["Attachment" => true]);
         exit;
     }

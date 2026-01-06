@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -14,7 +15,6 @@ class TreatmentController extends BaseController
     private \App\Service\DocumentService $documentService;
     private int $userId;
     private int $organizationId;
-
     public function __construct()
     {
         $this->ensureAuthenticated();
@@ -40,10 +40,8 @@ class TreatmentController extends BaseController
             'search' => $_GET['search'] ?? '',
             'legal_basis' => $_GET['legal_basis'] ?? ''
         ];
-
         $treatments = $this->service->getTreatmentsForOrganization($this->organizationId, $filters);
-
-        // Enrichir avec le score de sécurité
+// Enrichir avec le score de sécurité
         foreach ($treatments as $treatment) {
             $treatment->securityScore = $this->service->getSecurityScore($treatment->id, $this->organizationId);
         }
@@ -59,10 +57,8 @@ class TreatmentController extends BaseController
     {
         $subprocessorRepo = new \App\Repository\SubprocessorRepository();
         $allSubprocessors = $subprocessorRepo->findAllByOrganizationId($this->organizationId);
-
         $measureRepo = new \App\Repository\SecurityMeasureRepository();
         $allMeasures = $measureRepo->findAllForOrganization($this->organizationId);
-
         $this->render('treatments/form', [
             'title' => 'Nouveau traitement',
             'treatment' => null,
@@ -84,27 +80,23 @@ class TreatmentController extends BaseController
             $data['user_id'] = $this->userId;
             $data['organization_id'] = $this->organizationId;
             $treatmentId = $this->service->createTreatment($data);
-
             if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK) {
                 $this->documentService->upload($_FILES['document'], 'treatment', $treatmentId, $this->organizationId);
             }
 
             $this->auditLog('TREATMENT_CREATE', 'treatment', $treatmentId, ['name' => $data['name'] ?? '']);
-
             $_SESSION['flash_success'] = "Traitement ajouté avec succès.";
             $this->redirect('index.php?page=treatment&action=list');
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
             $this->redirect('index.php?page=treatment&action=create');
         }
-
     }
 
     public function edit(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
         $treatment = $this->service->getTreatmentForOrganization($id, $this->organizationId);
-
         if (!$treatment) {
             $_SESSION['flash_error'] = "Traitement introuvable ou vous n'avez pas les droits.";
             $this->redirect('index.php?page=treatment&action=list');
@@ -113,13 +105,10 @@ class TreatmentController extends BaseController
         $subprocessorRepo = new \App\Repository\SubprocessorRepository();
         $allSubprocessors = $subprocessorRepo->findAllByOrganizationId($this->organizationId);
         $selectedSubprocessors = $this->service->getSubprocessorIds($id);
-
         $measureRepo = new \App\Repository\SecurityMeasureRepository();
         $allMeasures = $measureRepo->findAllForOrganization($this->organizationId);
         $selectedMeasures = $this->service->getSecurityMeasureIds($id);
-
         $documents = $this->documentService->getDocuments('treatment', $id, $this->organizationId);
-
         $this->render('treatments/form', [
             'title' => 'Modifier le traitement',
             'treatment' => $treatment,
@@ -129,7 +118,6 @@ class TreatmentController extends BaseController
             'selectedMeasures' => $selectedMeasures,
             'documents' => $documents
         ]);
-
     }
 
     public function update(): void
@@ -142,20 +130,17 @@ class TreatmentController extends BaseController
             $data['user_id'] = $this->userId;
             $data['organization_id'] = $this->organizationId;
             $this->service->updateTreatmentForOrganization($id, $this->organizationId, $data);
-
             if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK) {
                 $this->documentService->upload($_FILES['document'], 'treatment', $id, $this->organizationId);
             }
 
             $this->auditLog('TREATMENT_UPDATE', 'treatment', $id, ['name' => $data['name'] ?? '']);
-
             $_SESSION['flash_success'] = "Traitement mis à jour.";
             $this->redirect('index.php?page=treatment&action=list');
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
             $this->redirect('index.php?page=treatment&action=edit&id=' . $id);
         }
-
     }
 
     public function delete(): void
@@ -164,9 +149,7 @@ class TreatmentController extends BaseController
         $this->validateNotGuest();
         $id = (int) ($_POST['id'] ?? 0);
         $this->service->deleteTreatmentForOrganization($id, $this->organizationId);
-
         $this->auditLog('TREATMENT_DELETE', 'treatment', $id);
-
         $_SESSION['flash_success'] = "Traitement supprimé.";
         $this->redirect('index.php?page=treatment&action=list');
     }
@@ -192,4 +175,3 @@ class TreatmentController extends BaseController
         ], true);
     }
 }
-

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Service;
@@ -9,7 +10,6 @@ use App\Repository\AuditLogRepository;
 class AuditLogService
 {
     private AuditLogRepository $repository;
-
     public function __construct()
     {
         $this->repository = new AuditLogRepository();
@@ -20,22 +20,11 @@ class AuditLogService
         $userId = $_SESSION['user_id'] ?? null;
         $organizationId = $_SESSION['organization_id'] ?? null;
         $ipAddress = $_SERVER['REMOTE_ADDR'] ?? null;
-
-        $log = new AuditLog(
-            null,
-            $userId ? (int) $userId : null,
-            $action,
-            $entityType,
-            $entityId,
-            $details ? json_encode($details, JSON_UNESCAPED_UNICODE) : null,
-            $ipAddress,
-            $organizationId ? (int) $organizationId : null
-        );
-
+        $log = new AuditLog(null, $userId ? (int) $userId : null, $action, $entityType, $entityId, $details ? json_encode($details, JSON_UNESCAPED_UNICODE) : null, $ipAddress, $organizationId ? (int) $organizationId : null);
         try {
             $this->repository->save($log);
         } catch (\Exception $e) {
-            // Log to error log but don't crash the app
+        // Log to error log but don't crash the app
             error_log("Failed to save audit log: " . $e->getMessage());
         }
     }
@@ -48,5 +37,4 @@ class AuditLogService
         $organizationId = (int) ($_SESSION['organization_id'] ?? 0);
         return $this->repository->findAllByOrganizationId($organizationId, $limit);
     }
-
 }

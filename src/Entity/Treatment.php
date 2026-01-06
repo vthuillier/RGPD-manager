@@ -1,10 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Entity;
 
 class Treatment
 {
+    public ?int $securityScore = null;
+
     public function __construct(
         public ?int $id,
         public int $userId,
@@ -40,5 +43,4 @@ class Treatment
             $data['updated_at'] ?? null
         );
     }
-
 }

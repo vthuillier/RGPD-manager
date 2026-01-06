@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -8,7 +9,6 @@ use App\Service\AuditLogService;
 class AuditLogController extends BaseController
 {
     private AuditLogService $service;
-
     public function __construct()
     {
         $this->ensureRole(['super_admin']);

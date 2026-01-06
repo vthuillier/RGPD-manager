@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -16,7 +17,6 @@ use Exception;
 class OrganizationController extends BaseController
 {
     private OrganizationRepository $repository;
-
     public function __construct()
     {
         $this->ensureRole(['super_admin']);
@@ -50,7 +50,6 @@ class OrganizationController extends BaseController
 
             $id = $this->repository->save(new Organization(null, $name));
             $this->auditLog('ORG_CREATE', 'organization', $id, ['name' => $name]);
-
             $_SESSION['flash_success'] = "Organisme créé avec succès.";
             $this->redirect('index.php?page=organization&action=list');
         } catch (Exception $e) {
@@ -63,7 +62,6 @@ class OrganizationController extends BaseController
     {
         $id = (int) ($_GET['id'] ?? 0);
         $organization = $this->repository->find($id);
-
         if (!$organization) {
             $_SESSION['flash_error'] = "Organisme non trouvé.";
             $this->redirect('index.php?page=organization&action=list');
@@ -81,19 +79,17 @@ class OrganizationController extends BaseController
         try {
             $id = (int) ($_POST['id'] ?? 0);
             $name = $_POST['name'] ?? '';
-
             if (!$id || !$name) {
                 throw new Exception("Données manquantes.");
             }
 
             $this->repository->save(new Organization($id, $name));
             $this->auditLog('ORG_UPDATE', 'organization', $id, ['name' => $name]);
-
             $_SESSION['flash_success'] = "Organisme mis à jour.";
             $this->redirect('index.php?page=organization&action=list');
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
-            $this->redirect('index.php?page=organization&action=edit&id=' . ($id ?? 0));
+            $this->redirect('index.php?page=organization&action=edit&id=' . $id);
         }
     }
 
@@ -102,18 +98,18 @@ class OrganizationController extends BaseController
         $this->validateCsrf();
         try {
             $id = (int) ($_POST['id'] ?? 0);
-
             if (!$id) {
                 throw new Exception("ID de l'organisme manquant.");
             }
 
             if ($id === (int) ($_SESSION['organization_id'] ?? 0)) {
-                throw new Exception("Vous ne pouvez pas supprimer l'organisme sur lequel vous êtes actuellement positionné. Basculez d'abord vers un autre organisme.");
+                $msg = "Vous ne pouvez pas supprimer l'organisme sur lequel vous êtes actuellement positionné. " .
+                    "Basculez d'abord vers un autre organisme.";
+                throw new Exception($msg);
             }
 
             $this->repository->delete($id);
             $this->auditLog('ORG_DELETE', 'organization', $id);
-
             $_SESSION['flash_success'] = "Organisme supprimé avec succès.";
         } catch (Exception $e) {
             $_SESSION['flash_error'] = "Erreur lors de la suppression : " . $e->getMessage();
@@ -126,7 +122,6 @@ class OrganizationController extends BaseController
     {
         $id = (int) ($_GET['id'] ?? 0);
         $organization = $this->repository->find($id);
-
         if (!$organization) {
             $_SESSION['flash_error'] = "Organisme non trouvé.";
             $this->redirect('index.php?page=organization&action=list');
@@ -134,9 +129,7 @@ class OrganizationController extends BaseController
 
         $data = $this->gatherOrganizationData($id);
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-
         $this->auditLog('ORG_BACKUP', 'organization', $id);
-
         header('Content-Type: application/json');
         header('Content-Disposition: attachment; filename="backup_' . urlencode($organization->name) . '_' . date('Y-m-d') . '.json"');
         echo $json;
@@ -150,7 +143,6 @@ class OrganizationController extends BaseController
         $rightsRepo = new RightsExerciseRepository();
         $breachRepo = new DataBreachRepository();
         $userRepo = new UserRepository();
-
         return [
             'organization' => $this->repository->find($orgId),
             'treatments' => $treatRepo->findAllByOrganizationId($orgId),

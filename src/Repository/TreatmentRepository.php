@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Repository;
@@ -10,7 +11,6 @@ use PDO;
 class TreatmentRepository
 {
     private PDO $pdo;
-
     public function __construct()
     {
         $this->pdo = Connection::get();
@@ -31,7 +31,6 @@ class TreatmentRepository
     {
         $sql = 'SELECT * FROM treatments WHERE organization_id = :organization_id';
         $params = ['organization_id' => $organizationId];
-
         if (!empty($filters['search'])) {
             $sql .= ' AND (name ILIKE :search OR purpose ILIKE :search)';
             $params['search'] = '%' . $filters['search'] . '%';
@@ -43,11 +42,9 @@ class TreatmentRepository
         }
 
         $sql .= ' ORDER BY created_at DESC';
-
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         return array_map(fn($data) => Treatment::fromArray($data), $results);
     }
 
@@ -56,7 +53,6 @@ class TreatmentRepository
         $stmt = $this->pdo->prepare('SELECT * FROM treatments WHERE id = :id AND organization_id = :organization_id');
         $stmt->execute(['id' => $id, 'organization_id' => $organizationId]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
         return $data ? Treatment::fromArray($data) : null;
     }
 
@@ -73,12 +69,9 @@ class TreatmentRepository
 
     private function insert(Treatment $treatment): int
     {
-        $stmt = $this->pdo->prepare(
-            'INSERT INTO treatments (user_id, organization_id, name, purpose, legal_basis, data_categories, retention_period, has_sensitive_data, is_large_scale, retention_years)
+        $stmt = $this->pdo->prepare('INSERT INTO treatments (user_id, organization_id, name, purpose, legal_basis, data_categories, retention_period, has_sensitive_data, is_large_scale, retention_years)
             VALUES (:user_id, :organization_id, :name, :purpose, :legal_basis, :data_categories, :retention_period, :has_sensitive_data, :is_large_scale, :retention_years)
-            RETURNING id'
-        );
-
+            RETURNING id');
         $stmt->execute([
             'user_id' => $treatment->userId,
             'organization_id' => $treatment->organizationId,
@@ -91,15 +84,13 @@ class TreatmentRepository
             'is_large_scale' => (int) $treatment->isLargeScale,
             'retention_years' => $treatment->retentionYears
         ]);
-
         return (int) $stmt->fetchColumn();
     }
 
 
     private function update(Treatment $treatment): void
     {
-        $stmt = $this->pdo->prepare(
-            'UPDATE treatments SET 
+        $stmt = $this->pdo->prepare('UPDATE treatments SET 
                 name = :name, 
                 purpose = :purpose, 
                 legal_basis = :legal_basis, 
@@ -109,9 +100,7 @@ class TreatmentRepository
                 is_large_scale = :is_large_scale,
                 retention_years = :retention_years,
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = :id AND organization_id = :organization_id'
-        );
-
+            WHERE id = :id AND organization_id = :organization_id');
         $stmt->execute([
             'id' => $treatment->id,
             'organization_id' => $treatment->organizationId,
@@ -165,17 +154,16 @@ class TreatmentRepository
         // First clear existing links
         $stmt = $this->pdo->prepare('DELETE FROM treatment_subprocessors WHERE treatment_id = :treatment_id');
         $stmt->execute(['treatment_id' => $treatmentId]);
-
-        // Then add new ones, but only if they belong to the correct organization
-        if (empty($subprocessorIds))
+// Then add new ones, but only if they belong to the correct organization
+        if (empty($subprocessorIds)) {
             return;
+        }
 
         $stmt = $this->pdo->prepare('
             INSERT INTO treatment_subprocessors (treatment_id, subprocessor_id)
             SELECT :treatment_id, id FROM subprocessors 
             WHERE id = :subprocessor_id AND organization_id = :organization_id
         ');
-
         foreach ($subprocessorIds as $sid) {
             $stmt->execute([
                 'treatment_id' => $treatmentId,
@@ -188,15 +176,14 @@ class TreatmentRepository
     {
         $stmt = $this->pdo->prepare('DELETE FROM treatment_security_measures WHERE treatment_id = :treatment_id');
         $stmt->execute(['treatment_id' => $treatmentId]);
-
-        if (empty($measureIds))
+        if (empty($measureIds)) {
             return;
+        }
 
         $stmt = $this->pdo->prepare('
             INSERT INTO treatment_security_measures (treatment_id, measure_id)
             VALUES (:treatment_id, :measure_id)
         ');
-
         foreach ($measureIds as $mid) {
             $stmt->execute([
                 'treatment_id' => $treatmentId,

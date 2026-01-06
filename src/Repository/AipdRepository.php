@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Repository;
@@ -10,7 +11,6 @@ use PDO;
 class AipdRepository
 {
     private PDO $pdo;
-
     public function __construct()
     {
         $this->pdo = Connection::get();
@@ -28,11 +28,9 @@ class AipdRepository
                 LEFT JOIN users u_mgr ON a.manager_id = u_mgr.id
                 WHERE a.organization_id = :organization_id 
                 ORDER BY a.created_at DESC';
-
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['organization_id' => $organizationId]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         return array_map(fn($data) => Aipd::fromArray($data), $results);
     }
 
@@ -44,11 +42,9 @@ class AipdRepository
                 LEFT JOIN users u_dpo ON a.dpo_id = u_dpo.id
                 LEFT JOIN users u_mgr ON a.manager_id = u_mgr.id
                 WHERE a.id = :id AND a.organization_id = :organization_id';
-
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['id' => $id, 'organization_id' => $organizationId]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
         return $data ? Aipd::fromArray($data) : null;
     }
 
@@ -64,12 +60,9 @@ class AipdRepository
 
     private function insert(Aipd $aipd): int
     {
-        $stmt = $this->pdo->prepare(
-            'INSERT INTO aipds (treatment_id, organization_id, user_id, status, necessity_assessment, risk_assessment, measures_planned, dpo_opinion, manager_decision, is_high_risk, dpo_id, manager_id)
+        $stmt = $this->pdo->prepare('INSERT INTO aipds (treatment_id, organization_id, user_id, status, necessity_assessment, risk_assessment, measures_planned, dpo_opinion, manager_decision, is_high_risk, dpo_id, manager_id)
             VALUES (:treatment_id, :organization_id, :user_id, :status, :necessity_assessment, :risk_assessment, :measures_planned, :dpo_opinion, :manager_decision, :is_high_risk, :dpo_id, :manager_id)
-            RETURNING id'
-        );
-
+            RETURNING id');
         $stmt->execute([
             'treatment_id' => $aipd->treatmentId,
             'organization_id' => $aipd->organizationId,
@@ -84,14 +77,12 @@ class AipdRepository
             'dpo_id' => $aipd->dpoId,
             'manager_id' => $aipd->managerId
         ]);
-
         return (int) $stmt->fetchColumn();
     }
 
     private function update(Aipd $aipd): void
     {
-        $stmt = $this->pdo->prepare(
-            'UPDATE aipds SET 
+        $stmt = $this->pdo->prepare('UPDATE aipds SET 
                 status = :status, 
                 necessity_assessment = :necessity_assessment, 
                 risk_assessment = :risk_assessment, 
@@ -102,9 +93,7 @@ class AipdRepository
                 dpo_id = :dpo_id,
                 manager_id = :manager_id,
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = :id AND organization_id = :organization_id'
-        );
-
+            WHERE id = :id AND organization_id = :organization_id');
         $stmt->execute([
             'id' => $aipd->id,
             'organization_id' => $aipd->organizationId,

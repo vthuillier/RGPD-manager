@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -11,7 +12,6 @@ use Exception;
 class SettingsController extends BaseController
 {
     private NotificationRepository $repository;
-
     public function __construct()
     {
         $this->ensureRole(['org_admin', 'super_admin']);
@@ -21,7 +21,6 @@ class SettingsController extends BaseController
     public function notifications(): void
     {
         $orgId = (int) ($_SESSION['organization_id'] ?? 0);
-
         // Si super_admin veut configurer le système ou une organisation spécifique
         if ($_SESSION['user_role'] === 'super_admin') {
             if (isset($_GET['system'])) {
@@ -32,7 +31,6 @@ class SettingsController extends BaseController
         }
 
         $settings = $this->repository->getSettingsByOrganizationId($orgId);
-
         $this->render('settings/notifications', [
             'settings' => $settings,
             'title' => ($orgId === -1) ? 'Configuration Système (Mail)' : 'Paramètres des notifications',
@@ -45,10 +43,8 @@ class SettingsController extends BaseController
     {
         $this->validateCsrf();
         $this->validateNotGuest();
-
         try {
             $orgId = (int) ($_SESSION['organization_id'] ?? 0);
-
             if ($_SESSION['user_role'] === 'super_admin') {
                 if (isset($_POST['is_system']) && $_POST['is_system'] == '1') {
                     $orgId = -1;
@@ -75,10 +71,8 @@ class SettingsController extends BaseController
                 $_POST['from_email'] ?? null,
                 $_POST['from_name'] ?? null
             );
-
             $this->repository->saveSettings($settings);
             $this->auditLog('SETTINGS_UPDATE', 'notification_settings', $orgId);
-
             $urlParams = '';
             if ($orgId === -1) {
                 $urlParams = '&system=1';
@@ -91,11 +85,13 @@ class SettingsController extends BaseController
         } catch (Exception $e) {
             $_SESSION['flash_error'] = "Erreur : " . $e->getMessage();
             $urlParams = '';
-            if (isset($orgId)) {
-                if ($orgId === -1)
-                    $urlParams = '&system=1';
-                elseif ($orgId !== (int) ($_SESSION['organization_id'] ?? 0))
-                    $urlParams = '&org_id=' . $orgId;
+            // $orgId might not be initialized if exception occurs before line 47 (unlikely here but possible in general)
+            // But here it is line 47.
+            $actualOrgId = $orgId;
+            if ($actualOrgId === -1) {
+                $urlParams = '&system=1';
+            } elseif ($actualOrgId !== (int) ($_SESSION['organization_id'] ?? 0)) {
+                $urlParams = '&org_id=' . $actualOrgId;
             }
             $this->redirect('index.php?page=settings&action=notifications' . $urlParams);
         }
@@ -108,7 +104,6 @@ class SettingsController extends BaseController
     {
         $orgId = (int) ($_SESSION['organization_id'] ?? 0);
         $urlParams = '';
-
         if ($_SESSION['user_role'] === 'super_admin') {
             if (isset($_GET['system'])) {
                 $orgId = -1;
@@ -120,10 +115,7 @@ class SettingsController extends BaseController
         }
 
         $service = new NotificationService();
-        $count = $service->processOrganizationNotifications(
-            $this->repository->getSettingsByOrganizationId($orgId)
-        );
-
+        $count = $service->processOrganizationNotifications($this->repository->getSettingsByOrganizationId($orgId));
         $_SESSION['flash_success'] = "$count notification(s) simulée(s) (voir logs/mail.log).";
         $this->redirect('index.php?page=settings&action=notifications' . $urlParams);
     }
@@ -135,7 +127,6 @@ class SettingsController extends BaseController
     {
         $orgId = (int) ($_SESSION['organization_id'] ?? 0);
         $urlParams = '';
-
         if ($_SESSION['user_role'] === 'super_admin') {
             if (isset($_GET['system'])) {
                 $orgId = -1;
@@ -149,7 +140,6 @@ class SettingsController extends BaseController
         try {
             $userRepo = new \App\Repository\UserRepository();
             $user = $userRepo->find((int) $_SESSION['user_id']);
-
             if (!$user) {
                 throw new Exception("Utilisateur non trouvé.");
             }
@@ -157,7 +147,6 @@ class SettingsController extends BaseController
             $mailService = new \App\Service\MailService();
             $subject = "🧪 Test de configuration SMTP - RGPD Manager";
             $body = "Ceci est un email de test pour confirmer que vos paramètres SMTP sont corrects.\n\nEnvoyé le : " . date('d/m/Y H:i:s');
-
             if ($orgId === -1) {
                 $mailService->sendSystemMail($user->email, $subject, $body);
             } else {

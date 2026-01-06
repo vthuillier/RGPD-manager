@@ -1,8 +1,57 @@
 stages:
-  - test
+  - quality
+  - security
+  - database
 
-lint:
-  stage: test
-  image: php:8.2-cli
+image: php:8.2-cli
+
+# Cache des dépendances Composer
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - vendor/
+
+before_script:
+  - apt-get update && apt-get install -y unzip libzip-dev libpq-dev git
+  - docker-php-ext-install zip pdo_pgsql
+  - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  - composer install --no-interaction --no-progress
+
+# Stage: Quality
+linting:
+  stage: quality
   script:
-    - find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
+    - find src public config -name "*.php" -exec php -l {} \;
+
+phpcs:
+  stage: quality
+  script:
+    - vendor/bin/phpcs --report=summary --no-colors
+
+phpstan:
+  stage: quality
+  script:
+    - vendor/bin/phpstan analyse --no-progress
+
+# Stage: Security
+composer_audit:
+  stage: security
+  script:
+    - composer audit
+
+# Stage: Database
+migration_validation:
+  stage: database
+  services:
+    - postgres:latest
+  variables:
+    POSTGRES_DB: rgpd_test
+    POSTGRES_USER: user
+    POSTGRES_PASSWORD: password
+    DB_HOST: postgres
+    DB_PORT: 5432
+    DB_NAME: rgpd_test
+    DB_USER: user
+    DB_PASSWORD: password
+  script:
+    - php test_migrations.php

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -9,7 +10,6 @@ use Exception;
 class PasswordController extends BaseController
 {
     private UserRepository $userRepository;
-
     public function __construct()
     {
         $this->userRepository = new UserRepository();
@@ -44,21 +44,21 @@ class PasswordController extends BaseController
     public function update(): void
     {
         $this->validateCsrf();
-
         $token = $_POST['token'] ?? '';
         $password = $_POST['password'] ?? '';
         $passwordConfirm = $_POST['password_confirm'] ?? '';
-
         try {
-            if (!$token)
+            if (!$token) {
                 throw new Exception("Jeton manquant.");
-            if (!$password)
+            }
+            if (!$password) {
                 throw new Exception("Le mot de passe est obligatoire.");
-            if ($password !== $passwordConfirm)
+            }
+            if ($password !== $passwordConfirm) {
                 throw new Exception("Les mots de passe ne correspondent pas.");
+            }
 
             $this->validatePasswordStrength($password);
-
             $user = $this->userRepository->findByToken($token);
             if (!$user) {
                 throw new Exception("Le lien est invalide ou a expiré.");
@@ -67,14 +67,10 @@ class PasswordController extends BaseController
             $user->password = password_hash($password, PASSWORD_DEFAULT);
             $user->resetToken = null;
             $user->resetExpiresAt = null;
-
             $this->userRepository->save($user);
-
             $this->auditLog('PASSWORD_SETUP_SUCCESS', 'user', $user->id, ['email' => $user->email]);
-
             $_SESSION['flash_success'] = "Votre mot de passe a été défini avec succès. Vous pouvez maintenant vous connecter.";
             $this->redirect('index.php?page=auth&action=login');
-
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
             $this->redirect('index.php?page=password&action=setup&token=' . $token);

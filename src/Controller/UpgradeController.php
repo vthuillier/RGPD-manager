@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -10,7 +11,6 @@ use Exception;
 class UpgradeController extends BaseController
 {
     private MigrationManager $manager;
-
     public function __construct()
     {
         $this->manager = new MigrationManager(Connection::get());
@@ -19,7 +19,6 @@ class UpgradeController extends BaseController
     public function showUpgrade(): void
     {
         $pending = $this->manager->getPendingMigrations();
-
         if (empty($pending)) {
             $this->redirect('index.php');
         }
@@ -36,7 +35,6 @@ class UpgradeController extends BaseController
         header('Content-Type: application/json');
         try {
             $migrationName = $this->manager->applyNextMigration();
-
             if ($migrationName) {
                 echo json_encode(['success' => true, 'migration' => $migrationName, 'finished' => false]);
             } else {
