@@ -31,6 +31,9 @@
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <a href="index.php?page=organization&action=backup&id=<?= $org->id ?>"
                             class="text-green-600 hover:text-green-900 mr-4" title="Télécharger un backup JSON">Backup</a>
+                        <a href="index.php?page=settings&action=notifications&org_id=<?= $org->id ?>"
+                            class="text-amber-600 hover:text-amber-900 mr-4"
+                            title="Configurer les alertes et le SMTP">Config Mail</a>
                         <a href="index.php?page=organization&action=edit&id=<?= $org->id ?>"
                             class="text-primary-600 hover:text-primary-900 mr-4">Modifier</a>
 

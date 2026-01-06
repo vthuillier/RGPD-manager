@@ -245,6 +245,25 @@ try {
                 $controller->list();
                 break;
         }
+    } elseif ($page === 'settings') {
+        $controller = new \App\Controller\SettingsController();
+        switch ($action) {
+            case 'notifications':
+                $controller->notifications();
+                break;
+            case 'update_notifications':
+                $controller->updateNotifications();
+                break;
+            case 'trigger_process':
+                $controller->triggerProcess();
+                break;
+            case 'test_smtp':
+                $controller->testSmtp();
+                break;
+            default:
+                $controller->notifications();
+                break;
+        }
     } elseif ($page === 'organization') {
         $controller = new \App\Controller\OrganizationController();
         switch ($action) {

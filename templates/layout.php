@@ -127,7 +127,12 @@
                                         class="absolute top-full left-0 w-48 bg-white border border-slate-200 shadow-xl rounded-b-lg py-2 hidden group-hover:block z-50 animate-fade-in">
                                         <a href="index.php?page=user&action=list"
                                             class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 <?= $currentPage === 'user' ? 'bg-slate-50 font-bold text-primary-600' : '' ?>">Utilisateurs</a>
+                                        <a href="index.php?page=settings&action=notifications"
+                                            class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 <?= $currentPage === 'settings' ? 'bg-slate-50 font-bold text-primary-600' : '' ?>">Notifications</a>
                                         <?php if ($userRole === 'super_admin'): ?>
+                                            <a href="index.php?page=settings&action=notifications&system=1"
+                                                class="block px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50">Configuration
+                                                Système (Mail)</a>
                                             <a href="index.php?page=organization&action=list"
                                                 class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 <?= $currentPage === 'organization' ? 'bg-slate-50 font-bold text-primary-600' : '' ?>">Organismes</a>
                                             <a href="index.php?page=logs&action=list"
@@ -233,6 +238,8 @@
                         </div>
                         <a href="index.php?page=user&action=list"
                             class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'user') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Utilisateurs</a>
+                        <a href="index.php?page=settings&action=notifications"
+                            class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'settings') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Notifications</a>
                         <?php if ($userRole === 'super_admin'): ?>
                             <a href="index.php?page=organization&action=list"
                                 class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'organization') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Organismes</a>

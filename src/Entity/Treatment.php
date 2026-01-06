@@ -17,7 +17,8 @@ class Treatment
         public bool $isLargeScale = false,
         public int $retentionYears = 5,
         public ?int $organizationId = null,
-        public ?string $createdAt = null
+        public ?string $createdAt = null,
+        public ?string $updatedAt = null
     ) {
     }
 
@@ -35,7 +36,8 @@ class Treatment
             (bool) ($data['is_large_scale'] ?? false),
             (int) ($data['retention_years'] ?? 5),
             isset($data['organization_id']) ? (int) $data['organization_id'] : null,
-            $data['created_at'] ?? null
+            $data['created_at'] ?? null,
+            $data['updated_at'] ?? null
         );
     }
 

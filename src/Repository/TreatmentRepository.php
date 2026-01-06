@@ -107,7 +107,8 @@ class TreatmentRepository
                 retention_period = :retention_period,
                 has_sensitive_data = :has_sensitive_data,
                 is_large_scale = :is_large_scale,
-                retention_years = :retention_years
+                retention_years = :retention_years,
+                updated_at = CURRENT_TIMESTAMP
             WHERE id = :id AND organization_id = :organization_id'
         );
 
