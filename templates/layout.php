@@ -14,6 +14,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -290,7 +293,8 @@
             <img src="assets/logo.png" alt="Logo"
                 class="h-8 w-auto opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300">
             <p class="text-center text-sm text-slate-500">
-                &copy; <?= date('Y') ?> RGPD Manager - Solution de mise en conformité
+                &copy; <?= date('Y') ?> RGPD Manager - Solution de mise en conformité -
+                v<?= defined('APP_VERSION') ? APP_VERSION : '?.?.?' ?>
             </p>
             <a href="index.php?page=credits" class="text-xs text-slate-400 hover:text-primary-600 transition-colors">
                 Crédits & Mentions

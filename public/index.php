@@ -1,4 +1,6 @@
 <?php
+define('APP_VERSION', '1.0.0');
+
 // Secure session configuration
 ini_set('session.cookie_httponly', '1');
 ini_set('session.use_only_cookies', '1');
@@ -15,7 +17,7 @@ session_start();
 header('X-Frame-Options: DENY');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: strict-origin-when-cross-origin');
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 
 require_once __DIR__ . '/../vendor/autoload.php';
 

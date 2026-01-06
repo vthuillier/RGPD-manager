@@ -191,41 +191,35 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <!-- Répartition par Base Légale -->
-    <div class="card p-8">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    <!-- Graphique Bases Légales -->
+    <div class="card p-8 lg:col-span-1">
         <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
             <h3 class="text-lg font-bold text-slate-800">Bases Légales</h3>
             <span class="text-xs font-semibold text-slate-400 bg-slate-100 px-2 py-1 rounded">Répartition</span>
         </div>
+        <div class="relative h-64">
+            <?php if (empty($stats['legal_basis'])): ?>
+                <div class="absolute inset-0 flex items-center justify-center text-slate-400 italic">Aucune donnée</div>
+            <?php else: ?>
+                <canvas id="legalBasisChart"></canvas>
+            <?php endif; ?>
+        </div>
+    </div>
 
-        <?php if (empty($stats['legal_basis'])): ?>
-            <div class="py-12 text-center text-slate-400 italic">Aucune donnée disponible.</div>
-        <?php else: ?>
-            <div class="space-y-6">
-                <?php foreach ($stats['legal_basis'] as $basis => $count): ?>
-                    <?php
-                    $percentage = ($stats['total'] > 0) ? ($count / $stats['total']) * 100 : 0;
-                    ?>
-                    <div>
-                        <div class="flex justify-between items-end mb-2">
-                            <span class="text-sm font-medium text-slate-700"><?= htmlspecialchars($basis) ?></span>
-                            <span class="text-sm font-bold text-primary-600"><?= $count ?> <span
-                                    class="text-slate-400 font-normal ml-1">(<?= round($percentage) ?>%)</span></span>
-                        </div>
-                        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full bg-primary-500 rounded-full transition-all duration-1000"
-                                style="width: <?= $percentage ?>%;"></div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-
-            </div>
-        <?php endif; ?>
+    <!-- Graphique Activité Opérationnelle -->
+    <div class="card p-8 lg:col-span-1">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+            <h3 class="text-lg font-bold text-slate-800">Incidents & Droits</h3>
+            <span class="text-xs font-semibold text-slate-400 bg-slate-100 px-2 py-1 rounded">Cumul</span>
+        </div>
+        <div class="relative h-64">
+            <canvas id="activityChart"></canvas>
+        </div>
     </div>
 
     <!-- Tips DPO -->
-    <div class="card p-8 border-l-4 border-primary-500">
+    <div class="card p-8 border-l-4 border-primary-500 lg:col-span-1">
         <h3 class="text-lg font-bold text-slate-800 mb-6 pb-4 border-b border-slate-100 flex items-center gap-2">
             <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -238,30 +232,84 @@
                 <div
                     class="flex-shrink-0 w-5 h-5 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center text-xs font-bold">
                     1</div>
-                <p class="text-sm text-slate-600"><strong>Obligation Article 30 :</strong> Le registre doit être tenu à
-                    jour et disponible en cas de contrôle de la CNIL.</p>
+                <p class="text-sm text-slate-600"><strong>Obligation Article 30 :</strong> Tenez votre registre à jour
+                    pour tout contrôle.</p>
             </li>
             <li class="flex gap-3">
                 <div
                     class="flex-shrink-0 w-5 h-5 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center text-xs font-bold">
                     2</div>
-                <p class="text-sm text-slate-600"><strong>Base légale :</strong> Vérifiez que "Consentement" est
-                    réellement libre. Souvent, "Intérêt légitime" ou "Contrat" sont plus adaptés.</p>
+                <p class="text-sm text-slate-600"><strong>Base légale :</strong> "Intérêt légitime" est souvent plus
+                    robuste que le consentement.</p>
             </li>
             <li class="flex gap-3">
                 <div
                     class="flex-shrink-0 w-5 h-5 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center text-xs font-bold">
                     3</div>
-                <p class="text-sm text-slate-600"><strong>Durée de conservation :</strong> Ne conservez pas les données
-                    "au cas où". Fixez des règles claires de purge (Article 5.1.e).</p>
-            </li>
-            <li class="flex gap-3">
-                <div
-                    class="flex-shrink-0 w-5 h-5 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center text-xs font-bold">
-                    4</div>
-                <p class="text-sm text-slate-600"><strong>AIPD :</strong> Si un traitement est susceptible d'engendrer
-                    un risque élevé (données sensibles à grande échelle), l'AIPD est obligatoire.</p>
+                <p class="text-sm text-slate-600"><strong>AIPD :</strong> Obligatoire pour tout risque élevé identifié.
+                </p>
             </li>
         </ul>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Configuration globale
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#64748b';
+
+        // 1. Chart Bases Légales
+        const lbCtx = document.getElementById('legalBasisChart');
+        if (lbCtx) {
+            const lbData = <?= json_encode($stats['legal_basis']) ?>;
+            new Chart(lbCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(lbData),
+                    datasets: [{
+                        data: Object.values(lbData),
+                        backgroundColor: ['#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        // 2. Chart Activité
+        const actCtx = document.getElementById('activityChart');
+        if (actCtx) {
+            new Chart(actCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Exercices de droits', 'Violations de données'],
+                    datasets: [{
+                        label: 'Nombre d\'événements',
+                        data: [<?= $stats['rights']['total'] ?>, <?= $stats['breaches']['total'] ?>],
+                        backgroundColor: ['#6366f1', '#f43f5e'],
+                        borderRadius: 6,
+                        barThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { display: false }, ticks: { stepSize: 1 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    });
+</script>
