@@ -24,14 +24,56 @@ class MaturityController extends BaseController
 
     public function index(): void
     {
-        $latest = $this->repository->findLatestByOrganizationId($this->organizationId);
         $history = $this->repository->findAllByOrganizationId($this->organizationId);
+        $latest = $history[0] ?? null;
+        $previous = $history[1] ?? null;
+
+        $recommendations = [];
+        if ($latest) {
+            $recommendations = $this->generateRecommendations($latest);
+        }
 
         $this->render('maturity/index', [
             'title' => 'Auto-évaluation de Maturité',
             'latest' => $latest,
-            'history' => $history
+            'previous' => $previous,
+            'history' => $history,
+            'recommendations' => $recommendations
         ]);
+    }
+
+    private function generateRecommendations(MaturityAssessment $latest): array
+    {
+        $advice = [
+            'governanceScore' => [
+                'label' => 'Gouvernance',
+                'text' => 'Désignez un DPO, impliquez la direction dans les décisions RGPD et sensibilisez régulièrement vos collaborateurs.'
+            ],
+            'registryScore' => [
+                'label' => 'Registre',
+                'text' => 'Recensez l\'ensemble de vos traitements. Assurez-vous que chaque finalité est associée à une base légale valide.'
+            ],
+            'rightsScore' => [
+                'label' => 'Droits & Processus',
+                'text' => 'Mettez en place des procédures claires pour répondre aux demandes d\'exercice de droits sous 30 jours.'
+            ],
+            'securityScore' => [
+                'label' => 'Sécurité',
+                'text' => 'Renforcez la sécurité de vos accès (MFA, mots de passe) et assurez-vous du chiffrement des données sensibles.'
+            ],
+            'riskScore' => [
+                'label' => 'Risques & Tiers',
+                'text' => 'Réalisez des AIPD pour vos traitements à risque et auditez la conformité de vos sous-traitants (Art. 28).'
+            ]
+        ];
+
+        $recos = [];
+        foreach ($advice as $property => $data) {
+            if ($latest->$property < 3.0) {
+                $recos[] = $data;
+            }
+        }
+        return $recos;
     }
 
     public function assessment(): void

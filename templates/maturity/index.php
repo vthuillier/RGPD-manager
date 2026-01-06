@@ -1,6 +1,8 @@
 <?php
 /** @var \App\Entity\MaturityAssessment|null $latest */
+/** @var \App\Entity\MaturityAssessment|null $previous */
 /** @var \App\Entity\MaturityAssessment[] $history */
+/** @var array $recommendations */
 ?>
 
 <div class="flex flex-col gap-8">
@@ -21,16 +23,56 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Graphique Radar -->
             <div class="card p-6 flex flex-col items-center justify-center">
-                <h2 class="text-lg font-semibold mb-6">Profil de maturité actuel</h2>
+                <div class="flex items-center justify-between w-full mb-6">
+                    <h2 class="text-lg font-semibold">Profil de maturité</h2>
+                    <?php if ($previous): ?>
+                        <span class="text-xs font-medium text-slate-400">Comparaison avec l'évaluation précédente</span>
+                    <?php endif; ?>
+                </div>
                 <div class="w-full max-w-md">
                     <canvas id="maturityRadarChart"></canvas>
                 </div>
             </div>
 
-            <!-- Détails et commentaires -->
+            <!-- Détails et recommandations -->
             <div class="flex flex-col gap-6">
+                <!-- Recommendations -->
+                <?php if (!empty($recommendations)): ?>
+                    <div class="card border-l-4 border-amber-500 bg-amber-50/30">
+                        <div class="p-6">
+                            <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Priorités d'action
+                            </h2>
+                            <div class="space-y-4">
+                                <?php foreach ($recommendations as $reco): ?>
+                                    <div class="flex gap-3 bg-white p-3 rounded-lg border border-amber-100 shadow-sm">
+                                        <div class="flex-shrink-0 w-8 h-8 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center text-xs font-bold">!</div>
+                                        <div>
+                                            <p class="text-xs font-bold text-amber-800 uppercase tracking-wider"><?= $reco['label'] ?></p>
+                                            <p class="text-sm text-slate-600"><?= $reco['text'] ?></p>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="card border-l-4 border-green-500 bg-green-50/30 p-6">
+                        <h2 class="text-lg font-bold text-green-800 mb-1 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Félicitations !
+                        </h2>
+                        <p class="text-sm text-green-700">Votre maturité globale est excellente. Continuez vos efforts pour maintenir ce niveau de conformité.</p>
+                    </div>
+                <?php endif; ?>
+
                 <div class="card p-6">
-                    <h2 class="text-lg font-semibold mb-4">Moyennes par pilier</h2>
+                    <h2 class="text-lg font-semibold mb-4">Scores par pilier</h2>
                     <div class="space-y-4">
                         <?php
                         $pillars = [
@@ -42,35 +84,34 @@
                         ];
                         foreach ($pillars as $p):
                             $percent = ($p['score'] / 5) * 100;
-                            ?>
+                        ?>
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
-                                    <span class="font-medium">
-                                        <?= $p['label'] ?>
-                                    </span>
-                                    <span class="text-slate-500">
-                                        <?= number_format($p['score'], 1) ?> / 5
-                                    </span>
+                                    <span class="font-medium"><?= $p['label'] ?></span>
+                                    <span class="text-slate-500"><?= number_format($p['score'], 1) ?> / 5</span>
                                 </div>
                                 <div class="w-full bg-slate-100 rounded-full h-2">
-                                    <div class="bg-<?= $p['color'] ?>-500 h-2 rounded-full" style="width: <?= $percent ?>%">
-                                    </div>
+                                    <div class="bg-<?= $p['color'] ?>-500 h-2 rounded-full" style="width: <?= $percent ?>%"></div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
                 </div>
-
-                <?php if ($latest->comments): ?>
-                    <div class="card p-6">
-                        <h2 class="text-lg font-semibold mb-2">Observations</h2>
-                        <p class="text-sm text-slate-600 italic">"
-                            <?= nl2br(htmlspecialchars($latest->comments)) ?>"
-                        </p>
-                    </div>
-                <?php endif; ?>
             </div>
         </div>
+
+        <!-- Commentaires -->
+        <?php if ($latest->comments): ?>
+            <div class="card p-6">
+                <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                    Observations du DPO
+                </h2>
+                <p class="text-sm text-slate-600 italic">"<?= nl2br(htmlspecialchars($latest->comments)) ?>"</p>
+            </div>
+        <?php endif; ?>
 
         <!-- Historique -->
         <div class="card overflow-hidden">
@@ -81,25 +122,21 @@
                 <table class="min-w-full divide-y divide-slate-200">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Date
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                                Moyenne Globale</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                                Commentaire</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Moyenne Globale</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Commentaire</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-slate-200">
-                        <?php foreach ($history as $h):
-                            $avg = ($h->governanceScore + $h->registryScore + $h->rightsScore + $h->securityScore + $h->riskScore) / 5;
-                            ?>
+                        <?php foreach ($history as $h): 
+                            $avg = ($h->governanceScore + $h->registryScore + $h->rightsScore + $h->securityScore + $h->riskScore) / 5;    
+                        ?>
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
                                     <?= date('d/m/Y H:i', strtotime($h->createdAt)) ?>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span
-                                        class="px-2 py-1 text-xs font-bold rounded-full <?= $avg >= 4 ? 'bg-green-100 text-green-700' : ($avg >= 2.5 ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700') ?>">
+                                    <span class="px-2 py-1 text-xs font-bold rounded-full <?= $avg >= 4 ? 'bg-green-100 text-green-700' : ($avg >= 2.5 ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700') ?>">
                                         <?= number_format($avg, 1) ?> / 5
                                     </span>
                                 </td>
@@ -114,28 +151,51 @@
         </div>
 
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function() {
                 const ctx = document.getElementById('maturityRadarChart').getContext('2d');
+                
+                const datasets = [{
+                    label: 'Maturité actuelle (<?= date('d/m/Y', strtotime($latest->createdAt)) ?>)',
+                    data: [
+                        <?= $latest->governanceScore ?>,
+                        <?= $latest->registryScore ?>,
+                        <?= $latest->rightsScore ?>,
+                        <?= $latest->securityScore ?>,
+                        <?= $latest->riskScore ?>
+                    ],
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    pointBackgroundColor: 'rgb(59, 130, 246)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(59, 130, 246)',
+                    z: 2
+                }];
+
+                <?php if ($previous): ?>
+                datasets.push({
+                    label: 'Évaluation précédente (<?= date('d/m/Y', strtotime($previous->createdAt)) ?>)',
+                    data: [
+                        <?= $previous->governanceScore ?>,
+                        <?= $previous->registryScore ?>,
+                        <?= $previous->rightsScore ?>,
+                        <?= $previous->securityScore ?>,
+                        <?= $previous->riskScore ?>
+                    ],
+                    backgroundColor: 'rgba(203, 213, 225, 0.2)',
+                    borderColor: 'rgb(148, 163, 184)',
+                    borderDash: [5, 5],
+                    pointBackgroundColor: 'rgb(148, 163, 184)',
+                    pointBorderColor: '#fff',
+                    z: 1
+                });
+                <?php endif; ?>
+
                 new Chart(ctx, {
                     type: 'radar',
                     data: {
                         labels: ['Gouvernance', 'Registre', 'Droits', 'Sécurité', 'Risques'],
-                        datasets: [{
-                            label: 'Maturité actuelle',
-                            data: [
-                                    <?= $latest->governanceScore ?>,
-                                    <?= $latest->registryScore ?>,
-                                    <?= $latest->rightsScore ?>,
-                                    <?= $latest->securityScore ?>,
-                                    <?= $latest->riskScore ?>
-                                ],
-                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                            borderColor: 'rgb(59, 130, 246)',
-                            pointBackgroundColor: 'rgb(59, 130, 246)',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: 'rgb(59, 130, 246)'
-                        }]
+                        datasets: datasets
                     },
                     options: {
                         scales: {
@@ -144,13 +204,29 @@
                                 min: 0,
                                 max: 5,
                                 ticks: {
-                                    stepSize: 1
+                                    stepSize: 1,
+                                    backdropColor: 'transparent'
+                                },
+                                grid: {
+                                    color: 'rgba(0,0,0,0.05)'
                                 }
                             }
                         },
                         plugins: {
                             legend: {
-                                display: false
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 20,
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                padding: 12,
+                                cornerRadius: 8
                             }
                         }
                     }
