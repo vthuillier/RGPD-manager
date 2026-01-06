@@ -17,6 +17,37 @@ class MigrationManager
         $this->migrationsPath = __DIR__ . '/../../migrations';
     }
 
+    public function getPendingMigrations(): array
+    {
+        $this->ensureMigrationsTable();
+        $appliedMigrations = $this->getAppliedMigrations();
+        $migrationFiles = $this->getMigrationFiles();
+
+        $pending = [];
+        foreach ($migrationFiles as $file) {
+            $migrationName = basename($file, '.sql');
+            if (!in_array($migrationName, $appliedMigrations)) {
+                $pending[] = [
+                    'name' => $migrationName,
+                    'path' => $file
+                ];
+            }
+        }
+        return $pending;
+    }
+
+    public function applyNextMigration(): ?string
+    {
+        $pending = $this->getPendingMigrations();
+        if (empty($pending)) {
+            return null;
+        }
+
+        $next = $pending[0];
+        $this->applyMigration($next['path'], $next['name']);
+        return $next['name'];
+    }
+
     public function migrate(): void
     {
         $this->ensureMigrationsTable();
@@ -44,8 +75,12 @@ class MigrationManager
 
     private function getAppliedMigrations(): array
     {
-        $stmt = $this->pdo->query("SELECT migration FROM migrations");
-        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+        try {
+            $stmt = $this->pdo->query("SELECT migration FROM migrations");
+            return $stmt !== false ? $stmt->fetchAll(PDO::FETCH_COLUMN) : [];
+        } catch (Exception $e) {
+            return [];
+        }
     }
 
     private function getMigrationFiles(): array
@@ -65,6 +100,7 @@ class MigrationManager
         try {
             $this->pdo->beginTransaction();
 
+            // Execute SQL (might contain multiple statements)
             $this->pdo->exec($sql);
 
             $stmt = $this->pdo->prepare("INSERT INTO migrations (migration) VALUES (?)");
@@ -72,7 +108,9 @@ class MigrationManager
 
             $this->pdo->commit();
         } catch (Exception $e) {
-            $this->pdo->rollBack();
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
             throw new Exception("Error applying migration " . $migrationName . ": " . $e->getMessage());
         }
     }

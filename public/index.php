@@ -1,5 +1,5 @@
 <?php
-define('APP_VERSION', '1.0.0');
+define('APP_VERSION', '1.0.1');
 
 // Secure session configuration
 ini_set('session.cookie_httponly', '1');
@@ -33,12 +33,20 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Auto-initialize database
+// Migration Check
+$page = $_GET['page'] ?? null;
+$action = $_GET['action'] ?? null;
+
 try {
-    $schemaManager = new \App\Database\SchemaManager();
-    $schemaManager->init();
+    $migrationManager = new \App\Database\MigrationManager(\App\Database\Connection::get());
+    $pendingMigrations = $migrationManager->getPendingMigrations();
+
+    if (!empty($pendingMigrations) && $page !== 'upgrade') {
+        header('Location: index.php?page=upgrade');
+        exit;
+    }
 } catch (\Exception $e) {
-    // We log but continue
+    // DB might not be ready, SetupController will handle it
 }
 
 // Installation Check
@@ -208,6 +216,16 @@ try {
                 break;
             default:
                 $controller->generateAnnual();
+                break;
+        }
+    } elseif ($page === 'upgrade') {
+        $controller = new \App\Controller\UpgradeController();
+        switch ($action) {
+            case 'process':
+                $controller->processStep();
+                break;
+            default:
+                $controller->showUpgrade();
                 break;
         }
     } elseif ($page === 'setup') {
