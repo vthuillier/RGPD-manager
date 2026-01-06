@@ -113,6 +113,10 @@
                                     class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'breach') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700' ?> text-sm font-medium">
                                     Violations
                                 </a>
+                                <a href="index.php?page=maturity&action=index"
+                                    class="inline-flex items-center px-1 pt-1 border-b-2 <?= ($currentPage === 'maturity') ? 'border-primary-500 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700' ?> text-sm font-medium">
+                                    Maturité
+                                </a>
                             </div>
 
                             <!-- Groupe Admin -->
@@ -238,6 +242,8 @@
                         class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'rights') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Droits</a>
                     <a href="index.php?page=breach&action=list"
                         class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'breach') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Violations</a>
+                    <a href="index.php?page=maturity&action=index"
+                        class="block pl-3 pr-4 py-2 border-l-4 <?= ($currentPage === 'maturity') ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-transparent text-slate-600' ?> text-base font-medium">Maturité</a>
 
                     <?php if ($userRole === 'org_admin' || $userRole === 'super_admin'): ?>
                         <div class="py-2 text-xs font-bold text-slate-400 uppercase tracking-widest px-3 mt-4">Administration

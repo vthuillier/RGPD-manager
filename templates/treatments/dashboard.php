@@ -172,6 +172,36 @@
         <?php endif; ?>
     </div>
 
+    <!-- Niveau de Maturité -->
+    <div class="card p-6 border-l-4 border-indigo-500">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+            </div>
+            <h3 class="font-bold text-slate-800">Indice de Maturité</h3>
+        </div>
+        <?php if ($latestMaturity):
+            $avgM = ($latestMaturity->governanceScore + $latestMaturity->registryScore + $latestMaturity->rightsScore + $latestMaturity->securityScore + $latestMaturity->riskScore) / 5;
+            ?>
+            <div class="flex items-end gap-2">
+                <span class="text-3xl font-black text-indigo-600"><?= number_format($avgM, 1) ?></span>
+                <span class="text-sm text-slate-400 font-bold mb-1">/ 5</span>
+            </div>
+            <p class="text-[10px] text-slate-500 font-medium mt-1">Évaluation du
+                <?= date('d/m/Y', strtotime($latestMaturity->createdAt)) ?></p>
+            <div class="mt-2 w-full bg-slate-100 rounded-full h-1.5">
+                <div class="bg-indigo-600 h-1.5 rounded-full" style="width: <?= ($avgM / 5) * 100 ?>%"></div>
+            </div>
+        <?php else: ?>
+            <p class="text-sm text-slate-400 italic">Non évalué.</p>
+            <a href="index.php?page=maturity&action=assessment"
+                class="text-xs text-primary-600 font-bold hover:underline mt-2 inline-block">Lancer l'auto-évaluation →</a>
+        <?php endif; ?>
+    </div>
+
     <!-- Carte Quick Action -->
     <div
         class="card p-6 bg-gradient-to-br from-primary-600 to-indigo-700 text-white flex flex-col justify-between border-none">

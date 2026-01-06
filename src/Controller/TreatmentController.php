@@ -28,9 +28,13 @@ class TreatmentController extends BaseController
     public function dashboard(): void
     {
         $stats = $this->service->getStatsForOrganization($this->organizationId);
+        $maturityRepo = new \App\Repository\MaturityRepository();
+        $latestMaturity = $maturityRepo->findLatestByOrganizationId($this->organizationId);
+
         $this->render('treatments/dashboard', [
             'title' => 'Tableau de bord',
-            'stats' => $stats
+            'stats' => $stats,
+            'latestMaturity' => $latestMaturity
         ]);
     }
 
@@ -41,7 +45,7 @@ class TreatmentController extends BaseController
             'legal_basis' => $_GET['legal_basis'] ?? ''
         ];
         $treatments = $this->service->getTreatmentsForOrganization($this->organizationId, $filters);
-// Enrichir avec le score de sécurité
+        // Enrichir avec le score de sécurité
         foreach ($treatments as $treatment) {
             $treatment->securityScore = $this->service->getSecurityScore($treatment->id, $this->organizationId);
         }
