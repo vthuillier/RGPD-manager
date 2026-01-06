@@ -25,6 +25,7 @@ use App\Controller\RightsExerciseController;
 use App\Controller\DataBreachController;
 use App\Controller\ReportController;
 use App\Controller\MaturityController;
+use App\Controller\DtiaController;
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -504,6 +505,28 @@ try {
                 break;
             default:
                 $controller->index();
+                break;
+        }
+    } elseif ($page === 'dtia') {
+        $controller = new DtiaController();
+        switch ($action) {
+            case 'list':
+                $controller->list();
+                break;
+            case 'create':
+                $controller->create();
+                break;
+            case 'store':
+                $controller->store();
+                break;
+            case 'edit':
+                $controller->edit();
+                break;
+            case 'delete':
+                $controller->delete();
+                break;
+            default:
+                $controller->list();
                 break;
         }
     } elseif ($page === 'credits') {
