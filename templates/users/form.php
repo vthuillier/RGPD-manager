@@ -13,7 +13,7 @@ $actionUrl = $isEdit ? 'index.php?page=user&action=update' : 'index.php?page=use
             Retour à la liste
         </a>
         <h1 class="text-2xl font-bold text-slate-800"><?= $isEdit ? 'Modifier un utilisateur' : 'Ajouter un utilisateur' ?></h1>
-        <p class="text-slate-600"><?= $isEdit ? 'Mettez à jour les informations et les accès de l\'utilisateur.' : 'L\'utilisateur pourra se connecter avec son email et le mot de passe défini ci-dessous.' ?>
+        <p class="text-slate-600"><?= $isEdit ? 'Mettez à jour les informations et les accès de l\'utilisateur.' : 'L\'utilisateur recevra un email pour définir son mot de passe et activer son compte.' ?>
         </p>
     </div>
 
@@ -52,7 +52,7 @@ $actionUrl = $isEdit ? 'index.php?page=user&action=update' : 'index.php?page=use
                         <div class="flex items-center">
                             <input type="checkbox" id="org_<?= $org->id ?>" name="organizations[]" value="<?= $org->id ?>" 
                                 class="w-4 h-4 text-primary-600 border-slate-300 rounded focus:ring-primary-500"
-                                <?= ($isEdit ? in_array($org->id, $userOrgIds) : $org->id === $this->organizationId) ? 'checked' : '' ?>>
+                                <?= ($isEdit ? in_array($org->id, $userOrgIds) : $org->id === ($currentOrgId ?? null)) ? 'checked' : '' ?>>
                             <label for="org_<?= $org->id ?>" class="ml-2 text-sm text-slate-700">
                                 <?= htmlspecialchars($org->name) ?>
                             </label>
@@ -60,14 +60,6 @@ $actionUrl = $isEdit ? 'index.php?page=user&action=update' : 'index.php?page=use
                     <?php endforeach; ?>
                 </div>
                 <p class="mt-1 text-xs text-slate-500 italic">L'utilisateur aura accès aux données des organismes cochés.</p>
-            </div>
-
-            <div>
-                <label for="password" class="form-label"><?= $isEdit ? 'Changer le mot de passe (laisser vide pour conserver)' : 'Mot de passe temporaire' ?></label>
-                <input type="password" id="password" name="password" <?= $isEdit ? '' : 'required' ?> minlength="8" class="form-input"
-                    placeholder="••••••••">
-                <p class="mt-1 text-xs text-slate-500 italic">8 caractères minimum préconisés. L'utilisateur pourra le
-                    modifier ultérieurement.</p>
             </div>
 
             <div class="pt-4">

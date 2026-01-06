@@ -63,7 +63,8 @@ class UserController extends BaseController
 
         $this->render('users/form', [
             'title' => 'Ajouter un utilisateur',
-            'organizations' => $organizations
+            'organizations' => $organizations,
+            'currentOrgId' => $this->organizationId
         ]);
     }
 
@@ -73,15 +74,12 @@ class UserController extends BaseController
         try {
             $email = $_POST['email'] ?? '';
             $name = $_POST['name'] ?? '';
-            $password = $_POST['password'] ?? '';
             $role = $_POST['role'] ?? 'user';
             $userRole = $_SESSION['user_role'] ?? 'user';
 
-            if (!$email || !$name || !$password) {
-                throw new Exception("Tous les champs sont obligatoires.");
+            if (!$email || !$name) {
+                throw new Exception("Nom et email sont obligatoires.");
             }
-
-            $this->validatePasswordStrength($password);
 
             if ($this->repository->findByEmail($email)) {
                 throw new Exception("Cet email est déjà utilisé.");
@@ -95,17 +93,22 @@ class UserController extends BaseController
 
             $validOrgs = array_intersect($selectedOrgs, $allowedOrgs);
 
+            $token = bin2hex(random_bytes(32));
+            $expires = (new \DateTime())->modify('+48 hours')->format('Y-m-d H:i:s');
+
             $user = new User(
                 null,
                 $email,
-                password_hash($password, PASSWORD_DEFAULT),
+                'INVITATION_PENDING', // Placeholder password
                 $name,
                 $role,
-                !empty($validOrgs) ? (int) $validOrgs[0] : $this->organizationId
+                !empty($validOrgs) ? (int) $validOrgs[0] : $this->organizationId,
+                null,
+                $token,
+                $expires
             );
 
-            $this->repository->save($user);
-            $userId = (int) \App\Database\Connection::get()->lastInsertId();
+            $userId = $this->repository->save($user);
 
             if (!$userId) {
                 $savedUser = $this->repository->findByEmail($email);
@@ -116,9 +119,12 @@ class UserController extends BaseController
                 $this->repository->addOrganization($userId, (int) $orgId);
             }
 
+            // Envoi de l'invitation
+            $this->sendInvitationEmail($user);
+
             $this->auditLog('USER_CREATE', 'user', $userId, ['email' => $email, 'role' => $role, 'orgs' => $validOrgs]);
 
-            $_SESSION['flash_success'] = "Utilisateur créé avec succès.";
+            $_SESSION['flash_success'] = "Utilisateur créé avec succès. Un email d'invitation a été envoyé.";
             $this->redirect('index.php?page=user&action=list');
         } catch (Exception $e) {
             $_SESSION['flash_error'] = $e->getMessage();
@@ -152,7 +158,8 @@ class UserController extends BaseController
             'title' => 'Modifier un utilisateur',
             'user' => $user,
             'organizations' => $organizations,
-            'userOrgIds' => $userOrgIds
+            'userOrgIds' => $userOrgIds,
+            'currentOrgId' => $this->organizationId
         ]);
     }
 
@@ -169,15 +176,10 @@ class UserController extends BaseController
 
             $email = $_POST['email'] ?? '';
             $name = $_POST['name'] ?? '';
-            $password = $_POST['password'] ?? '';
             $role = $_POST['role'] ?? 'user';
 
             if (!$email || !$name) {
                 throw new Exception("Nom et email sont obligatoires.");
-            }
-
-            if ($password) {
-                $this->validatePasswordStrength($password);
             }
 
             if ($email !== $user->email && $this->repository->findByEmail($email)) {
@@ -187,9 +189,6 @@ class UserController extends BaseController
             $user->email = $email;
             $user->name = $name;
             $user->role = $role;
-            if ($password) {
-                $user->password = password_hash($password, PASSWORD_DEFAULT);
-            }
 
             $selectedOrgs = $_POST['organizations'] ?? [];
             $orgRepo = new \App\Repository\OrganizationRepository();
@@ -236,5 +235,72 @@ class UserController extends BaseController
         $this->auditLog('USER_DELETE', 'user', $id);
         $_SESSION['flash_success'] = "Utilisateur supprimé.";
         $this->redirect('index.php?page=user&action=list');
+    }
+
+    public function reset(): void
+    {
+        $this->validateCsrf();
+        $id = (int) ($_POST['id'] ?? 0);
+        $user = $this->repository->find($id);
+
+        if (!$user) {
+            $_SESSION['flash_error'] = "Utilisateur non trouvé.";
+            $this->redirect('index.php?page=user&action=list');
+        }
+
+        try {
+            $token = bin2hex(random_bytes(32));
+            $expires = (new \DateTime())->modify('+24 hours')->format('Y-m-d H:i:s');
+
+            $user->resetToken = $token;
+            $user->resetExpiresAt = $expires;
+            $this->repository->save($user);
+
+            $this->sendResetEmail($user);
+
+            $this->auditLog('USER_PASSWORD_RESET_REQUESTED', 'user', $id, ['email' => $user->email]);
+            $_SESSION['flash_success'] = "Un email de réinitialisation a été envoyé à " . $user->email;
+        } catch (Exception $e) {
+            $_SESSION['flash_error'] = "Erreur lors de l'envoi de l'email : " . $e->getMessage();
+        }
+
+        $this->redirect('index.php?page=user&action=list');
+    }
+
+    private function sendInvitationEmail(User $user): void
+    {
+        $mailService = new \App\Service\MailService();
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+        $host = $_SERVER['HTTP_HOST'];
+        $url = "$protocol://$host/index.php?page=password&action=setup&token=" . $user->resetToken;
+
+        $subject = "🚀 Bienvenue sur RGPD Manager";
+        $title = "Activez votre compte";
+        $content = "<p>Bonjour <strong>" . htmlspecialchars($user->name) . "</strong>,</p>" .
+            "<p>Un compte vous a été créé sur la plateforme <strong>RGPD Manager</strong>.<br>" .
+            "Vous pourrez ainsi gérer la conformité RGPD de votre organisation en toute simplicité.</p>" .
+            "<p>Pour finaliser votre inscription et choisir votre mot de passe, merci de cliquer sur le bouton ci-dessous :</p>";
+
+        $htmlBody = $mailService->getHtmlLayout($title, $content, "Activer mon compte", $url);
+
+        $mailService->sendSystemMail($user->email, $subject, $htmlBody, true);
+    }
+
+    private function sendResetEmail(User $user): void
+    {
+        $mailService = new \App\Service\MailService();
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+        $host = $_SERVER['HTTP_HOST'];
+        $url = "$protocol://$host/index.php?page=password&action=setup&token=" . $user->resetToken;
+
+        $subject = "🔑 Réinitialisation de votre mot de passe";
+        $title = "Mot de passe oublié ?";
+        $content = "<p>Bonjour <strong>" . htmlspecialchars($user->name) . "</strong>,</p>" .
+            "<p>Une demande de réinitialisation de mot de passe a été effectuée pour votre compte <strong>RGPD Manager</strong>.</p>" .
+            "<p>Si vous êtes à l'origine de cette demande, vous pouvez définir un nouveau mot de passe en cliquant ici :</p>";
+
+        $htmlBody = $mailService->getHtmlLayout($title, $content, "Réinitialiser mon mot de passe", $url);
+
+        $mailService->sendSystemMail($user->email, $subject, $htmlBody, true);
     }
 }

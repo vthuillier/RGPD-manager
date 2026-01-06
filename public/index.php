@@ -241,8 +241,24 @@ try {
             case 'delete':
                 $controller->delete();
                 break;
+            case 'reset':
+                $controller->reset();
+                break;
             default:
                 $controller->list();
+                break;
+        }
+    } elseif ($page === 'password') {
+        $controller = new \App\Controller\PasswordController();
+        switch ($action) {
+            case 'setup':
+                $controller->setup();
+                break;
+            case 'update':
+                $controller->update();
+                break;
+            default:
+                header('Location: index.php?page=auth&action=login');
                 break;
         }
     } elseif ($page === 'settings') {

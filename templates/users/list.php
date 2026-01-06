@@ -54,6 +54,12 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <form action="index.php?page=user&action=reset" method="POST" class="inline">
+                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                            <input type="hidden" name="id" value="<?= $user->id ?>">
+                            <button type="submit" class="text-amber-600 hover:text-amber-900 mr-3"
+                                title="Envoyer un email de réinitialisation">Réinitialiser</button>
+                        </form>
                         <a href="index.php?page=user&action=edit&id=<?= $user->id ?>"
                             class="text-primary-600 hover:text-primary-900 mr-3">Modifier</a>
                         <?php if ($user->id !== (int) $_SESSION['user_id']): ?>

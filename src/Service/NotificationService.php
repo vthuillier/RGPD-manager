@@ -81,15 +81,23 @@ class NotificationService
                 if (!$this->notificationRepo->hasSentNotification($settings->organizationId, 'rights_exercise', 'rights_exercise', $request->id)) {
                     $recipient = $this->getRecipient($settings);
                     $subject = "🚨 Rappel : Exercice des droits approchant l'échéance";
-                    $body = sprintf(
-                        "La demande d'exercice de droits de %s reçue le %s arrive à échéance le %s.\nIl reste %d jours pour répondre.",
-                        $request->applicantName,
+
+                    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+                    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                    $url = "$protocol://$host/index.php?page=rights&action=list";
+
+                    $content = sprintf(
+                        "<p>La demande d'exercice de droits de <strong>%s</strong> reçue le %s arrive à échéance le <strong>%s</strong>.</p>" .
+                        "<p>Il reste <strong>%d jours</strong> pour répondre conformément au RGPD.</p>",
+                        htmlspecialchars($request->applicantName),
                         $request->requestDate,
-                        $deadline->format('Y-m-d'),
+                        $deadline->format('d/m/Y'),
                         $isPast ? -$daysToDeadline : $daysToDeadline
                     );
 
-                    $this->mailService->sendFromOrganization($settings->organizationId, $recipient, $subject, $body);
+                    $htmlBody = $this->mailService->getHtmlLayout($subject, $content, "Gérer les demandes", $url);
+
+                    $this->mailService->sendFromOrganization($settings->organizationId, $recipient, $subject, $htmlBody, true);
                     $this->notificationRepo->logNotification($settings->organizationId, 'rights_exercise', 'rights_exercise', $request->id, $recipient);
                     $sent++;
                 }
@@ -114,14 +122,22 @@ class NotificationService
                 if (!$this->notificationRepo->hasSentNotification($settings->organizationId, 'treatment_review', 'treatment', $treatment->id)) {
                     $recipient = $this->getRecipient($settings);
                     $subject = "📅 Revue annuelle du traitement : " . $treatment->name;
-                    $body = sprintf(
-                        "Le traitement '%s' n'a pas été mis à jour depuis le %s.\nUne revue de conformité est nécessaire (intervalle de %d an(s)).",
-                        $treatment->name,
+
+                    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+                    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                    $url = "$protocol://$host/index.php?page=treatment&action=list";
+
+                    $content = sprintf(
+                        "<p>Le traitement <strong>'%s'</strong> n'a pas été mis à jour depuis le %s.</p>" .
+                        "<p>Une revue de conformité est nécessaire (intervalle configuré de %d an(s)).</p>",
+                        htmlspecialchars($treatment->name),
                         $lastUpdate->format('d/m/Y'),
                         $interval
                     );
 
-                    $this->mailService->sendFromOrganization($settings->organizationId, $recipient, $subject, $body);
+                    $htmlBody = $this->mailService->getHtmlLayout("Revue de traitement", $content, "Voir le registre", $url);
+
+                    $this->mailService->sendFromOrganization($settings->organizationId, $recipient, $subject, $htmlBody, true);
                     $this->notificationRepo->logNotification($settings->organizationId, 'treatment_review', 'treatment', $treatment->id, $recipient);
                     $sent++;
                 }
@@ -149,13 +165,21 @@ class NotificationService
                 if (!$this->notificationRepo->hasSentNotification($settings->organizationId, 'aipd_draft', 'aipd', $aipd->id)) {
                     $recipient = $this->getRecipient($settings);
                     $subject = "📝 AIPD en attente de finalisation";
-                    $body = sprintf(
-                        "L'AIPD pour le traitement id #%d est en mode brouillon depuis %d jours.\nPensez à la finaliser pour assurer la conformité.",
+
+                    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+                    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                    $url = "$protocol://$host/index.php?page=aipd&action=list";
+
+                    $content = sprintf(
+                        "<p>L'Analyse d'Impact (AIPD) pour le traitement <strong>#%d</strong> est en mode brouillon depuis %d jours.</p>" .
+                        "<p>Pensez à la finaliser pour assurer la conformité de ce traitement à risque.</p>",
                         $aipd->treatmentId,
                         $ageDays
                     );
 
-                    $this->mailService->sendFromOrganization($settings->organizationId, $recipient, $subject, $body);
+                    $htmlBody = $this->mailService->getHtmlLayout($subject, $content, "Finaliser l'AIPD", $url);
+
+                    $this->mailService->sendFromOrganization($settings->organizationId, $recipient, $subject, $htmlBody, true);
                     $this->notificationRepo->logNotification($settings->organizationId, 'aipd_draft', 'aipd', $aipd->id, $recipient);
                     $sent++;
                 }

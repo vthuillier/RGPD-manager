@@ -12,7 +12,9 @@ class User
         public string $name,
         public string $role = 'user',
         public ?int $organizationId = null,
-        public ?string $createdAt = null
+        public ?string $createdAt = null,
+        public ?string $resetToken = null,
+        public ?string $resetExpiresAt = null
     ) {
     }
 
@@ -25,7 +27,9 @@ class User
             $data['name'] ?? '',
             $data['role'] ?? 'user',
             $data['organization_id'] ?? null,
-            $data['created_at'] ?? null
+            $data['created_at'] ?? null,
+            $data['reset_token'] ?? null,
+            $data['reset_expires_at'] ?? null
         );
     }
 
