@@ -7,5 +7,8 @@ return [
         'name' => getenv('DB_NAME') ?: 'rgpdmanager',
         'user' => getenv('DB_USER') ?: 'postgres',
         'password' => getenv('DB_PASSWORD') ?: 'postgres'
+    ],
+    'app' => [
+        'demo_mode' => getenv('APP_DEMO_MODE') === 'true'
     ]
 ];

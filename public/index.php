@@ -15,7 +15,7 @@ session_start();
 header('X-Frame-Options: DENY');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: strict-origin-when-cross-origin');
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 require_once __DIR__ . '/../vendor/autoload.php';
 use App\Controller\TreatmentController;
 use App\Controller\AuthController;
@@ -59,8 +59,15 @@ if (!$isInstalled && $page !== 'setup' && $page !== 'upgrade') {
     exit;
 }
 
+$config = require __DIR__ . '/../config/config.php';
+$demoMode = $config['app']['demo_mode'] ?? false;
+
 if ($isInstalled && !$page && !isset($_SESSION['user_id'])) {
-    header('Location: landing.html');
+    if ($demoMode) {
+        header('Location: landing.html');
+    } else {
+        header('Location: index.php?page=auth&action=login');
+    }
     exit;
 }
 
@@ -529,6 +536,20 @@ try {
                 $controller->list();
                 break;
         }
+    } elseif ($page === 'legal') {
+        $actions = ['mentions', 'policy', 'cgu'];
+        $action = in_array($action, $actions) ? $action : 'mentions';
+        $title = match ($action) {
+            'mentions' => 'Mentions Légales',
+            'policy' => 'Politique de Confidentialité',
+            'cgu' => 'Conditions Générales d' . "'" . 'Utilisation',
+        };
+        extract(['title' => $title]);
+        ob_start();
+        require __DIR__ . '/../templates/legal/' . $action . '.php';
+        $content = ob_get_clean();
+        require __DIR__ . '/../templates/layout.php';
+        exit;
     } elseif ($page === 'credits') {
         $title = 'Crédits';
         extract(['title' => $title]);

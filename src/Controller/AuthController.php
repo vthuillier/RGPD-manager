@@ -14,7 +14,8 @@ class AuthController extends BaseController
     public function __construct()
     {
         $this->authService = new AuthService();
-        $this->allowGuest = (bool) (getenv('ALLOW_GUEST') ?: false);
+        $config = require __DIR__ . '/../../config/config.php';
+        $this->allowGuest = $config['app']['demo_mode'] ?? false;
     }
 
 
@@ -37,7 +38,7 @@ class AuthController extends BaseController
         $password = $_POST['password'] ?? '';
         $user = $this->authService->login($email, $password);
         if ($user) {
-        // Prevent session fixation
+            // Prevent session fixation
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user->id;
             $_SESSION['organization_id'] = $user->organizationId;
@@ -47,9 +48,9 @@ class AuthController extends BaseController
             $this->auditLog('LOGIN', 'user', $user->id, ['email' => $email]);
             $this->redirect('index.php?page=treatment&action=dashboard');
         } else {
-        // Brute force mitigation: small delay
+            // Brute force mitigation: small delay
             usleep(500000);
-        // 500ms
+            // 500ms
 
             $this->auditLog('LOGIN_FAILED', 'user', null, ['email' => $email]);
             $_SESSION['flash_error'] = "Identifiants incorrects.";
@@ -65,7 +66,7 @@ class AuthController extends BaseController
 
         $_SESSION['user_id'] = (int) (getenv('GUEST_TARGET_ID') ?: 1);
         $_SESSION['organization_id'] = 1;
-// Default organization for guest mode
+        // Default organization for guest mode
         $_SESSION['user_name'] = "Invité";
         $_SESSION['user_role'] = 'guest';
         $_SESSION['flash_success'] = "Connecté en mode consultation.";
